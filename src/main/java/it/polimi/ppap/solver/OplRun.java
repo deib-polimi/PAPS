@@ -17,6 +17,7 @@ package it.polimi.ppap.solver;
 import ilog.concert.IloException;
 import ilog.opl.*;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -137,6 +138,11 @@ public class OplRun {
                         trace("post process");
                         if (_cl.isVerbose()) {
                             opl.printSolution(System.out);
+                            if(_cl.getExternalDataName() != null) {
+                                FileOutputStream fos = new FileOutputStream(_cl.getExternalDataName());
+                                opl.printSolution(fos);
+                                fos.close();
+                            }
                         }
                     } else {
                         trace("no solution");
@@ -165,9 +171,9 @@ public class OplRun {
             trace("done");
         }
         if (_cl.getExternalDataName() != null) {
-            FileOutputStream ofs = new FileOutputStream(_cl.getExternalDataName());
-            opl.printExternalData(ofs);
-            ofs.close();
+            //FileOutputStream ofs = new FileOutputStream(_cl.getExternalDataName());
+            //opl.printExternalData(ofs);
+            //ofs.close();
             trace("write external data", _cl.getExternalDataName());
         }
         if (_cl.getInternalDataName() != null) {

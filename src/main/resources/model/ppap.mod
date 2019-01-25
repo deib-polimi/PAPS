@@ -45,7 +45,7 @@ subject to{
   forall( w in Nodes, f in Functions )
     ctMaxCostOfWarehouse:    
       sum( s in DemandSources ) 
-        SupplyCost[s][w] * Supply[s][w][f] <= 80;
+        SupplyCost[s][w] * Supply[s][w][f] <= 30;
 }
 
 

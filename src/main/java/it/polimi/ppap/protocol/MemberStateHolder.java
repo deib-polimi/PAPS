@@ -1,19 +1,17 @@
 package it.polimi.ppap.protocol;
 
 import it.polimi.deib.ppap.node.services.Service;
-import it.polimi.ppap.common.scheme.ServiceDemand;
 import it.polimi.ppap.common.scheme.PlacementAllocationSchema;
-import peersim.core.Node;
+import it.polimi.ppap.model.FogNode;
 import peersim.core.Protocol;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 public abstract class MemberStateHolder implements Protocol {
 
     boolean leader;
     int monitoringCount;
-    Object demandAllocation;
     public boolean isLeader() {
         return leader;
     }
@@ -25,7 +23,7 @@ public abstract class MemberStateHolder implements Protocol {
 
     //MAPE - Monitoring and Analysis
 
-    Map<Node, Map<Service, Float>> nodeServiceDemand = new HashMap<>();
+    Map<FogNode, Map<Service, Float>> nodeServiceDemand = new TreeMap<>();
 
     public int getMonitoringCount() {
         return monitoringCount;
@@ -39,23 +37,25 @@ public abstract class MemberStateHolder implements Protocol {
         this.monitoringCount = 0;
     }
 
-    public Map<Node, Map<Service, Float>> getNodeServiceDemand(){
+    public Map<FogNode, Map<Service, Float>> getNodeServiceDemand(){
         return nodeServiceDemand;
     }
 
-    public void setNodeServiceDemand(Map<Node, Map<Service, Float>> nodeServiceDemand){
+    public void setNodeServiceDemand(Map<FogNode, Map<Service, Float>> nodeServiceDemand){
         this.nodeServiceDemand = nodeServiceDemand;
     }
 
-    public void updateServiceDemand(Node node, Service service, float demand){
+    public void updateServiceDemand(FogNode node, Service service, float demand){
         if(!nodeServiceDemand.containsKey(node))
-            nodeServiceDemand.put(node, new HashMap<>());
+            nodeServiceDemand.put(node, new TreeMap<>());
         Map<Service, Float> serviceDemand = nodeServiceDemand.get(node);
         serviceDemand.put(service, demand);
         nodeServiceDemand.put(node, serviceDemand);
     }
 
     //MAPE - Planning
+
+    Map<FogNode, Map<Service, Float>> nodeServiceAllocation = new TreeMap<>();
 
     PlacementAllocationSchema placementAllocationSchema;
 
@@ -67,15 +67,16 @@ public abstract class MemberStateHolder implements Protocol {
         this.placementAllocationSchema = placementAllocationSchema;
     }
 
+    public Map<FogNode, Map<Service, Float>> getNodeServiceAllocation() {
+        return nodeServiceAllocation;
+    }
+
+    public void setNodeServiceAllocation(Map<FogNode, Map<Service, Float>> nodeServiceAllocation) {
+        this.nodeServiceAllocation = nodeServiceAllocation;
+    }
+
     //MAPE - ?
 
-    public Object getDemandAllocation() {
-        return demandAllocation;
-    }
-
-    public void setDemandAllocation(Object demandAllocation) {
-        this.demandAllocation = demandAllocation;
-    }
 
 
     @Override

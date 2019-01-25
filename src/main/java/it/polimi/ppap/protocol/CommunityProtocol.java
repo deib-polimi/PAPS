@@ -1,5 +1,6 @@
 package it.polimi.ppap.protocol;
 
+import com.sun.org.apache.xerces.internal.impl.xpath.regex.Match;
 import it.polimi.ppap.common.communication.CommunityMessage;
 import it.polimi.ppap.common.communication.LeaderMessage;
 import it.polimi.ppap.common.communication.MemberMessage;
@@ -11,6 +12,9 @@ import peersim.core.Linkable;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 import peersim.transport.Transport;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CommunityProtocol
         extends MemberStateHolder
@@ -106,7 +110,7 @@ public class CommunityProtocol
     private Object solvePlacementAllocation(Node node, int pid){
         OplModSolver oplModSolver = new OplModSolver();
         oplModSolver.generateData(getNodeServiceDemand());
-        oplModSolver.solve();
+        setNodeServiceAllocation(oplModSolver.solve(getNodeServiceDemand()));
         return new Object();
     }
 

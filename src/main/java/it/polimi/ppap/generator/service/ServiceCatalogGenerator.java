@@ -26,7 +26,7 @@ public class ServiceCatalogGenerator {
     }
 
     public  Set<Service> generateCatalog(){
-        Set<Service> serviceCatalog = new HashSet<>();
+        Set<Service> serviceCatalog = new TreeSet<>();
         ServiceGenerator serviceGenerator = new ServiceGenerator(baseServiceMemory, serviceMemoryMultiplier);
         for(int i = 0; i < catalogSize; i++){
             Service service = serviceGenerator.nextService(70);//TODO

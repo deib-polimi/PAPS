@@ -17,6 +17,6 @@ public class FogNodeCapacityGenerator {
     }
 
     public long nextCapacity(){
-        return baseCapacity + (1 + random.nextInt(maxCapacityMultiplier));
+        return baseCapacity * (1 + random.nextInt(maxCapacityMultiplier));
     }
 }

@@ -35,6 +35,11 @@ network.size SIZE
 simulation.endtime CYCLE*CYCLES
 simulation.logtime CYCLE
 
+
+################### topol ===========================
+
+network.node it.polimi.ppap.model.FogNode
+
 ################### protocols ===========================
 
 protocol.link peersim.core.IdleProtocol
@@ -73,11 +78,11 @@ init.rndlink.undir true
 init.ms it.polimi.ppap.control.MemberStateInitializer
 init.ms.protocol cp
 init.ms.entropy ENTROPY
-init.ms.capacity CAPACITY
 
 init.ns it.polimi.ppap.control.NodeStateInitializer
 init.ns.protocol np
 init.ns.delta DELTATICK
+init.ns.capacity CAPACITY
 
 init.cpsch CDScheduler
 init.cpsch.protocol cp

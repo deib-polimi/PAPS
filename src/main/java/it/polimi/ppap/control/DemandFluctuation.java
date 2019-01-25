@@ -18,7 +18,7 @@
 
 package it.polimi.ppap.control;
 
-import it.polimi.ppap.common.random.RandomDemand;
+import it.polimi.ppap.generator.service.ServiceDemandGenerator;
 import it.polimi.ppap.protocol.NodeProtocol;
 import peersim.config.Configuration;
 import peersim.core.Control;
@@ -101,19 +101,19 @@ public class DemandFluctuation implements Control {
         for (int i = 0; i < Network.size(); i++) {
             NodeProtocol protocol = (NodeProtocol) Network.get(i)
                     .getProtocol(pid);
-
             /*for(String functionName : protocol.getCatalog().getDemands().keySet()) {
                 double actualDemand = protocol.getCatalog().getDemands().get(functionName);
                 double nextDemand = getNextDemand(actualDemand);
-                protocol.getCatalog().updateDemand(functionName, nextDemand);
+
             }*/
         }
         return false;
     }
 
-    private double getNextDemand(double actualDemand) {
-        double variation = RandomDemand.getVariation(delta);
-        return Math.max(0, actualDemand + variation);
+    //TODO
+    private float getNextDemand(float actualDemand) {
+        ServiceDemandGenerator serviceDemandGenerator = new ServiceDemandGenerator(0, 5); //TODO
+        return serviceDemandGenerator.nextDemand();
     }
 
 }

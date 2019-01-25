@@ -5,7 +5,6 @@ import peersim.core.Protocol;
 
 public abstract class NodeStateHolder implements Protocol {
 
-    long memoryCapacity;
     Object currentDemand;
     NodeFacade nodeFacade;
 
@@ -18,14 +17,6 @@ public abstract class NodeStateHolder implements Protocol {
             e.printStackTrace();
         }
         return svh;
-    }
-
-    public long getMemoryCapacity() {
-        return memoryCapacity;
-    }
-
-    public void setMemoryCapacity(long memoryCapacity) {
-        this.memoryCapacity = memoryCapacity;
     }
 
     public NodeFacade getNodeFacade() {

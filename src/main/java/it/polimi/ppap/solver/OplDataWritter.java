@@ -2,6 +2,7 @@ package it.polimi.ppap.solver;
 
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.common.scheme.PlacementAllocationSchema;
+import it.polimi.ppap.model.FogNode;
 import peersim.core.Node;
 
 import java.io.File;
@@ -28,9 +29,9 @@ public class OplDataWritter {
     private final String DEMAND_LEVEL_MATRIX = "$DEMAND_LEVEL_MATRIX";
     private final String SOURCE_NODE_DELAY_MATRIX = "$SOURCE_NODE_DELAY_MATRIX";
 
-    final Map<Node, Map<Service, Float>> nodeServiceDemand;
+    final Map<FogNode, Map<Service, Float>> nodeServiceDemand;
 
-    public OplDataWritter(Map<Node, Map<Service, Float>> nodeServiceDemand, String oplDataFilePath, String templateFilePath){
+    public OplDataWritter(Map<FogNode, Map<Service, Float>> nodeServiceDemand, String oplDataFilePath, String templateFilePath){
         this.oplDataFilePath = oplDataFilePath;
         this.templateFilePath = templateFilePath;
         this.nodeServiceDemand = nodeServiceDemand;
@@ -42,18 +43,18 @@ public class OplDataWritter {
         closeFile();
     }
 
+    //TODO parametrize in configs
     final String migrationCost = "1";
-    final int baseCapacity = 48 * 8;
-    final int maxCapacityMultiplier = 10;
+    final int baseCapacity = 1024;
     final int colocatedSourceNodeDelay = 2;
-    final int maxSourceNodeDelay = 100;
+    final int maxSourceNodeDelay = 50;
 
     private void writeFile() throws IOException {
         String template = readTemplateFile();
         template = template.replace(MIGRATION_COST, migrationCost);
         String nodesList = buildNodesList();
         template = template.replace(NODE_NAME_LIST, nodesList);
-        String capacityList = buildCapacityList(baseCapacity, maxCapacityMultiplier);
+        String capacityList = buildCapacityList(baseCapacity);
         template = template.replace(CAPACITY_LIST, capacityList);
         String functionsList = buildFunctionsList();
         template = template.replace(FUNCTION_NAME_LIST, functionsList);
@@ -72,7 +73,8 @@ public class OplDataWritter {
             List<String> functionDemandList = new ArrayList<>();
             for(Service service : nodeServiceDemand.get(node).keySet()){
                 float serviceDemand = nodeServiceDemand.get(node).get(service);
-                functionDemandList.add((int)serviceDemand + "");
+                int memoryMultiplier = (int)(service.getMemory() / 128); //TODO
+                functionDemandList.add(((int)serviceDemand * memoryMultiplier) + "");
             }
             sb.append(String.join(",", functionDemandList));
             sb.append("]");
@@ -120,10 +122,10 @@ public class OplDataWritter {
         return String.join(",", nodeList);
     }
 
-    private String buildCapacityList(int baseCapacity, int maxCapacityMultiplier) {
+    private String buildCapacityList(int baseCapacity) {
         List<String> nodeList = new ArrayList<>();
-        for(Node node : nodeServiceDemand.keySet())
-            nodeList.add((rand.nextInt(maxCapacityMultiplier) + 1) * baseCapacity + "");
+        for(FogNode node : nodeServiceDemand.keySet())
+            nodeList.add(node.getMemoryCapacity()/baseCapacity + "");
         return String.join(",", nodeList);
     }
 

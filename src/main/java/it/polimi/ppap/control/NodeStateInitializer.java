@@ -20,11 +20,11 @@ package it.polimi.ppap.control;
 
 import it.polimi.deib.ppap.node.NodeFacade;
 import it.polimi.ppap.generator.service.FogNodeCapacityGenerator;
+import it.polimi.ppap.model.FogNode;
 import it.polimi.ppap.protocol.NodeStateHolder;
 import peersim.config.Configuration;
 import peersim.core.Control;
 import peersim.core.Network;
-import peersim.core.Node;
 import peersim.vector.SingleValue;
 
 /**
@@ -55,6 +55,13 @@ public class NodeStateInitializer implements Control {
     private static final String PAR_PROT = "protocol";
 
 
+    /**
+     * The capacity available to this catalog.
+     *
+     * @config
+     */
+    private static final String PAR_CAPACITY = "capacity";
+
     // ------------------------------------------------------------------------
     // Fields
     // ------------------------------------------------------------------------
@@ -68,6 +75,9 @@ public class NodeStateInitializer implements Control {
      */
     private final int delta;
 
+    /** Protocol identifier; obtained from config property {@link #PAR_CAPACITY}. */
+    private final int capacity;
+
 
     // ------------------------------------------------------------------------
     // Constructor
@@ -80,7 +90,7 @@ public class NodeStateInitializer implements Control {
 
         pid = Configuration.getPid(prefix + "." + PAR_PROT);
         delta = Configuration.getInt(prefix + "." + PAR_DELTA);
-
+        capacity = Configuration.getInt(prefix + "." + PAR_CAPACITY);
     }
 
     // ------------------------------------------------------------------------
@@ -92,26 +102,26 @@ public class NodeStateInitializer implements Control {
     */
     public boolean execute() {
         //TODO parametrize in configs
-        FogNodeCapacityGenerator fogNodeCapacityGenerator = new FogNodeCapacityGenerator(1024, (short) 8);
+        FogNodeCapacityGenerator fogNodeCapacityGenerator = new FogNodeCapacityGenerator(1024, (short) 256);
         for(int i=0; i<Network.size(); ++i) {
-            Node node = Network.get(i);
+            FogNode node = (FogNode) Network.get(i);
             NodeStateHolder nodeProt = (NodeStateHolder) node.getProtocol(pid);
-            setupNodeState(fogNodeCapacityGenerator, nodeProt);
+            setupNodeState(node, fogNodeCapacityGenerator);
+            NodeFacade nodeFacade = createNodeFacade(node);
+            nodeProt.setNodeFacade(nodeFacade);
         }
         return false;
     }
 
-    private void setupNodeState(FogNodeCapacityGenerator fogNodeCapacityGenerator, NodeStateHolder nodeProt) {
+    private void setupNodeState(FogNode node, FogNodeCapacityGenerator fogNodeCapacityGenerator) {
         long memoryCapacity = fogNodeCapacityGenerator.nextCapacity();
-        nodeProt.setMemoryCapacity(memoryCapacity);
-        NodeFacade nodeFacace = createNodeFacade(memoryCapacity);
-        nodeProt.setNodeFacade(nodeFacace);
+        node.setMemoryCapacity(memoryCapacity);
     }
 
     //TODO this is a factory method
-    private NodeFacade createNodeFacade(long memoryCapacity) {
+    private NodeFacade createNodeFacade(FogNode node) {
         long controlPeriodMillis = delta;
         float alpha = 0.9f;//TODO parametrize in configs
-        return new NodeFacade(memoryCapacity, controlPeriodMillis, alpha);
+        return new NodeFacade(node.getMemoryCapacity(), controlPeriodMillis, alpha);
     }
 }

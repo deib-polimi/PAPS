@@ -23,6 +23,7 @@ import it.polimi.ppap.common.scheme.PlacementAllocationSchema;
 import it.polimi.ppap.common.scheme.PlacementAllocationSchemaFactory;
 import it.polimi.ppap.generator.service.ServiceCatalogGenerator;
 import it.polimi.ppap.generator.service.ServiceDemandGenerator;
+import it.polimi.ppap.model.FogNode;
 import it.polimi.ppap.protocol.MemberStateHolder;
 import peersim.config.Configuration;
 import peersim.core.Control;
@@ -64,12 +65,6 @@ public class MemberStateInitializer implements Control {
      */
     private static final String PAR_ENTROPY = "entropy";
 
-    /**
-     * The capacity available to this catalog.
-     *
-     * @config
-     */
-    private static final String PAR_CAPACITY = "capacity";
 
     // ------------------------------------------------------------------------
     // Fields
@@ -80,9 +75,6 @@ public class MemberStateInitializer implements Control {
 
     /** Protocol identifier; obtained from config property {@link #PAR_ENTROPY}. */
     private final int entropy;
-
-    /** Protocol identifier; obtained from config property {@link #PAR_CAPACITY}. */
-    private final int capacity;
 
     // ------------------------------------------------------------------------
     // Constructor
@@ -95,7 +87,6 @@ public class MemberStateInitializer implements Control {
 
         pid = Configuration.getPid(prefix + "." + PAR_PROT);
         entropy = Configuration.getInt(prefix + "." + PAR_ENTROPY);
-        capacity = Configuration.getInt(prefix + "." + PAR_CAPACITY);
     }
 
     // ------------------------------------------------------------------------
@@ -107,7 +98,7 @@ public class MemberStateInitializer implements Control {
     */
     public boolean execute() {
         //TODO parametrize in configs
-        int catalogSize = 100;
+        int catalogSize = 5;
         long baseServiceMemory = 128;
         short serviceMemoryMultiplier = 2;
         float targetRT = 70;
@@ -154,7 +145,7 @@ public class MemberStateInitializer implements Control {
         ServiceDemandGenerator serviceDemandGenerator = new ServiceDemandGenerator(minServiceDemand, maxServiceDemand);
         MemberStateHolder memberProtocol = (MemberStateHolder) leader.getProtocol(pid);
         for(int i=0; i<Network.size(); ++i) {
-            Node member = Network.get(i);
+            FogNode member = (FogNode)Network.get(i);
             for(Service service : serviceCatalog){
                 float demand = serviceDemandGenerator.nextDemand();
                 memberProtocol.updateServiceDemand(member, service, demand);
