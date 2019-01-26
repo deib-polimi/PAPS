@@ -19,7 +19,8 @@
 package it.polimi.ppap.control;
 
 import it.polimi.deib.ppap.node.NodeFacade;
-import it.polimi.ppap.generator.service.FogNodeCapacityGenerator;
+import it.polimi.ppap.generator.initializer.FogNodeCapacityGenerator;
+import it.polimi.ppap.generator.workload.ServiceRequestGenerator;
 import it.polimi.ppap.model.FogNode;
 import it.polimi.ppap.protocol.NodeStateHolder;
 import peersim.config.Configuration;
@@ -87,7 +88,6 @@ public class NodeStateInitializer implements Control {
      * Creates a new instance and read parameters from the config file.
      */
     public NodeStateInitializer(String prefix) {
-
         pid = Configuration.getPid(prefix + "." + PAR_PROT);
         delta = Configuration.getInt(prefix + "." + PAR_DELTA);
         capacity = Configuration.getInt(prefix + "." + PAR_CAPACITY);
@@ -102,13 +102,16 @@ public class NodeStateInitializer implements Control {
     */
     public boolean execute() {
         //TODO parametrize in configs
-        FogNodeCapacityGenerator fogNodeCapacityGenerator = new FogNodeCapacityGenerator(1024, (short) 256);
+        FogNodeCapacityGenerator fogNodeCapacityGenerator = new FogNodeCapacityGenerator(1024* 32, 1024, (short) capacity);
         for(int i=0; i<Network.size(); ++i) {
             FogNode node = (FogNode) Network.get(i);
             NodeStateHolder nodeProt = (NodeStateHolder) node.getProtocol(pid);
             setupNodeState(node, fogNodeCapacityGenerator);
             NodeFacade nodeFacade = createNodeFacade(node);
+            nodeFacade.start();
             nodeProt.setNodeFacade(nodeFacade);
+            ServiceRequestGenerator serviceRequestGenerator = new ServiceRequestGenerator(nodeFacade);
+            nodeProt.setServiceRequestGenerator(serviceRequestGenerator);
         }
         return false;
     }
@@ -122,6 +125,6 @@ public class NodeStateInitializer implements Control {
     private NodeFacade createNodeFacade(FogNode node) {
         long controlPeriodMillis = delta;
         float alpha = 0.9f;//TODO parametrize in configs
-        return new NodeFacade(node.getMemoryCapacity(), controlPeriodMillis, alpha);
+        return new NodeFacade(node.getID() + "", node.getMemoryCapacity(), controlPeriodMillis, alpha); //TODO
     }
 }

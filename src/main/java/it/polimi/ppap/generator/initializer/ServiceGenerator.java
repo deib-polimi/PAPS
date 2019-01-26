@@ -1,4 +1,4 @@
-package it.polimi.ppap.generator.service;
+package it.polimi.ppap.generator.initializer;
 
 import it.polimi.deib.ppap.node.services.Service;
 import peersim.core.CommonState;
@@ -32,7 +32,7 @@ public class ServiceGenerator {
     }
 
     private String getNextServiceId(){
-        return "Function_" + serviceCount;
+        return serviceCount + "";
     }
 
     private void incServiceCount(){

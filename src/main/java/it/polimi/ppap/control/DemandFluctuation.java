@@ -18,7 +18,7 @@
 
 package it.polimi.ppap.control;
 
-import it.polimi.ppap.generator.service.ServiceDemandGenerator;
+import it.polimi.ppap.generator.initializer.ServiceDemandGenerator;
 import it.polimi.ppap.protocol.NodeProtocol;
 import peersim.config.Configuration;
 import peersim.core.Control;

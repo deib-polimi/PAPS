@@ -1,9 +1,13 @@
 package it.polimi.ppap.protocol;
 
 import it.polimi.deib.ppap.node.NodeFacade;
+import it.polimi.deib.ppap.node.services.Service;
+import it.polimi.ppap.generator.workload.ServiceRequestGenerator;
 import peersim.cdsim.CDProtocol;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
+
+import java.util.Map;
 
 public class NodeProtocol
     extends NodeStateHolder
@@ -18,8 +22,7 @@ public class NodeProtocol
 
     @Override
     public void nextCycle(Node node, int protocolID) {
-        System.out.println("NODE PROTOCOL CYCLE");
-        sendCurrentDemandToControl(getCurrentDemand());
+        updateCurrentDemandInControl(getCurrentDemand());
     }
 
     @Override
@@ -32,25 +35,31 @@ public class NodeProtocol
         return getDemandAllocationFromControl();
     }
 
-    public void setPlacementAllocation(Object placementAllocation){
-        sendPlacementAllocationToControl(placementAllocation);
+    public void setPlacementAllocation(Map<Service, Float> placementAllocation){
+        updatePlacementAllocationInControl(placementAllocation);
     }
 
 //--------------------------------------------------------------------------
 // INTERNAL
 //--------------------------------------------------------------------------
 
-    private boolean isPlacementAllocationUpdated(){
-
-        return false;
+    private void updatePlacementAllocationInControl(Map<Service, Float> placementAllocation){
+        NodeFacade nodeFacade = getNodeFacade();
+        ServiceRequestGenerator serviceRequestGenerator = getServiceRequestGenerator();
+        for(Service service : placementAllocation.keySet()){
+            if(placementAllocation.get(service) > 0 && !nodeFacade.isServing(service)) {
+                float allocation  = placementAllocation.get(service);
+                service.setTargetAllocation(allocation);
+                nodeFacade.addService(service);
+                serviceRequestGenerator.activateDemandForService(service);
+            }else if(placementAllocation.get(service) == 0 && nodeFacade.isServing(service)) {
+                serviceRequestGenerator.disableDemandForService(service);
+                nodeFacade.removeService(service);
+            }
+        }
     }
 
-    //TODO
-    private void sendPlacementAllocationToControl(Object placementAllocation){
-
-    }
-
-    private void sendCurrentDemandToControl(Object demand){
+    private void updateCurrentDemandInControl(Object demand){
         NodeFacade nodeFacade = getNodeFacade();
 
     }

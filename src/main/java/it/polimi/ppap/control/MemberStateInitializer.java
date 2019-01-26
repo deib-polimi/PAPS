@@ -21,8 +21,8 @@ package it.polimi.ppap.control;
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.common.scheme.PlacementAllocationSchema;
 import it.polimi.ppap.common.scheme.PlacementAllocationSchemaFactory;
-import it.polimi.ppap.generator.service.ServiceCatalogGenerator;
-import it.polimi.ppap.generator.service.ServiceDemandGenerator;
+import it.polimi.ppap.generator.initializer.ServiceCatalogGenerator;
+import it.polimi.ppap.generator.initializer.ServiceDemandGenerator;
 import it.polimi.ppap.model.FogNode;
 import it.polimi.ppap.protocol.MemberStateHolder;
 import peersim.config.Configuration;
@@ -31,9 +31,6 @@ import peersim.core.Network;
 import peersim.core.Node;
 import peersim.vector.SingleValue;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -98,7 +95,7 @@ public class MemberStateInitializer implements Control {
     */
     public boolean execute() {
         //TODO parametrize in configs
-        int catalogSize = 5;
+        int catalogSize = entropy;
         long baseServiceMemory = 128;
         short serviceMemoryMultiplier = 2;
         float targetRT = 70;
@@ -141,7 +138,7 @@ public class MemberStateInitializer implements Control {
         //TODO parametrize in configs
         Node leader = getLeader();
         int minServiceDemand = 0;
-        int maxServiceDemand = 5;
+        int maxServiceDemand = 4;
         ServiceDemandGenerator serviceDemandGenerator = new ServiceDemandGenerator(minServiceDemand, maxServiceDemand);
         MemberStateHolder memberProtocol = (MemberStateHolder) leader.getProtocol(pid);
         for(int i=0; i<Network.size(); ++i) {

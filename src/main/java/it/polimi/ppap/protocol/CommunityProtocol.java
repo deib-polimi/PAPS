@@ -1,9 +1,11 @@
 package it.polimi.ppap.protocol;
 
 import com.sun.org.apache.xerces.internal.impl.xpath.regex.Match;
+import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.common.communication.CommunityMessage;
 import it.polimi.ppap.common.communication.LeaderMessage;
 import it.polimi.ppap.common.communication.MemberMessage;
+import it.polimi.ppap.model.FogNode;
 import it.polimi.ppap.solver.OplModSolver;
 import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
@@ -13,6 +15,7 @@ import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 import peersim.transport.Transport;
 
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,27 +53,27 @@ public class CommunityProtocol
         CommunityMessage msg = (CommunityMessage) event;
         switch (msg.getCode()){
             case CommunityMessage.MBR_MON_MSG:
-                processMemberMessage(node, pid, msg);
+                processMemberMessage((FogNode) node, pid, msg);
                 break;
             case CommunityMessage.LDR_PLAN_MSG:
                 LeaderMessage leaderMessage = (LeaderMessage) msg;
-                execute(leaderMessage.getContent(), node, pid);
+                execute((Map<Service, Float>) leaderMessage.getContent(), node, pid);
                 break;
             default:
                 break;
         }
     }
 
-// LEADER BEHAVIOR
+    // LEADER BEHAVIOR
 
-    private void processMemberMessage(Node node, int pid, CommunityMessage msg) {
+    private void processMemberMessage(FogNode node, int pid, CommunityMessage msg) {
         MemberMessage memberMessage = (MemberMessage) msg;
         storeMonitoredDemand(memberMessage.getContent(), msg.getSender(), node, pid);
         incMonitoringCount();
         if(isAllMonitoringReceived(getMonitoringCount(), node, pid)) {
             analyze(node, pid);
             plan(node, pid);
-            sendPlanToMembers(getPlacementAllocationSchema(), node, pid);
+            sendPlanToMembers(node, pid);
             resetMonitoringCount();
         }
 
@@ -100,35 +103,38 @@ public class CommunityProtocol
         return linkable.degree() + 1 == monitoringCount;
     }
 
-    private void plan(Node node, int pid){
+    private void plan(FogNode node, int pid){
         //System.out.println("Performing the PLAN activity");
-        Object placementAllocation = solvePlacementAllocation(node, pid);
-        sendPlanToMembers(placementAllocation, node, pid);
+        solvePlacementAllocation(node, pid);
+        sendPlanToMembers(node, pid);
     }
 
     //TODO async system call to CPLEX solver;
-    private Object solvePlacementAllocation(Node node, int pid){
+    private void solvePlacementAllocation(Node node, int pid){
         OplModSolver oplModSolver = new OplModSolver();
         oplModSolver.generateData(getNodeServiceDemand());
         setNodeServiceAllocation(oplModSolver.solve(getNodeServiceDemand()));
-        return new Object();
     }
 
-    private void sendPlanToMembers(Object placementAllocation, Node node, int pid){
+    private void sendPlanToMembers(FogNode node, int pid){
         Linkable linkable =
                 (Linkable) node.getProtocol(FastConfig.getLinkable(pid));
+
+        Map<Service, Float> leaderServiceAllocation = getNodeServiceAllocation().get(node);
+        execute(leaderServiceAllocation, node, pid);
         for(int i = 0; i < linkable.degree(); i++){
             Node member = linkable.getNeighbor(i);
-            ((Transport) node.getProtocol(FastConfig.getTransport(pid))).
+            Map<Service, Float> memberServiceAllocation = getNodeServiceAllocation().get(member);
+             ((Transport) node.getProtocol(FastConfig.getTransport(pid))).
                     send(
                         node,
                         member,
-                        new LeaderMessage(node, placementAllocation),
+                        new LeaderMessage(node, memberServiceAllocation),
                         pid);
         }
     }
 
-// MEMBERS BEHAVIOR
+    // MEMBERS BEHAVIOR
 
     private void performMemberBehavior(Node node, int pid){
         monitor(node, pid);
@@ -157,10 +163,17 @@ public class CommunityProtocol
     }
 
     //MAPE: EXECUTION
-    private void execute(Object placementAllocation, Node node, int pid){
+    private void execute(Map<Service, Float> placementAllocation, Node node, int pid){
         //System.out.println("Performing the EXECUTE activity");
         NodeProtocol nodeProtocol = (NodeProtocol) node.getProtocol(nodePid);
         nodeProtocol.setPlacementAllocation(placementAllocation);
+        /*if(node.getID() == 1) {
+            try {
+                Thread.sleep(1000 * 1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }*/
     }
 
 

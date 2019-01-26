@@ -1,4 +1,4 @@
-package it.polimi.ppap.generator.service;
+package it.polimi.ppap.generator.initializer;
 
 import peersim.core.CommonState;
 
@@ -8,15 +8,17 @@ public class FogNodeCapacityGenerator {
 
     static Random random = CommonState.r;
 
+    final int minCapacity;
     final int baseCapacity;
     final short maxCapacityMultiplier;
 
-    public FogNodeCapacityGenerator(int baseCapacity, short maxCapacityMultiplier) {
+    public FogNodeCapacityGenerator(int minCapacity, int baseCapacity, short maxCapacityMultiplier) {
+        this.minCapacity = minCapacity;
         this.baseCapacity = baseCapacity;
         this.maxCapacityMultiplier = maxCapacityMultiplier;
     }
 
     public long nextCapacity(){
-        return baseCapacity * (1 + random.nextInt(maxCapacityMultiplier));
+        return minCapacity + baseCapacity * random.nextInt(maxCapacityMultiplier);
     }
 }

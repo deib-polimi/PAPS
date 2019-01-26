@@ -1,14 +1,14 @@
 # network size
-SIZE 15
+SIZE 2
 
 # connectivity
 CONNECTIVITY SIZE - 1
 
 # number of distinct functions in the system
-ENTROPY 10
+ENTROPY 4
 
-# the capacity available to each node
-CAPACITY 4
+# the maximum capacity available to each node (GB)
+CAPACITY 32
 
 # the maximum variation of demand at each cycle
 DELTADEMAND 0

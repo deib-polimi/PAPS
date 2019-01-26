@@ -4,6 +4,7 @@ import com.google.gson.*;
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.model.FogNode;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -42,9 +43,18 @@ public class OplModSolver {
         String absoluteModelFilePath = classLoader.getResource(oplModelFilePath).getPath();
         String absoluteResultsFilePath = classLoader.getResource(oplResultsFilePath).getPath();
         OplRun.oplRun(new String[]{"-v", "-de", absoluteResultsFilePath, absoluteModelFilePath, absoluteDataFilePath});
-        String solution = readResultsFromFile(absoluteResultsFilePath);
+        String solution = null;
+        try {
+            solution = readResultsFromFile(absoluteResultsFilePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new OplSolutionNotFoundException();
+        }
         return parseSolution(solution, nodeServiceDemand);
     }
+
+    public class OplSolutionNotFoundException extends RuntimeException{}
+
 
     private Map<FogNode, Map<Service, Float>>
     parseSolution(String solution, Map<FogNode, Map<Service, Float>> nodeServiceDemand){
@@ -68,7 +78,8 @@ public class OplModSolver {
     public class SolutionMalFormedSolutionException extends RuntimeException{}
 
     private Map<FogNode, Map<Service, Float>>
-    parseSourcesJsonArray(JsonArray solutionJsonArray, Map<FogNode, Map<Service, Float>> nodeServiceDemand){
+    parseSourcesJsonArray(JsonArray solutionJsonArray,
+                          Map<FogNode, Map<Service, Float>> nodeServiceDemand){
         Iterator<JsonElement> sourceIt = solutionJsonArray.iterator();
         Map<FogNode, Map<Service, Float>> nodeServicePlacement = new TreeMap<>();
         Iterator<FogNode> sourceNodeIt = nodeServiceDemand.keySet().iterator();
@@ -82,7 +93,12 @@ public class OplModSolver {
         return nodeServicePlacement;
     }
 
-    private void parseNodeJsonArray(Map<FogNode, Map<Service, Float>> nodeServiceDemand, Map<FogNode, Map<Service, Float>> nodeServicePlacement, Iterator<JsonElement> nodeIt, FogNode sourceNode, Iterator<FogNode> targetNodeIt) {
+    private void
+    parseNodeJsonArray(Map<FogNode, Map<Service, Float>> nodeServiceDemand,
+                       Map<FogNode, Map<Service, Float>> nodeServicePlacement,
+                       Iterator<JsonElement> nodeIt,
+                       FogNode sourceNode,
+                       Iterator<FogNode> targetNodeIt) {
         while(nodeIt.hasNext()){
             FogNode targetNode = targetNodeIt.next();
             if(!nodeServicePlacement.containsKey(targetNode))
@@ -94,7 +110,12 @@ public class OplModSolver {
         }
     }
 
-    private void parseFunctiosJsonArray(Map<FogNode, Map<Service, Float>> nodeServiceDemand, Map<FogNode, Map<Service, Float>> nodeServicePlacement, FogNode sourceNode, Iterator<JsonElement> functionIt, Iterator<Service> targetServiceIt) {
+    private void
+    parseFunctiosJsonArray(Map<FogNode, Map<Service, Float>> nodeServiceDemand,
+                           Map<FogNode, Map<Service, Float>> nodeServicePlacement,
+                           FogNode sourceNode,
+                           Iterator<JsonElement> functionIt,
+                           Iterator<Service> targetServiceIt) {
         while(functionIt.hasNext()){
             JsonPrimitive allocationElement = (JsonPrimitive) functionIt.next();
             Service targetService = targetServiceIt.next();
@@ -102,24 +123,13 @@ public class OplModSolver {
             float demand = nodeServiceDemand.get(sourceNode).get(targetService);
             int memoryMultiplier = (int)(targetService.getMemory() / 128); //TODO
             float allocated = nodeServicePlacement.get(sourceNode).getOrDefault(targetService, 0f);
-            allocated += placed * demand * memoryMultiplier;
+            allocated += placed * demand;// * memoryMultiplier; //TODO allocation should refer to the n of CTS
             nodeServicePlacement.get(sourceNode).put(targetService, allocated);
         }
     }
 
-    private static String readResultsFromFile(String filePath)
-    {
-        String content = "";
-
-        try
-        {
-            content = new String ( Files.readAllBytes( Paths.get(filePath) ) );
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-
+    private static String readResultsFromFile(String filePath) throws IOException {
+        String content = new String ( Files.readAllBytes( Paths.get(filePath) ) );
         return content;
     }
 }

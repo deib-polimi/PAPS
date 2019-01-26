@@ -47,7 +47,7 @@ public class OplDataWritter {
     final String migrationCost = "1";
     final int baseCapacity = 1024;
     final int colocatedSourceNodeDelay = 2;
-    final int maxSourceNodeDelay = 50;
+    final int maxSourceNodeDelay = 30;
 
     private void writeFile() throws IOException {
         String template = readTemplateFile();
@@ -133,7 +133,7 @@ public class OplDataWritter {
         List<String> functionsList = new ArrayList<>();
         Node firstNode = nodeServiceDemand.keySet().iterator().next();
         for(Service service : nodeServiceDemand.get(firstNode).keySet())
-            functionsList.add("\"" + service.getId() + "\"");
+            functionsList.add("\"" + service + "\"");
         return String.join(",", functionsList);
     }
 

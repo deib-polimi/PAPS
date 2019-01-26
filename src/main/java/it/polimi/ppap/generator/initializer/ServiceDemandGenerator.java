@@ -1,4 +1,4 @@
-package it.polimi.ppap.generator.service;
+package it.polimi.ppap.generator.initializer;
 
 import peersim.core.CommonState;
 
