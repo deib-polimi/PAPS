@@ -138,7 +138,7 @@ public class MemberStateInitializer implements Control {
         //TODO parametrize in configs
         Node leader = getLeader();
         int minServiceDemand = 0;
-        int maxServiceDemand = 4;
+        int maxServiceDemand = 5;
         ServiceDemandGenerator serviceDemandGenerator = new ServiceDemandGenerator(minServiceDemand, maxServiceDemand);
         MemberStateHolder memberProtocol = (MemberStateHolder) leader.getProtocol(pid);
         for(int i=0; i<Network.size(); ++i) {

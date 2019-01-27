@@ -72,7 +72,7 @@ public class OplDataWritter {
             sb.append("[");
             List<String> functionDemandList = new ArrayList<>();
             for(Service service : nodeServiceDemand.get(node).keySet()){
-                float serviceDemand = nodeServiceDemand.get(node).get(service);
+                int serviceDemand = (int) Math.ceil(nodeServiceDemand.get(node).get(service));
                 int memoryMultiplier = (int)(service.getMemory() / 128); //TODO
                 functionDemandList.add(((int)serviceDemand * memoryMultiplier) + "");
             }

@@ -108,6 +108,7 @@ public class NodeStateInitializer implements Control {
             NodeStateHolder nodeProt = (NodeStateHolder) node.getProtocol(pid);
             setupNodeState(node, fogNodeCapacityGenerator);
             NodeFacade nodeFacade = createNodeFacade(node);
+            nodeFacade.setTickListener(nodeProt);
             nodeFacade.start();
             nodeProt.setNodeFacade(nodeFacade);
             ServiceRequestGenerator serviceRequestGenerator = new ServiceRequestGenerator(nodeFacade);

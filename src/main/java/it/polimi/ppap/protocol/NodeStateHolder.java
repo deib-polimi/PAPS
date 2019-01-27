@@ -1,17 +1,18 @@
 package it.polimi.ppap.protocol;
 
 import it.polimi.deib.ppap.node.NodeFacade;
+import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.generator.workload.ServiceRequestGenerator;
-import it.polimi.ppap.model.FogNode;
 import peersim.core.Protocol;
 
-import java.util.Set;
+import java.util.Map;
+import java.util.TreeMap;
 
-public abstract class NodeStateHolder implements Protocol {
+public abstract class NodeStateHolder implements Protocol, NodeFacade.TickListener {
 
-    Object currentDemand;
     NodeFacade nodeFacade;
     ServiceRequestGenerator serviceRequestGenerator;
+    Map<Service, Map.Entry<Float, Float>> currentDemandAllocation = new TreeMap<>();
 
     @Override
     public Object clone() {
@@ -32,19 +33,11 @@ public abstract class NodeStateHolder implements Protocol {
         this.serviceRequestGenerator = serviceRequestGenerator;
     }
 
-    public NodeFacade getNodeFacade() {
-        return nodeFacade;
-    }
-
     public void setNodeFacade(NodeFacade nodeFacade) {
         this.nodeFacade = nodeFacade;
     }
 
-    public Object getCurrentDemand() {
-        return currentDemand;
-    }
-
-    public void setCurrentDemand(Object currentDemand) {
-        this.currentDemand = currentDemand;
+    public Map<Service, Map.Entry<Float, Float>> getCurrentDemandAllocation() {
+        return currentDemandAllocation;
     }
 }

@@ -85,11 +85,14 @@ public class CommunityProtocol
 
     private void coordinateSharedMemberCapacityAllocation(Node node, int pid){
         //System.out.println("Performing shared member capacity allocation");
-
     }
 
-    private void storeMonitoredDemand(Object demand, Node sender, Node node, int pid){
-
+    private void storeMonitoredDemand(Map<Service, Map.Entry<Float, Float>> currentDemandAllocation, Node sender, Node node, int pid){
+        for(Service service : currentDemandAllocation.keySet()) {
+            Map.Entry<Float, Float> demandAllocation = currentDemandAllocation.get(service);
+            float currentDemand = demandAllocation.getValue();
+            getNodeServiceDemand().get(sender).put(service, currentDemand);
+        }
     }
 
     private void analyze(Node node, int pid){
@@ -144,7 +147,7 @@ public class CommunityProtocol
     private void monitor(Node node, int pid){
         //System.out.println("Performing the MONITOR activity");
         NodeProtocol nodeProtocol = (NodeProtocol) node.getProtocol(nodePid);
-        Object demandAllocation = nodeProtocol.getDemandAllocation();
+        Map<Service, Map.Entry<Float, Float>> demandAllocation = nodeProtocol.getCurrentDemandAllocation();
         try {
             sendMonitoredDataToLeader(demandAllocation, node, pid);
         } catch (CommunityLeaderNotFoundException e) {
@@ -152,7 +155,8 @@ public class CommunityProtocol
         }
     }
 
-    private void sendMonitoredDataToLeader(Object demandAllocation, Node node, int pid) throws CommunityLeaderNotFoundException {
+    private void sendMonitoredDataToLeader(Map<Service, Map.Entry<Float, Float>> demandAllocation,
+                                           Node node, int pid) throws CommunityLeaderNotFoundException {
         Node communityLeader = getCommunityLeader(node, pid);
         ((Transport) node.getProtocol(FastConfig.getTransport(pid))).
                 send(
@@ -167,13 +171,6 @@ public class CommunityProtocol
         //System.out.println("Performing the EXECUTE activity");
         NodeProtocol nodeProtocol = (NodeProtocol) node.getProtocol(nodePid);
         nodeProtocol.setPlacementAllocation(placementAllocation);
-        /*if(node.getID() == 1) {
-            try {
-                Thread.sleep(1000 * 1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }*/
     }
 
 

@@ -11,4 +11,12 @@ public class ServiceDemand {
         this.service = service;
         this.demand = demand;
     }
+
+    public Service getService() {
+        return service;
+    }
+
+    public float getDemand() {
+        return demand;
+    }
 }

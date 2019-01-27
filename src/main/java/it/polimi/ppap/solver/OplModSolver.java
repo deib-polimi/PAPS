@@ -119,11 +119,11 @@ public class OplModSolver {
         while(functionIt.hasNext()){
             JsonPrimitive allocationElement = (JsonPrimitive) functionIt.next();
             Service targetService = targetServiceIt.next();
+
             short placed = allocationElement.getAsShort();
             float demand = nodeServiceDemand.get(sourceNode).get(targetService);
-            int memoryMultiplier = (int)(targetService.getMemory() / 128); //TODO
             float allocated = nodeServicePlacement.get(sourceNode).getOrDefault(targetService, 0f);
-            allocated += placed * demand;// * memoryMultiplier; //TODO allocation should refer to the n of CTS
+            allocated += placed * demand;
             nodeServicePlacement.get(sourceNode).put(targetService, allocated);
         }
     }
