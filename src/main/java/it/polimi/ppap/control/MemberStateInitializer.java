@@ -127,9 +127,9 @@ public class MemberStateInitializer implements Control {
         for(int i = 0; i< Network.size(); ++i) {
             Node member = Network.get(i);
             MemberStateHolder memberProtocol = (MemberStateHolder) member.getProtocol(pid);
-            PlacementAllocationSchemaFactory factory = PlacementAllocationSchemaFactory.getInstance();
+            /*PlacementAllocationSchemaFactory factory = PlacementAllocationSchemaFactory.getInstance();
             PlacementAllocationSchema placementAllocationSchema = factory.createPlacementAllocationSchema();
-            memberProtocol.setPlacementAllocationSchema(placementAllocationSchema);
+            memberProtocol.setPlacementAllocationSchema(placementAllocationSchema);*/
         }
     }
 

@@ -19,9 +19,7 @@ public abstract class MemberStateHolder implements Protocol {
         this.leader = leader;
     }
 
-
-
-    //MAPE - Monitoring and Analysis
+    //MAPE: Monitoring
 
     Map<FogNode, Map<Service, Float>> nodeServiceDemand = new TreeMap<>();
 
@@ -37,12 +35,10 @@ public abstract class MemberStateHolder implements Protocol {
         this.monitoringCount = 0;
     }
 
+    //MAPE: Analysis
+
     public Map<FogNode, Map<Service, Float>> getNodeServiceDemand(){
         return nodeServiceDemand;
-    }
-
-    public void setNodeServiceDemand(Map<FogNode, Map<Service, Float>> nodeServiceDemand){
-        this.nodeServiceDemand = nodeServiceDemand;
     }
 
     public void updateServiceDemand(FogNode node, Service service, float demand){
@@ -53,19 +49,9 @@ public abstract class MemberStateHolder implements Protocol {
         nodeServiceDemand.put(node, serviceDemand);
     }
 
-    //MAPE - Planning
+    //MAPE: Planning
 
     Map<FogNode, Map<Service, Float>> nodeServiceAllocation = new TreeMap<>();
-
-    PlacementAllocationSchema placementAllocationSchema;
-
-    public PlacementAllocationSchema getPlacementAllocationSchema() {
-        return placementAllocationSchema;
-    }
-
-    public void setPlacementAllocationSchema(PlacementAllocationSchema placementAllocationSchema) {
-        this.placementAllocationSchema = placementAllocationSchema;
-    }
 
     public Map<FogNode, Map<Service, Float>> getNodeServiceAllocation() {
         return nodeServiceAllocation;
@@ -75,10 +61,11 @@ public abstract class MemberStateHolder implements Protocol {
         this.nodeServiceAllocation = nodeServiceAllocation;
     }
 
-    //MAPE - ?
-
-
-
+    /**
+     * Overrides the clone method, as required by PeerSim.
+     * TODO Check if we need to properly implement this (i.e. clone the member's state)
+     * @return
+     */
     @Override
     public Object clone() {
         MemberStateHolder svh=null;

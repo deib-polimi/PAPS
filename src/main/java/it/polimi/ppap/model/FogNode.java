@@ -24,4 +24,9 @@ public class FogNode extends GeneralNode implements Node, Comparable{
         FogNode other = (FogNode) o;
         return (int) (this.getID() - other.getID());
     }
+
+    @Override
+    public String toString() {
+        return "FogNode " + getID();
+    }
 }

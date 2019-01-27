@@ -28,6 +28,8 @@ import peersim.core.Control;
 import peersim.core.Network;
 import peersim.vector.SingleValue;
 
+import java.util.TreeMap;
+
 /**
  * Initialize an aggregation protocol using a peak distribution; only one peak
  * is allowed. Note that any protocol implementing
@@ -106,6 +108,7 @@ public class NodeStateInitializer implements Control {
         for(int i=0; i<Network.size(); ++i) {
             FogNode node = (FogNode) Network.get(i);
             NodeStateHolder nodeProt = (NodeStateHolder) node.getProtocol(pid);
+            nodeProt.setCurrentWorkloadAllocation(new TreeMap<>());//TODO
             setupNodeState(node, fogNodeCapacityGenerator);
             NodeFacade nodeFacade = createNodeFacade(node);
             nodeFacade.setTickListener(nodeProt);

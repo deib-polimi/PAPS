@@ -1,14 +1,14 @@
 # network size
-SIZE 10
+SIZE 15
 
 # connectivity
 CONNECTIVITY SIZE - 1
 
 # number of distinct functions in the system
-ENTROPY 5
+ENTROPY 15
 
 # the maximum capacity available to each node (GB)
-CAPACITY 32
+CAPACITY 64
 
 # the maximum variation of demand at each cycle
 DELTADEMAND 0
@@ -19,7 +19,7 @@ DELTATICK 3000
 # parameters of periodic execution
 CYCLES 100
 CYCLE SIZE*10000
-NODE_CYCLE CYCLE / 10
+NODE_CYCLE CYCLE / 5
 COMMUNITY_CYCLE CYCLE
 
 # parameters of message transfer

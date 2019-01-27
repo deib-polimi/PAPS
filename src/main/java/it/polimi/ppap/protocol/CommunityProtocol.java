@@ -1,6 +1,5 @@
 package it.polimi.ppap.protocol;
 
-import com.sun.org.apache.xerces.internal.impl.xpath.regex.Match;
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.common.communication.CommunityMessage;
 import it.polimi.ppap.common.communication.LeaderMessage;
@@ -16,8 +15,6 @@ import peersim.edsim.EDProtocol;
 import peersim.transport.Transport;
 
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class CommunityProtocol
         extends MemberStateHolder
@@ -69,6 +66,7 @@ public class CommunityProtocol
     private void processMemberMessage(FogNode node, int pid, CommunityMessage msg) {
         MemberMessage memberMessage = (MemberMessage) msg;
         storeMonitoredDemand(memberMessage.getContent(), msg.getSender(), node, pid);
+        System.out.println("Member Monitoring Message Received: " + monitoringCount);
         incMonitoringCount();
         if(isAllMonitoringReceived(getMonitoringCount(), node, pid)) {
             analyze(node, pid);
@@ -91,6 +89,7 @@ public class CommunityProtocol
         for(Service service : currentDemandAllocation.keySet()) {
             Map.Entry<Float, Float> demandAllocation = currentDemandAllocation.get(service);
             float currentDemand = demandAllocation.getValue();
+            //System.out.println("######### Current Demand from " + sender + " for service " + service + ": " + currentDemand);
             getNodeServiceDemand().get(sender).put(service, currentDemand);
         }
     }
@@ -147,7 +146,7 @@ public class CommunityProtocol
     private void monitor(Node node, int pid){
         //System.out.println("Performing the MONITOR activity");
         NodeProtocol nodeProtocol = (NodeProtocol) node.getProtocol(nodePid);
-        Map<Service, Map.Entry<Float, Float>> demandAllocation = nodeProtocol.getCurrentDemandAllocation();
+        Map<Service, Map.Entry<Float, Float>> demandAllocation = nodeProtocol.getCurrentWorkloadAllocation();
         try {
             sendMonitoredDataToLeader(demandAllocation, node, pid);
         } catch (CommunityLeaderNotFoundException e) {
@@ -170,7 +169,7 @@ public class CommunityProtocol
     private void execute(Map<Service, Float> placementAllocation, Node node, int pid){
         //System.out.println("Performing the EXECUTE activity");
         NodeProtocol nodeProtocol = (NodeProtocol) node.getProtocol(nodePid);
-        nodeProtocol.setPlacementAllocation(placementAllocation);
+        nodeProtocol.updatePlacementAllocation(placementAllocation);
     }
 
 

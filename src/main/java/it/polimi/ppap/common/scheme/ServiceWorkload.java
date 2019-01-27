@@ -2,21 +2,21 @@ package it.polimi.ppap.common.scheme;
 
 import it.polimi.deib.ppap.node.services.Service;
 
-public class ServiceDemand {
+public class ServiceWorkload {
 
     private final Service service;
-    private float demand;
+    private float workload;
 
-    public ServiceDemand(Service service, float demand){
+    public ServiceWorkload(Service service, float demand){
         this.service = service;
-        this.demand = demand;
+        this.workload = demand;
     }
 
     public Service getService() {
         return service;
     }
 
-    public float getDemand() {
-        return demand;
+    public float getWokload() {
+        return workload;
     }
 }

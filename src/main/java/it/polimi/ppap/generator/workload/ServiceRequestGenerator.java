@@ -5,13 +5,12 @@ import it.polimi.deib.ppap.node.commons.NormalDistribution;
 import it.polimi.deib.ppap.node.commons.Utils;
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.deib.ppap.node.services.ServiceRequest;
-import it.polimi.ppap.common.scheme.ServiceDemand;
+import it.polimi.ppap.common.scheme.ServiceWorkload;
 import org.apache.commons.math3.distribution.ExponentialDistribution;
 import peersim.core.CommonState;
 
 import java.util.Map;
 import java.util.Random;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ServiceRequestGenerator {
@@ -28,42 +27,32 @@ public class ServiceRequestGenerator {
         this.nodeFacade = nodeFacade;
     }
 
-    public void activateDemandForService(ServiceDemand serviceDemand){
-        activeServices.put(serviceDemand.getService(), serviceDemand.getDemand());
-        generateRequests(serviceDemand);
+    public void activateWorkloadForService(ServiceWorkload serviceWorkload){
+        activeServices.put(serviceWorkload.getService(), serviceWorkload.getWokload());
+        generateRequests(serviceWorkload);
     }
 
-    public void disableDemandForService(Service service){
+    public void disableWorkloadForService(Service service){
         activeServices.remove(service);
-        synchronized (service) {
-            try {
-                service.wait(500);
-                System.out.println("########### Service Released ##############");
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
-    public void updateDemandForService(ServiceDemand serviceDemand){
-        activeServices.put(serviceDemand.getService(), serviceDemand.getDemand());
-    }
-
-    private void generateRequests(ServiceDemand serviceDemand){
-        if(nodeFacade.isServing(serviceDemand.getService())) {
-            Thread t = new Thread(executeRequestsStableScenario(serviceDemand.getService(), 250)); //TODO 1000 to 250
-            t.start();
-        }else
-            throw new ServiceNotRunningExecption();
+    public void updateWorkloadForService(ServiceWorkload serviceWorkload){
+        activeServices.put(serviceWorkload.getService(), serviceWorkload.getWokload());
     }
 
     public class ServiceNotRunningExecption extends RuntimeException{}
 
     /** Methods **/
 
-
-
     private final static short MAX_WORKLOAD_SCENARIOS = 4;
+
+    private void generateRequests(ServiceWorkload serviceDemand){
+        if(nodeFacade.isServing(serviceDemand.getService())) {
+            Thread t = new Thread(executeRequestsStableScenario(serviceDemand.getService(), 250)); //TODO 1000 to 250
+            t.start();
+        }else
+            throw new ServiceNotRunningExecption();
+    }
 
     private Runnable executeRequestsStableScenario(Service service, long num){
         return () -> {
@@ -73,13 +62,10 @@ public class ServiceRequestGenerator {
                 ExponentialDistribution exponentialDistribution = new ExponentialDistribution(demand);
                 stableScenario(num, service, normalDistribution, exponentialDistribution);
             }
-            synchronized (service) {
-                service.notify();
-            }
         };
     }
 
-    private Runnable executeRequestsRandomScenario(ServiceDemand serviceDemand, long num){
+    private Runnable executeRequestsRandomScenario(ServiceWorkload serviceDemand, long num){
         Service service = serviceDemand.getService();
         return () -> {
             float demand = activeServices.get(service);
