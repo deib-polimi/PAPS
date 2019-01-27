@@ -10,8 +10,9 @@ import java.util.TreeMap;
 
 public abstract class MemberStateHolder implements Protocol {
 
+    //Community
+
     boolean leader;
-    int monitoringCount;
     public boolean isLeader() {
         return leader;
     }
@@ -21,7 +22,7 @@ public abstract class MemberStateHolder implements Protocol {
 
     //MAPE: Monitoring
 
-    Map<FogNode, Map<Service, Float>> nodeServiceDemand = new TreeMap<>();
+    int monitoringCount;
 
     public int getMonitoringCount() {
         return monitoringCount;
@@ -35,7 +36,10 @@ public abstract class MemberStateHolder implements Protocol {
         this.monitoringCount = 0;
     }
 
+
     //MAPE: Analysis
+
+    Map<FogNode, Map<Service, Float>> nodeServiceDemand = new TreeMap<>();
 
     public Map<FogNode, Map<Service, Float>> getNodeServiceDemand(){
         return nodeServiceDemand;

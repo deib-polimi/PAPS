@@ -22,9 +22,9 @@ public class CommunityProtocol
 
     private static final String PAR_NODE_PROTOCOL = "nodeprotocol";
 
-//--------------------------------------------------------------------------
-// Initialization
-//--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    // Initialization
+    //--------------------------------------------------------------------------
 
     private final int nodePid;
 
@@ -32,13 +32,12 @@ public class CommunityProtocol
         nodePid = Configuration.getPid(prefix + "." + PAR_NODE_PROTOCOL);
     }
 
-//--------------------------------------------------------------------------
-// METHODS
-//--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    // INTERFACE
+    //--------------------------------------------------------------------------
 
     @Override
     public void nextCycle(Node node, int protocolID) {
-        System.out.println("COMMUNITY PROTOCOL CYCLE");
         performMemberBehavior(node, protocolID);
         if(isLeader()) {
             performLeaderBehavior(node, protocolID);
@@ -61,21 +60,12 @@ public class CommunityProtocol
         }
     }
 
-    // LEADER BEHAVIOR
+    //--------------------------------------------------------------------------
+    // METHODS
+    //--------------------------------------------------------------------------
 
-    private void processMemberMessage(FogNode node, int pid, CommunityMessage msg) {
-        MemberMessage memberMessage = (MemberMessage) msg;
-        storeMonitoredDemand(memberMessage.getContent(), msg.getSender(), node, pid);
-        System.out.println("Member Monitoring Message Received: " + monitoringCount);
-        incMonitoringCount();
-        if(isAllMonitoringReceived(getMonitoringCount(), node, pid)) {
-            analyze(node, pid);
-            plan(node, pid);
-            sendPlanToMembers(node, pid);
-            resetMonitoringCount();
-        }
-
-    }
+    // -----------------
+    // LEADER's BEHAVIOR
 
     private void performLeaderBehavior(Node node, int pid){
         coordinateSharedMemberCapacityAllocation(node, pid);
@@ -83,6 +73,28 @@ public class CommunityProtocol
 
     private void coordinateSharedMemberCapacityAllocation(Node node, int pid){
         //System.out.println("Performing shared member capacity allocation");
+    }
+
+    private void analyze(FogNode node, int pid){
+        //System.out.println("Performing ANALYSIS activity");
+        plan(node, pid);
+    }
+
+    private void plan(FogNode node, int pid){
+        //System.out.println("Performing the PLAN activity");
+        solvePlacementAllocation();
+        sendPlanToMembers(node, pid);
+    }
+
+    private void processMemberMessage(FogNode node, int pid, CommunityMessage msg) {
+        MemberMessage memberMessage = (MemberMessage) msg;
+        storeMonitoredDemand(memberMessage.getContent(), msg.getSender(), node, pid);
+        incMonitoringCount();
+        if(isAllMonitoringReceived(getMonitoringCount(), node, pid)) {
+            analyze(node, pid);
+            resetMonitoringCount();
+        }
+
     }
 
     private void storeMonitoredDemand(Map<Service, Map.Entry<Float, Float>> currentDemandAllocation, Node sender, Node node, int pid){
@@ -94,25 +106,15 @@ public class CommunityProtocol
         }
     }
 
-    private void analyze(Node node, int pid){
-        //System.out.println("Performing ANALYSIS activity");
-    }
-
-    //TODO: only works in a fully connected topology
+    //TODO: only works if the leader has a connection to all members, which is expected; can improve it?
     private boolean isAllMonitoringReceived(int monitoringCount, Node node, int pid){
         Linkable linkable =
                 (Linkable) node.getProtocol(FastConfig.getLinkable(pid));
         return linkable.degree() + 1 == monitoringCount;
     }
 
-    private void plan(FogNode node, int pid){
-        //System.out.println("Performing the PLAN activity");
-        solvePlacementAllocation(node, pid);
-        sendPlanToMembers(node, pid);
-    }
-
-    //TODO async system call to CPLEX solver;
-    private void solvePlacementAllocation(Node node, int pid){
+    //TODO async system call to CPLEX solver; otherwise complex optimization will make the simulation to stop
+    private void solvePlacementAllocation(){
         OplModSolver oplModSolver = new OplModSolver();
         oplModSolver.generateData(getNodeServiceDemand());
         setNodeServiceAllocation(oplModSolver.solve(getNodeServiceDemand()));
@@ -136,7 +138,8 @@ public class CommunityProtocol
         }
     }
 
-    // MEMBERS BEHAVIOR
+    // -----------------
+    // MEMBER's BEHAVIOR
 
     private void performMemberBehavior(Node node, int pid){
         monitor(node, pid);
@@ -165,7 +168,9 @@ public class CommunityProtocol
                     pid);
     }
 
+    // -----------------
     //MAPE: EXECUTION
+
     private void execute(Map<Service, Float> placementAllocation, Node node, int pid){
         //System.out.println("Performing the EXECUTE activity");
         NodeProtocol nodeProtocol = (NodeProtocol) node.getProtocol(nodePid);

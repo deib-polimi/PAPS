@@ -4,7 +4,6 @@ import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.common.scheme.ServiceWorkload;
 import it.polimi.ppap.generator.initializer.ServiceWorkloadGenerator;
 import it.polimi.ppap.generator.workload.ServiceRequestGenerator;
-import org.apache.commons.math3.distribution.NormalDistribution;
 import peersim.cdsim.CDProtocol;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
@@ -30,7 +29,7 @@ public class NodeProtocol
     @Override
     public void afterTick() {
         fetchOptimalAllocationFromControl();
-        fluctuateWorkload();
+        //fluctuateWorkload();
     }
 
     @Override
@@ -55,8 +54,11 @@ public class NodeProtocol
         System.out.println("########### Placing Service " + service.getId() + " Onto Node ##############");
         float allocation  = placementAllocation.get(service);
         service.setTargetAllocation(allocation);
-        ServiceWorkloadGenerator serviceWorkloadGenerator = new ServiceWorkloadGenerator(service);
+        float mean = service.getSLA() * 5f / service.getTargetAllocation();
+        float std = service.getSLA() * 0.1f;
+        ServiceWorkloadGenerator serviceWorkloadGenerator = new ServiceWorkloadGenerator(mean, std);
         float initialWorkload = serviceWorkloadGenerator.nextWorkload();
+        System.out.println("########### Initialized Workload for " + service.getId() + ": " + initialWorkload + " ##############");
         nodeFacade.addService(service);
         Map.Entry<Float, Float> workloadAllocation = new AbstractMap.SimpleEntry<>(initialWorkload, allocation);
         currentWorkloadAllocation.put(service, workloadAllocation);
@@ -96,9 +98,10 @@ public class NodeProtocol
             if(nodeFacade.isServing(service)) {
                 Map.Entry<Float, Float> workloadAllocation = currentWorkloadAllocation.get(service);
                 float currentWorkload = workloadAllocation.getKey();
-                //TODO varying the interarrival time with average twice the SLA and STD = SLA
-                NormalDistribution normalDistribution = new NormalDistribution(service.getSLA() * 2, service.getSLA());
-                float nextWorkload = (float) normalDistribution.sample();
+                float std = service.getSLA() * 0.1f;
+                ServiceWorkloadGenerator serviceWorkloadGenerator = new ServiceWorkloadGenerator(currentWorkload, std);
+                float nextWorkload = serviceWorkloadGenerator.nextWorkload();
+                System.out.println("########### Next Workload for " + service.getId() + ": " + nextWorkload + " ##############");
                 workloadAllocation = new AbstractMap.SimpleEntry<>(nextWorkload, workloadAllocation.getValue());
                 currentWorkloadAllocation.put(service, workloadAllocation);
                 ServiceWorkload serviceWorkload = new ServiceWorkload(service, currentWorkload);

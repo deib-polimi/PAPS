@@ -7,14 +7,18 @@ public class ServiceWorkloadGenerator {
 
     final NormalDistribution normalDistribution;
 
-    public ServiceWorkloadGenerator(Service service) {
-        float allocationFactor = 5 / service.getTargetAllocation();
-        float mean = service.getSLA() * allocationFactor;
-        float std = service.getSLA();
+    public ServiceWorkloadGenerator(float mean, float std) {
         normalDistribution = new NormalDistribution(mean, std);
     }
 
     public float nextWorkload(){
-        return (float) normalDistribution.sample();
+        float sample;
+        for(int i=0; i < 1000; i++)
+            if((sample = (float) normalDistribution.sample()) >= 0)
+                return sample;
+        throw new NegativeServiceWorkloadException();
     }
+
+
+    public class NegativeServiceWorkloadException extends RuntimeException{}
 }

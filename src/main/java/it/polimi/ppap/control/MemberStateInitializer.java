@@ -25,6 +25,7 @@ import it.polimi.ppap.generator.initializer.ServiceCatalogGenerator;
 import it.polimi.ppap.generator.initializer.ServiceDemandGenerator;
 import it.polimi.ppap.model.FogNode;
 import it.polimi.ppap.protocol.MemberStateHolder;
+import it.polimi.ppap.solver.OplModSolver;
 import peersim.config.Configuration;
 import peersim.core.Control;
 import peersim.core.Network;
@@ -104,13 +105,16 @@ public class MemberStateInitializer implements Control {
         Set<Service> serviceCatalog = serviceCatalogGenerator.generateCatalog();
         initializeLeader();
         initializeNodeServiceDemand(serviceCatalog);
-        initializePlacementAllocation();
-        solvePlacementAllocation();
+        //solvePlacementAllocation();
         return false;
     }
 
     private void solvePlacementAllocation() {
-
+        Node leader = getLeader();
+        MemberStateHolder memberProtocol = (MemberStateHolder) leader.getProtocol(pid);
+        OplModSolver oplModSolver = new OplModSolver();
+        oplModSolver.generateData(memberProtocol.getNodeServiceDemand());
+        memberProtocol.setNodeServiceAllocation(oplModSolver.solve(memberProtocol.getNodeServiceDemand()));
     }
 
     private Node getLeader(){
@@ -123,13 +127,14 @@ public class MemberStateInitializer implements Control {
         memberProtocol.setLeader(true);
     }
 
+    @Deprecated
     private void initializePlacementAllocation() {
         for(int i = 0; i< Network.size(); ++i) {
             Node member = Network.get(i);
             MemberStateHolder memberProtocol = (MemberStateHolder) member.getProtocol(pid);
-            /*PlacementAllocationSchemaFactory factory = PlacementAllocationSchemaFactory.getInstance();
+            PlacementAllocationSchemaFactory factory = PlacementAllocationSchemaFactory.getInstance();
             PlacementAllocationSchema placementAllocationSchema = factory.createPlacementAllocationSchema();
-            memberProtocol.setPlacementAllocationSchema(placementAllocationSchema);*/
+            //memberProtocol.setPlacementAllocationSchema(placementAllocationSchema);
         }
     }
 
