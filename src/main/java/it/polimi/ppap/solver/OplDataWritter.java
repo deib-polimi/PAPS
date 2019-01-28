@@ -1,8 +1,7 @@
 package it.polimi.ppap.solver;
 
 import it.polimi.deib.ppap.node.services.Service;
-import it.polimi.ppap.common.scheme.PlacementAllocationSchema;
-import it.polimi.ppap.model.FogNode;
+import it.polimi.ppap.topology.FogNode;
 import peersim.core.Node;
 
 import java.io.File;

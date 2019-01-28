@@ -1,4 +1,4 @@
-package it.polimi.ppap.common.communication;
+package it.polimi.ppap.transport;
 
 import peersim.core.Node;
 

@@ -2,9 +2,10 @@ package it.polimi.ppap.solver;
 
 import com.google.gson.*;
 import it.polimi.deib.ppap.node.services.Service;
-import it.polimi.ppap.model.FogNode;
+import it.polimi.ppap.service.AggregateServiceDemand;
+import it.polimi.ppap.service.ServiceDemand;
+import it.polimi.ppap.topology.FogNode;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -36,7 +37,7 @@ public class OplModSolver {
         }
     }
 
-    public Map<FogNode, Map<Service, Float>>
+    public Map<FogNode, Map<Service, AggregateServiceDemand>>
     solve(Map<FogNode, Map<Service, Float>> nodeServiceDemand){
         ClassLoader classLoader = getClass().getClassLoader();
         String absoluteDataFilePath = classLoader.getResource(oplDataFilePath).getPath();
@@ -56,7 +57,7 @@ public class OplModSolver {
     public class OplSolutionNotFoundException extends RuntimeException{}
 
 
-    private Map<FogNode, Map<Service, Float>>
+    private Map<FogNode, Map<Service, AggregateServiceDemand>>
     parseSolution(String solution, Map<FogNode, Map<Service, Float>> nodeServiceDemand){
         solution = solution.replaceAll("\n|  ", "");
         Pattern pattern = Pattern.compile("(Supply = (\\[.*\\]);)(Open = (\\[.*\\]);)");
@@ -77,11 +78,11 @@ public class OplModSolver {
 
     public class SolutionMalFormedSolutionException extends RuntimeException{}
 
-    private Map<FogNode, Map<Service, Float>>
+    private Map<FogNode, Map<Service, AggregateServiceDemand>>
     parseSourcesJsonArray(JsonArray solutionJsonArray,
                           Map<FogNode, Map<Service, Float>> nodeServiceDemand){
         Iterator<JsonElement> sourceIt = solutionJsonArray.iterator();
-        Map<FogNode, Map<Service, Float>> nodeServicePlacement = new TreeMap<>();
+        Map<FogNode, Map<Service, AggregateServiceDemand>> nodeServicePlacement = new TreeMap<>();
         Iterator<FogNode> sourceNodeIt = nodeServiceDemand.keySet().iterator();
         while(sourceIt.hasNext()){
             JsonArray sourceArray = (JsonArray) sourceIt.next();
@@ -95,36 +96,41 @@ public class OplModSolver {
 
     private void
     parseNodeJsonArray(Map<FogNode, Map<Service, Float>> nodeServiceDemand,
-                       Map<FogNode, Map<Service, Float>> nodeServicePlacement,
+                       Map<FogNode, Map<Service, AggregateServiceDemand>> nodeServicePlacement,
                        Iterator<JsonElement> nodeIt,
                        FogNode sourceNode,
                        Iterator<FogNode> targetNodeIt) {
         while(nodeIt.hasNext()){
             FogNode targetNode = targetNodeIt.next();
             if(!nodeServicePlacement.containsKey(targetNode))
-                nodeServicePlacement.put(targetNode, new TreeMap<Service,Float>());
+                nodeServicePlacement.put(targetNode, new TreeMap<Service,AggregateServiceDemand>());
             JsonArray functionArray = (JsonArray) nodeIt.next();
             Iterator<JsonElement> functionIt = functionArray.iterator();
             Iterator<Service> targetServiceIt = nodeServiceDemand.get(sourceNode).keySet().iterator();
-            parseFunctiosJsonArray(nodeServiceDemand, nodeServicePlacement, sourceNode, functionIt, targetServiceIt);
+            parseFunctiosJsonArray(nodeServiceDemand, nodeServicePlacement, sourceNode, targetNode, functionIt, targetServiceIt);
         }
     }
 
     private void
     parseFunctiosJsonArray(Map<FogNode, Map<Service, Float>> nodeServiceDemand,
-                           Map<FogNode, Map<Service, Float>> nodeServicePlacement,
+                           Map<FogNode, Map<Service, AggregateServiceDemand>> nodeServicePlacement,
                            FogNode sourceNode,
+                           FogNode targetNode,
                            Iterator<JsonElement> functionIt,
                            Iterator<Service> targetServiceIt) {
+
+        Map<Service, AggregateServiceDemand> serviceAggregateDemand = nodeServicePlacement.get(targetNode);
         while(functionIt.hasNext()){
             JsonPrimitive allocationElement = (JsonPrimitive) functionIt.next();
             Service targetService = targetServiceIt.next();
-
             short placed = allocationElement.getAsShort();
-            float demand = nodeServiceDemand.get(sourceNode).get(targetService);
-            float allocated = nodeServicePlacement.get(sourceNode).getOrDefault(targetService, 0f);
-            allocated += placed * demand;
-            nodeServicePlacement.get(sourceNode).put(targetService, allocated);
+            if(placed == 1) {
+                float demand = nodeServiceDemand.get(sourceNode).get(targetService);
+                AggregateServiceDemand aggregateServiceDemand = serviceAggregateDemand.getOrDefault(
+                        targetService, new AggregateServiceDemand());
+                aggregateServiceDemand.addServiceDemand(sourceNode, targetService, demand);
+                serviceAggregateDemand.put(targetService, aggregateServiceDemand);
+            }
         }
     }
 

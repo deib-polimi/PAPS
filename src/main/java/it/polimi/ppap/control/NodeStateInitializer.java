@@ -21,7 +21,7 @@ package it.polimi.ppap.control;
 import it.polimi.deib.ppap.node.NodeFacade;
 import it.polimi.ppap.generator.initializer.FogNodeCapacityGenerator;
 import it.polimi.ppap.generator.workload.ServiceRequestGenerator;
-import it.polimi.ppap.model.FogNode;
+import it.polimi.ppap.topology.FogNode;
 import it.polimi.ppap.protocol.NodeStateHolder;
 import peersim.config.Configuration;
 import peersim.core.Control;

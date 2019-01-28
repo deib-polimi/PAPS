@@ -1,24 +1,26 @@
 package it.polimi.ppap.generator.workload;
 
-import cern.jet.random.Normal;
 import it.polimi.deib.ppap.node.NodeFacade;
 import it.polimi.deib.ppap.node.commons.NormalDistribution;
 import it.polimi.deib.ppap.node.commons.Utils;
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.deib.ppap.node.services.ServiceRequest;
-import it.polimi.ppap.common.scheme.ServiceWorkload;
+import it.polimi.ppap.service.ServiceWorkload;
+import it.polimi.ppap.topology.FogNode;
 import org.apache.commons.math3.distribution.ExponentialDistribution;
 import peersim.core.CommonState;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ServiceRequestGenerator {
 
     // State
 
-    final Map<Service, Float> activeServices = new ConcurrentHashMap<>();
+    final Map<Service, Set<ServiceWorkload>> activeServices = new ConcurrentHashMap<>();
     final NodeFacade nodeFacade;
     final Random random = CommonState.r;
 
@@ -28,17 +30,24 @@ public class ServiceRequestGenerator {
         this.nodeFacade = nodeFacade;
     }
 
-    public void activateWorkloadForService(ServiceWorkload serviceWorkload){
-        activeServices.put(serviceWorkload.getService(), serviceWorkload.getWokload());
+    public void activateServiceWorkload(ServiceWorkload serviceWorkload){
+        Set<ServiceWorkload> aggregateWorkload = activeServices.getOrDefault(
+                serviceWorkload.getService(), new HashSet<>());
+        aggregateWorkload.add(serviceWorkload);
+        activeServices.put(serviceWorkload.getService(), aggregateWorkload);
         generateRequests(serviceWorkload);
     }
 
-    public void disableWorkloadForService(Service service){
+    public void disableServiceWorkload(Service service){
         activeServices.remove(service);
     }
 
     public void updateWorkloadForService(ServiceWorkload serviceWorkload){
-        activeServices.put(serviceWorkload.getService(), serviceWorkload.getWokload());
+        activeServices.get(serviceWorkload.getService()).add(serviceWorkload);
+    }
+
+    public float getAggregateWorkload(Service service){
+        return (float) activeServices.get(service).stream().mapToDouble(e -> e.getWokload()).sum();
     }
 
     public class ServiceNotRunningExecption extends RuntimeException{}
@@ -46,41 +55,41 @@ public class ServiceRequestGenerator {
 
     // Internal
 
-    private void generateRequests(ServiceWorkload serviceDemand){
-        if(nodeFacade.isServing(serviceDemand.getService())) {
-            Thread t = new Thread(executeRequestsRandomScenario(serviceDemand.getService())); //TODO 1000 to 250
+    private void generateRequests(ServiceWorkload serviceWorkload){
+        if(nodeFacade.isServing(serviceWorkload.getService())) {
+            Thread t = new Thread(executeRequestsRandomScenario(serviceWorkload)); //TODO 1000 to 250
             t.start();
         }else
             throw new ServiceNotRunningExecption();
     }
 
-    private Runnable executeRequestsStableScenario(Service service){
+    private Runnable executeRequestsStableScenario(ServiceWorkload serviceWorkload){
         return () -> {
-            while(activeServices.containsKey(service)) {
-                long workload = activeServices.get(service).longValue();//TODO
-                stableScenario(service, workload, 250);
+            while(activeServices.containsKey(serviceWorkload.getService())) {
+                long workload = (long) serviceWorkload.getWokload();
+                stableScenario(serviceWorkload.getService(), workload, 250);
             }
         };
     }
 
     private final static short MAX_WORKLOAD_SCENARIOS = 4;
 
-    private Runnable executeRequestsRandomScenario(Service service){
+    private Runnable executeRequestsRandomScenario(ServiceWorkload serviceWorkload){
         return () -> {
             short nextScenario = 0; //start with stable rate
-            while(activeServices.containsKey(service)) {
-                long workload = activeServices.get(service).longValue();//TODO
+            while(activeServices.containsKey(serviceWorkload.getService())) {
+                long workload = (long) serviceWorkload.getWokload();//TODO
                 switch (nextScenario){
                     case 0:
-                        stableScenario(service, workload, 250);
+                        stableScenario(serviceWorkload.getService(), workload, 250);
                         break;
                     case 1:
-                        decreasingScenario(service, workload, 200);
+                        decreasingScenario(serviceWorkload.getService(), workload, 200);
                     case 2:
-                        peakScenario(service, workload, 200);
+                        peakScenario(serviceWorkload.getService(), workload, 200);
                         break;
                     default:
-                        quietScenario(service,100,100);
+                        quietScenario(serviceWorkload.getService(),100,100);
                         break;
                 }
                 nextScenario = (short)random.nextInt(MAX_WORKLOAD_SCENARIOS);

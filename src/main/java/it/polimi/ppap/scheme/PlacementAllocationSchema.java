@@ -1,4 +1,4 @@
-package it.polimi.ppap.common.scheme;
+package it.polimi.ppap.scheme;
 
 import it.polimi.deib.ppap.node.services.Service;
 

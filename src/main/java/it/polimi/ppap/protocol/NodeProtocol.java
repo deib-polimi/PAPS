@@ -1,9 +1,10 @@
 package it.polimi.ppap.protocol;
 
 import it.polimi.deib.ppap.node.services.Service;
-import it.polimi.ppap.common.scheme.ServiceWorkload;
+import it.polimi.ppap.service.AggregateServiceDemand;
+import it.polimi.ppap.service.ServiceDemand;
+import it.polimi.ppap.service.ServiceWorkload;
 import it.polimi.ppap.generator.initializer.ServiceWorkloadGenerator;
-import it.polimi.ppap.generator.workload.ServiceRequestGenerator;
 import peersim.cdsim.CDProtocol;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
@@ -35,13 +36,12 @@ public class NodeProtocol
     @Override
     public void processEvent(Node node, int pid, Object event) {}
 
-    public void updatePlacementAllocation(Map<Service, Float> placementAllocation){
-        ServiceRequestGenerator serviceRequestGenerator = getServiceRequestGenerator();
+    public void updatePlacementAllocation(Map<Service, AggregateServiceDemand> placementAllocation){
         for(Service service : placementAllocation.keySet()){
-            if(placementAllocation.get(service) > 0 && !nodeFacade.isServing(service)) {
-                placeServiceOnThisNode(new Service(service), serviceRequestGenerator, placementAllocation);
-            }else if(placementAllocation.get(service) == 0 && nodeFacade.isServing(service)) {
-                removeServiceFromThisNode(service, serviceRequestGenerator);
+            if(placementAllocation.containsKey(service) && !nodeFacade.isServing(service)) {
+                placeServiceOnThisNode(new Service(service), placementAllocation);
+            }else if(!placementAllocation.containsKey(service) && nodeFacade.isServing(service)) {
+                removeServiceFromThisNode(service);
             }
         }
     }
@@ -50,25 +50,36 @@ public class NodeProtocol
 // INTERNAL
 //--------------------------------------------------------------------------
 
-    private void placeServiceOnThisNode(Service service, ServiceRequestGenerator serviceRequestGenerator, Map<Service,Float> placementAllocation) {
+    private void placeServiceOnThisNode(final Service service,
+                                        Map<Service,AggregateServiceDemand> placementAllocation) {
         System.out.println("########### Placing Service " + service.getId() + " Onto Node ##############");
-        float allocation  = placementAllocation.get(service);
+        float allocation  = placementAllocation.get(service).getAggregateDemand();
         service.setTargetAllocation(allocation);
-        float mean = service.getSLA() * 5f / service.getTargetAllocation();
+        nodeFacade.addService(service);
+        placementAllocation.get(service).forEach(serviceDemand -> {
+            activateWorkloadForSource(serviceDemand);
+        });
+        float workload = serviceRequestGenerator.getAggregateWorkload(service);
+        Map.Entry<Float, Float> workloadAllocation = new AbstractMap.SimpleEntry<>(workload, allocation);
+        currentWorkloadAllocation.put(service, workloadAllocation);
+    }
+
+    //TODO this should not be decided here, but previous to allocation (random workload -> demand)
+    private float activateWorkloadForSource(ServiceDemand serviceDemand) {
+        Service service = serviceDemand.getService();
+        float mean = service.getSLA() * 5f / serviceDemand.getDemand();
         float std = service.getSLA() * 0.1f;
         ServiceWorkloadGenerator serviceWorkloadGenerator = new ServiceWorkloadGenerator(mean, std);
         float initialWorkload = serviceWorkloadGenerator.nextWorkload();
+        ServiceWorkload serviceWorkload = new ServiceWorkload(serviceDemand.getSource(), service, initialWorkload);
+        serviceRequestGenerator.activateServiceWorkload(serviceWorkload);
         System.out.println("########### Initialized Workload for " + service.getId() + ": " + initialWorkload + " ##############");
-        nodeFacade.addService(service);
-        Map.Entry<Float, Float> workloadAllocation = new AbstractMap.SimpleEntry<>(initialWorkload, allocation);
-        currentWorkloadAllocation.put(service, workloadAllocation);
-        ServiceWorkload serviceWorkload = new ServiceWorkload(service, initialWorkload);
-        serviceRequestGenerator.activateWorkloadForService(serviceWorkload);
+        return initialWorkload;
     }
 
-    private void removeServiceFromThisNode(Service service, ServiceRequestGenerator serviceRequestGenerator) {
+    private void removeServiceFromThisNode(Service service) {
         System.out.println("########### Removing Service " + service.getId() + " From Node ##############");
-        serviceRequestGenerator.disableWorkloadForService(service);
+        serviceRequestGenerator.disableServiceWorkload(service);
         currentWorkloadAllocation.remove(service);
         nodeFacade.removeService(service);
     }
@@ -78,10 +89,11 @@ public class NodeProtocol
     private void fetchOptimalAllocationFromControl(){
         for(Service service : currentWorkloadAllocation.keySet()){
             if(nodeFacade.isServing(service)) {
-                float currentWorkload = currentWorkloadAllocation.get(service).getKey();
+                float currentWorkload = serviceRequestGenerator.getAggregateWorkload(service);
                 //System.out.println("######### Current Workload for " + service + ": " + currentWorkload);
                 float optimalAllocation = nodeFacade.getLastOptimalAllocation(service);
                 //System.out.println("######### Optimal Allocation for " + service + ": " + optimalAllocation);
+                //TODO here we should add to a history set containing multiple workload-allocation pairs for later analysis
                 Map.Entry<Float, Float> workloadAllocation = currentWorkloadAllocation.get(service);
                 if(currentWorkload > 0 && optimalAllocation > 0) {
                     workloadAllocation.setValue(optimalAllocation);
@@ -104,8 +116,8 @@ public class NodeProtocol
                 System.out.println("########### Next Workload for " + service.getId() + ": " + nextWorkload + " ##############");
                 workloadAllocation = new AbstractMap.SimpleEntry<>(nextWorkload, workloadAllocation.getValue());
                 currentWorkloadAllocation.put(service, workloadAllocation);
-                ServiceWorkload serviceWorkload = new ServiceWorkload(service, currentWorkload);
-                serviceRequestGenerator.updateWorkloadForService(serviceWorkload);
+                //ServiceWorkload serviceWorkload = new ServiceWorkload(service, currentWorkload);
+                //serviceRequestGenerator.updateWorkloadForService(serviceWorkload);
             }
         }
     }

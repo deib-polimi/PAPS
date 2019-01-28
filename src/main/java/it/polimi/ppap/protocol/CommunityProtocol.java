@@ -1,10 +1,12 @@
 package it.polimi.ppap.protocol;
 
 import it.polimi.deib.ppap.node.services.Service;
-import it.polimi.ppap.common.communication.CommunityMessage;
-import it.polimi.ppap.common.communication.LeaderMessage;
-import it.polimi.ppap.common.communication.MemberMessage;
-import it.polimi.ppap.model.FogNode;
+import it.polimi.ppap.service.AggregateServiceDemand;
+import it.polimi.ppap.service.ServiceDemand;
+import it.polimi.ppap.transport.CommunityMessage;
+import it.polimi.ppap.transport.LeaderMessage;
+import it.polimi.ppap.transport.MemberMessage;
+import it.polimi.ppap.topology.FogNode;
 import it.polimi.ppap.solver.OplModSolver;
 import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
@@ -53,7 +55,7 @@ public class CommunityProtocol
                 break;
             case CommunityMessage.LDR_PLAN_MSG:
                 LeaderMessage leaderMessage = (LeaderMessage) msg;
-                execute((Map<Service, Float>) leaderMessage.getContent(), node, pid);
+                execute((Map<Service, AggregateServiceDemand>) leaderMessage.getContent(), node, pid);
                 break;
             default:
                 break;
@@ -124,11 +126,11 @@ public class CommunityProtocol
         Linkable linkable =
                 (Linkable) node.getProtocol(FastConfig.getLinkable(pid));
 
-        Map<Service, Float> leaderServiceAllocation = getNodeServiceAllocation().get(node);
+        Map<Service, AggregateServiceDemand> leaderServiceAllocation = getNodeServiceAllocation().get(node);
         execute(leaderServiceAllocation, node, pid);
         for(int i = 0; i < linkable.degree(); i++){
             Node member = linkable.getNeighbor(i);
-            Map<Service, Float> memberServiceAllocation = getNodeServiceAllocation().get(member);
+            Map<Service, AggregateServiceDemand> memberServiceAllocation = getNodeServiceAllocation().get(member);
              ((Transport) node.getProtocol(FastConfig.getTransport(pid))).
                     send(
                         node,
@@ -171,7 +173,7 @@ public class CommunityProtocol
     // -----------------
     //MAPE: EXECUTION
 
-    private void execute(Map<Service, Float> placementAllocation, Node node, int pid){
+    private void execute(Map<Service, AggregateServiceDemand> placementAllocation, Node node, int pid){
         //System.out.println("Performing the EXECUTE activity");
         NodeProtocol nodeProtocol = (NodeProtocol) node.getProtocol(nodePid);
         nodeProtocol.updatePlacementAllocation(placementAllocation);

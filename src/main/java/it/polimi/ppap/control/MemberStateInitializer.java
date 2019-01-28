@@ -19,11 +19,11 @@
 package it.polimi.ppap.control;
 
 import it.polimi.deib.ppap.node.services.Service;
-import it.polimi.ppap.common.scheme.PlacementAllocationSchema;
-import it.polimi.ppap.common.scheme.PlacementAllocationSchemaFactory;
+import it.polimi.ppap.scheme.PlacementAllocationSchema;
+import it.polimi.ppap.scheme.PlacementAllocationSchemaFactory;
 import it.polimi.ppap.generator.initializer.ServiceCatalogGenerator;
 import it.polimi.ppap.generator.initializer.ServiceDemandGenerator;
-import it.polimi.ppap.model.FogNode;
+import it.polimi.ppap.topology.FogNode;
 import it.polimi.ppap.protocol.MemberStateHolder;
 import it.polimi.ppap.solver.OplModSolver;
 import peersim.config.Configuration;

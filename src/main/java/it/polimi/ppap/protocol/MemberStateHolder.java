@@ -1,8 +1,9 @@
 package it.polimi.ppap.protocol;
 
 import it.polimi.deib.ppap.node.services.Service;
-import it.polimi.ppap.common.scheme.PlacementAllocationSchema;
-import it.polimi.ppap.model.FogNode;
+import it.polimi.ppap.service.AggregateServiceDemand;
+import it.polimi.ppap.service.ServiceDemand;
+import it.polimi.ppap.topology.FogNode;
 import peersim.core.Protocol;
 
 import java.util.Map;
@@ -55,13 +56,14 @@ public abstract class MemberStateHolder implements Protocol {
 
     //MAPE: Planning
 
-    Map<FogNode, Map<Service, Float>> nodeServiceAllocation = new TreeMap<>();
+    //for a given host, defines what are the service source-demand pairs
+    Map<FogNode, Map<Service, AggregateServiceDemand>> nodeServiceAllocation = new TreeMap<>();
 
-    public Map<FogNode, Map<Service, Float>> getNodeServiceAllocation() {
+    public Map<FogNode, Map<Service, AggregateServiceDemand>> getNodeServiceAllocation() {
         return nodeServiceAllocation;
     }
 
-    public void setNodeServiceAllocation(Map<FogNode, Map<Service, Float>> nodeServiceAllocation) {
+    public void setNodeServiceAllocation(Map<FogNode, Map<Service, AggregateServiceDemand>> nodeServiceAllocation) {
         this.nodeServiceAllocation = nodeServiceAllocation;
     }
 
