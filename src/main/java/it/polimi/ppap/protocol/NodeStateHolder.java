@@ -3,23 +3,34 @@ package it.polimi.ppap.protocol;
 import it.polimi.deib.ppap.node.NodeFacade;
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.generator.workload.ServiceRequestGenerator;
+import it.polimi.ppap.service.ServiceWorkload;
 import peersim.core.Protocol;
 
 import java.util.Map;
 
 public abstract class NodeStateHolder implements Protocol, NodeFacade.TickListener {
 
-    NodeFacade nodeFacade;
-    ServiceRequestGenerator serviceRequestGenerator;
+    protected NodeFacade nodeFacade;
+    protected ServiceRequestGenerator serviceRequestGenerator;
+
 
     /**
-     * For each service hosted by this node, stores the current demand (interarrival time) and allocation (CTNs)
+     * The source of workload for different services generated at this node (surrogate access points)
+     */
+    Map<Service, ServiceWorkload> localServiceWorkload;
+
+    public void setLocalServiceWorkload(Map<Service, ServiceWorkload> localServiceWorkload) {
+        this.localServiceWorkload = localServiceWorkload;
+    }
+
+    public Map<Service, ServiceWorkload> getLocalServiceWorkload() {
+        return localServiceWorkload;
+    }
+
+    /**
+     * For each service hosted by this node, keeps track of theworkload (interarrival time) -> allocation (CTNs)
      */
     Map<Service, Map.Entry<Float, Float>> currentWorkloadAllocation;
-
-    public ServiceRequestGenerator getServiceRequestGenerator() {
-        return serviceRequestGenerator;
-    }
 
     public void setServiceRequestGenerator(ServiceRequestGenerator serviceRequestGenerator) {
         this.serviceRequestGenerator = serviceRequestGenerator;

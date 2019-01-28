@@ -19,13 +19,9 @@
 package it.polimi.ppap.control;
 
 import it.polimi.deib.ppap.node.services.Service;
-import it.polimi.ppap.scheme.PlacementAllocationSchema;
-import it.polimi.ppap.scheme.PlacementAllocationSchemaFactory;
-import it.polimi.ppap.generator.initializer.ServiceCatalogGenerator;
 import it.polimi.ppap.generator.initializer.ServiceDemandGenerator;
-import it.polimi.ppap.topology.FogNode;
 import it.polimi.ppap.protocol.MemberStateHolder;
-import it.polimi.ppap.solver.OplModSolver;
+import it.polimi.ppap.topology.FogNode;
 import peersim.config.Configuration;
 import peersim.core.Control;
 import peersim.core.Network;
@@ -56,13 +52,6 @@ public class MemberStateInitializer implements Control {
      */
     private static final String PAR_PROT = "protocol";
 
-    /**
-     * The number of distinct functions in the system.
-     *
-     * @config
-     */
-    private static final String PAR_ENTROPY = "entropy";
-
 
     // ------------------------------------------------------------------------
     // Fields
@@ -71,8 +60,6 @@ public class MemberStateInitializer implements Control {
     /** Protocol identifier; obtained from config property {@link #PAR_PROT}. */
     private final int pid;
 
-    /** Protocol identifier; obtained from config property {@link #PAR_ENTROPY}. */
-    private final int entropy;
 
     // ------------------------------------------------------------------------
     // Constructor
@@ -84,7 +71,6 @@ public class MemberStateInitializer implements Control {
     public MemberStateInitializer(String prefix) {
 
         pid = Configuration.getPid(prefix + "." + PAR_PROT);
-        entropy = Configuration.getInt(prefix + "." + PAR_ENTROPY);
     }
 
     // ------------------------------------------------------------------------
@@ -95,26 +81,9 @@ public class MemberStateInitializer implements Control {
     * @return always false
     */
     public boolean execute() {
-        //TODO parametrize in configs
-        int catalogSize = entropy;
-        long baseServiceMemory = 128;
-        short serviceMemoryMultiplier = 2;
-        float targetRT = 70;
-        ServiceCatalogGenerator serviceCatalogGenerator = new ServiceCatalogGenerator(
-                catalogSize, baseServiceMemory, serviceMemoryMultiplier, targetRT);
-        Set<Service> serviceCatalog = serviceCatalogGenerator.generateCatalog();
         initializeLeader();
-        initializeNodeServiceDemand(serviceCatalog);
-        //solvePlacementAllocation();
+        //initializeNodeServiceDemand(serviceCatalog);
         return false;
-    }
-
-    private void solvePlacementAllocation() {
-        Node leader = getLeader();
-        MemberStateHolder memberProtocol = (MemberStateHolder) leader.getProtocol(pid);
-        OplModSolver oplModSolver = new OplModSolver();
-        oplModSolver.generateData(memberProtocol.getNodeServiceDemand());
-        memberProtocol.setNodeServiceAllocation(oplModSolver.solve(memberProtocol.getNodeServiceDemand()));
     }
 
     private Node getLeader(){
@@ -126,18 +95,6 @@ public class MemberStateInitializer implements Control {
         MemberStateHolder memberProtocol = (MemberStateHolder) leader.getProtocol(pid);
         memberProtocol.setLeader(true);
     }
-
-    @Deprecated
-    private void initializePlacementAllocation() {
-        for(int i = 0; i< Network.size(); ++i) {
-            Node member = Network.get(i);
-            MemberStateHolder memberProtocol = (MemberStateHolder) member.getProtocol(pid);
-            PlacementAllocationSchemaFactory factory = PlacementAllocationSchemaFactory.getInstance();
-            PlacementAllocationSchema placementAllocationSchema = factory.createPlacementAllocationSchema();
-            //memberProtocol.setPlacementAllocationSchema(placementAllocationSchema);
-        }
-    }
-
 
     private void initializeNodeServiceDemand(Set<Service> serviceCatalog){
         //TODO parametrize in configs

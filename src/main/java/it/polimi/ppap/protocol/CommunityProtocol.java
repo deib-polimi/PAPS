@@ -2,6 +2,7 @@ package it.polimi.ppap.protocol;
 
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.service.AggregateServiceDemand;
+import it.polimi.ppap.service.ServiceWorkload;
 import it.polimi.ppap.transport.CommunityMessage;
 import it.polimi.ppap.transport.LeaderMessage;
 import it.polimi.ppap.transport.MemberMessage;
@@ -10,6 +11,7 @@ import it.polimi.ppap.solver.OplModSolver;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.interpolation.UnivariateInterpolator;
+import org.apache.commons.math3.exception.OutOfRangeException;
 import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
 import peersim.config.FastConfig;
@@ -18,9 +20,7 @@ import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 import peersim.transport.Transport;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 public class CommunityProtocol
         extends MemberStateHolder
@@ -44,7 +44,7 @@ public class CommunityProtocol
 
     @Override
     public void nextCycle(Node node, int protocolID) {
-        performMemberBehavior(node, protocolID);
+        performMemberBehavior((FogNode) node, protocolID);
         if(isLeader()) {
             performLeaderBehavior(node, protocolID);
         }
@@ -83,22 +83,86 @@ public class CommunityProtocol
 
     private void analyze(FogNode node, int pid){
         //System.out.println("Performing ANALYSIS activity");
-        for(Service service : workloadAllocationHistory.keySet()){
-            if(workloadAllocationHistory.get(service).size() > 2) {
-                double x[] = workloadAllocationHistory.get(service).keySet().stream().mapToDouble(e -> (double) 1/e).sorted().toArray();
-                double y[] = workloadAllocationHistory.get(service).values().stream().mapToDouble(e -> (double) 1/e).sorted().toArray();
-                System.out.println(x);
-                System.out.println(y);
-                UnivariateInterpolator interpolator = new SplineInterpolator();
-                UnivariateFunction function = interpolator.interpolate(x, y);
-                double currentWorkload = workloadAllocationHistory.get(service).keySet().stream().mapToDouble(e -> (double) e).average().getAsDouble();
-                double interpolatedAllocation = function.value(1 / currentWorkload);
-                System.out.println("##############################f(" + 1 / currentWorkload + ") = " + interpolatedAllocation);
-            }else{
-
+        Map<Service, UnivariateFunction> workloadDemandFunctionMap = buildServiceUnivariateFunctionMap();
+        for(FogNode member : nodeServiceWorkload.keySet()){
+            for(ServiceWorkload serviceWorkload : nodeServiceWorkload.get(member)){
+                Service service = serviceWorkload.getService();
+                if(workloadDemandFunctionMap.containsKey(service)){
+                    updateDemandFromWorkload(service, workloadDemandFunctionMap.get(service));
+                }else{
+                    initializeDemand(service);
+                }
             }
         }
         plan(node, pid);
+    }
+
+    private Map<Service, UnivariateFunction> buildServiceUnivariateFunctionMap() {
+        Map<Service, UnivariateFunction> workloadDemandFunctionMap = new HashMap<>();
+        for(Service service : workloadAllocationHistory.keySet()){
+            if(workloadAllocationHistory.containsKey(service) && workloadAllocationHistory.get(service).size() > 2) {
+                double x[] = workloadAllocationHistory.get(service).keySet().stream().mapToDouble(e -> (double) e).toArray();
+                double y[] = workloadAllocationHistory.get(service).values().stream().mapToDouble(e -> (double) e).toArray();
+                UnivariateInterpolator interpolator = new SplineInterpolator();
+                UnivariateFunction workloadDemandFunction = interpolator.interpolate(x, y);
+                workloadDemandFunctionMap.put(service, workloadDemandFunction);
+                //double currentWorkload = workloadAllocationHistory.get(service).keySet().stream().mapToDouble(e -> (double) e).average().getAsDouble();
+                //double interpolatedAllocation = workloadDemandFunction.value(1 / currentWorkload);
+                //System.out.println("##############################f(" + 1 / currentWorkload + ") = " + interpolatedAllocation);
+            }
+        }
+        return workloadDemandFunctionMap;
+    }
+
+    private void updateDemandFromWorkload(Service service, UnivariateFunction workloadDemandFunction) {
+        for(FogNode member : nodeServiceWorkload.keySet()){
+            for(ServiceWorkload serviceWorkload : nodeServiceWorkload.get(member)){
+                if(serviceWorkload.getService().equals(service)){
+                    calculateDemandFromWorkload(service, workloadDemandFunction, member, serviceWorkload);
+                }
+            }
+        }
+    }
+
+    private void calculateDemandFromWorkload(Service service, UnivariateFunction workloadDemandFunction, FogNode member, ServiceWorkload serviceWorkload) {
+        float workloadFromMember = 1 / serviceWorkload.getWokload();
+        try {
+            float demandFromMember = (float) workloadDemandFunction.value(workloadFromMember);
+            if(demandFromMember > 0)
+                nodeServiceDemand.get(member).put(service, demandFromMember);
+            else
+                nodeServiceDemand.get(member).put(service, 1f);
+        }catch (OutOfRangeException exception){
+            float fitWorkload = getDemandFromNearestWorkload(service, member, workloadFromMember);
+            float demandFromMember = (float) workloadDemandFunction.value(fitWorkload);
+            nodeServiceDemand.get(member).put(service, demandFromMember);
+        }
+        System.out.println("Allocation demand from member " + service + ": " + nodeServiceDemand.get(member).get(service));
+    }
+
+    private float getDemandFromNearestWorkload(Service service, FogNode member, final float unfitWorkload) {
+        //TODO if is out of range, which value to use? perhaps the nearest one
+        //float demandFromMember = (float) workloadAllocationHistory.get(service).values().stream().mapToDouble(e -> (double) e).max().getAsDouble();
+        OptionalDouble optionalWorkload = workloadAllocationHistory.get(service).keySet().stream().filter(e -> e > unfitWorkload).mapToDouble(e-> e).min();
+        float fitWorkload;
+        if(optionalWorkload.isPresent())
+            fitWorkload = (float) optionalWorkload.getAsDouble();
+        else
+            fitWorkload =  (float) workloadAllocationHistory.get(service).keySet().stream().filter(e -> e < unfitWorkload).mapToDouble(e-> e).max().getAsDouble();
+        return fitWorkload;
+    }
+
+    private void initializeDemand(Service service){
+        for(FogNode member : nodeServiceWorkload.keySet()){
+            for(ServiceWorkload serviceWorkload : nodeServiceWorkload.get(member)){
+                if(serviceWorkload.getService().equals(service)){
+                    Map<Service, Float> serviceDemand = nodeServiceDemand.getOrDefault(member, new TreeMap<>());
+                    float demandFromMember = serviceWorkload.getWokload() > 0 ? 1 : 0;
+                    serviceDemand.put(service, demandFromMember);
+                    nodeServiceDemand.put(member, serviceDemand);
+                }
+            }
+        }
     }
 
     private void plan(FogNode node, int pid){
@@ -109,21 +173,29 @@ public class CommunityProtocol
 
     private void processMemberMessage(FogNode node, int pid, CommunityMessage msg) {
         MemberMessage memberMessage = (MemberMessage) msg;
-        storeWorkloadAllocation(memberMessage.getContent(), msg.getSender(), node, pid);
+        updateNodeServiceWorkload(memberMessage.getSender(), memberMessage.getLocalServiceWorkload());
+        storeNodeWorkloadAllocation(memberMessage.getSender(), memberMessage.getWorkloadAllocation());
         incMonitoringCount();
         if(isAllMonitoringReceived(getMonitoringCount(), node, pid)) {
             analyze(node, pid);
             resetMonitoringCount();
         }
-
     }
 
-    private void storeWorkloadAllocation(Map<Service, Map.Entry<Float, Float>> currentWorkloadAllocation, Node sender, Node node, int pid){
+    private void updateNodeServiceWorkload(FogNode sender, Map<Service, ServiceWorkload> localServiceWorkload){
+        Set<ServiceWorkload> serviceWorkloads = new HashSet<>();
+        for(Service service : localServiceWorkload.keySet())
+            serviceWorkloads.add(localServiceWorkload.get(service));
+        nodeServiceWorkload.put(sender, serviceWorkloads);
+    }
+
+    private void storeNodeWorkloadAllocation(FogNode sender, Map<Service, Map.Entry<Float, Float>> currentWorkloadAllocation){
         for(Service service : currentWorkloadAllocation.keySet()) {
             if(!workloadAllocationHistory.containsKey(service))
                 workloadAllocationHistory.put(service, new TreeMap<>());
             Map.Entry<Float, Float> workloadAllocation = currentWorkloadAllocation.get(service);
-            workloadAllocationHistory.get(service).put(workloadAllocation.getKey(), workloadAllocation.getValue());
+            if(workloadAllocation.getValue() > 0)
+                workloadAllocationHistory.get(service).put(1 / workloadAllocation.getKey(), workloadAllocation.getValue());
         }
     }
 
@@ -162,30 +234,32 @@ public class CommunityProtocol
     // -----------------
     // MEMBER's BEHAVIOR
 
-    private void performMemberBehavior(Node node, int pid){
+    private void performMemberBehavior(FogNode node, int pid){
         monitor(node, pid);
     }
 
     //MAPE: MONITORING
-    private void monitor(Node node, int pid){
+    private void monitor(FogNode node, int pid){
         //System.out.println("Performing the MONITOR activity");
         NodeProtocol nodeProtocol = (NodeProtocol) node.getProtocol(nodePid);
-        Map<Service, Map.Entry<Float, Float>> demandAllocation = nodeProtocol.getCurrentWorkloadAllocation();
+        Map<Service, ServiceWorkload> localServiceWorkload = nodeProtocol.getLocalServiceWorkload();
+        Map<Service, Map.Entry<Float, Float>> currentDemandAllocation = nodeProtocol.getCurrentWorkloadAllocation();
         try {
-            sendMonitoredDataToLeader(demandAllocation, node, pid);
+            sendMonitoredDataToLeader(localServiceWorkload, currentDemandAllocation, node, pid);
         } catch (CommunityLeaderNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    private void sendMonitoredDataToLeader(Map<Service, Map.Entry<Float, Float>> demandAllocation,
-                                           Node node, int pid) throws CommunityLeaderNotFoundException {
-        Node communityLeader = getCommunityLeader(node, pid);
+    private void sendMonitoredDataToLeader(Map<Service, ServiceWorkload> localServiceWorkload,
+                                           Map<Service, Map.Entry<Float, Float>> currentWorkloadAllocation,
+                                           FogNode node, int pid) throws CommunityLeaderNotFoundException {
+        FogNode communityLeader = getCommunityLeader(node, pid);
         ((Transport) node.getProtocol(FastConfig.getTransport(pid))).
                 send(
                     node,
                     communityLeader,
-                    new MemberMessage(node, demandAllocation),
+                    new MemberMessage(node, localServiceWorkload, currentWorkloadAllocation),
                     pid);
     }
 
@@ -199,14 +273,14 @@ public class CommunityProtocol
     }
 
 
-    private Node getCommunityLeader(Node node, int pid) throws CommunityLeaderNotFoundException {
+    private FogNode getCommunityLeader(FogNode node, int pid) throws CommunityLeaderNotFoundException {
         Linkable linkable =
                 (Linkable) node.getProtocol(FastConfig.getLinkable(pid));
         if(isLeader())
             return node;
         else {
             for (int i = 0; i < linkable.degree(); i++) {
-                Node member = linkable.getNeighbor(i);
+                FogNode member = (FogNode) linkable.getNeighbor(i);
                 CommunityProtocol memberCommunityProtocol = (CommunityProtocol) member.getProtocol(pid);
                 if (memberCommunityProtocol.isLeader())
                     return member;

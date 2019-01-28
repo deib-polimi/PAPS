@@ -3,6 +3,7 @@ package it.polimi.ppap.protocol;
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.service.AggregateServiceDemand;
 import it.polimi.ppap.service.ServiceDemand;
+import it.polimi.ppap.service.ServiceWorkload;
 import it.polimi.ppap.topology.FogNode;
 import peersim.core.Protocol;
 
@@ -38,6 +39,8 @@ public abstract class MemberStateHolder implements Protocol {
         this.monitoringCount = 0;
     }
 
+    Map<FogNode, Set<ServiceWorkload>> nodeServiceWorkload = new TreeMap<>(); //TODO only leader needs it
+
     Map<Service, Map<Float, Float>> workloadAllocationHistory = new TreeMap<>(); //TODO only leader needs it
 
     //MAPE: Analysis
@@ -58,7 +61,7 @@ public abstract class MemberStateHolder implements Protocol {
 
     //MAPE: Planning
 
-    //for a given host, defines what are the service source-demand pairs
+    //for a given target host, defines what are the service source-demand pairs
     Map<FogNode, Map<Service, AggregateServiceDemand>> nodeServiceAllocation = new TreeMap<>();
 
     public Map<FogNode, Map<Service, AggregateServiceDemand>> getNodeServiceAllocation() {

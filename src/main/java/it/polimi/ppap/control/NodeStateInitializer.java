@@ -19,15 +19,23 @@
 package it.polimi.ppap.control;
 
 import it.polimi.deib.ppap.node.NodeFacade;
+import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.generator.initializer.FogNodeCapacityGenerator;
+import it.polimi.ppap.generator.initializer.ServiceCatalogGenerator;
+import it.polimi.ppap.generator.initializer.ServiceWorkloadGenerator;
 import it.polimi.ppap.generator.workload.ServiceRequestGenerator;
+import it.polimi.ppap.service.ServiceWorkload;
 import it.polimi.ppap.topology.FogNode;
 import it.polimi.ppap.protocol.NodeStateHolder;
+import it.polimi.ppap.topology.NodeFactory;
 import peersim.config.Configuration;
 import peersim.core.Control;
 import peersim.core.Network;
 import peersim.vector.SingleValue;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -65,6 +73,13 @@ public class NodeStateInitializer implements Control {
      */
     private static final String PAR_CAPACITY = "capacity";
 
+    /**
+     * The number of distinct functions in the system.
+     *
+     * @config
+     */
+    private static final String PAR_ENTROPY = "entropy";
+
     // ------------------------------------------------------------------------
     // Fields
     // ------------------------------------------------------------------------
@@ -78,8 +93,11 @@ public class NodeStateInitializer implements Control {
      */
     private final int delta;
 
-    /** Protocol identifier; obtained from config property {@link #PAR_CAPACITY}. */
+    /** TODO; obtained from config property {@link #PAR_CAPACITY}. */
     private final int capacity;
+
+    /** TODO; obtained from config property {@link #PAR_ENTROPY}. */
+    private final int entropy;
 
 
     // ------------------------------------------------------------------------
@@ -93,6 +111,7 @@ public class NodeStateInitializer implements Control {
         pid = Configuration.getPid(prefix + "." + PAR_PROT);
         delta = Configuration.getInt(prefix + "." + PAR_DELTA);
         capacity = Configuration.getInt(prefix + "." + PAR_CAPACITY);
+        entropy = Configuration.getInt(prefix + "." + PAR_ENTROPY);
     }
 
     // ------------------------------------------------------------------------
@@ -105,30 +124,57 @@ public class NodeStateInitializer implements Control {
     public boolean execute() {
         //TODO parametrize in configs
         FogNodeCapacityGenerator fogNodeCapacityGenerator = new FogNodeCapacityGenerator(1024* 32, 1024, (short) capacity);
+        ServiceCatalogGenerator serviceCatalogGenerator = createServiceCatalogGenerator();
+        Set<Service> serviceCatalog = serviceCatalogGenerator.generateCatalog();
         for(int i=0; i<Network.size(); ++i) {
             FogNode node = (FogNode) Network.get(i);
+            setupNodeCapacity(node, fogNodeCapacityGenerator);
             NodeStateHolder nodeProt = (NodeStateHolder) node.getProtocol(pid);
-            nodeProt.setCurrentWorkloadAllocation(new TreeMap<>());//TODO
-            setupNodeState(node, fogNodeCapacityGenerator);
-            NodeFacade nodeFacade = createNodeFacade(node);
+            nodeProt.setCurrentWorkloadAllocation(new TreeMap<>());
+            Map<Service, ServiceWorkload> localServiceWorkload = initServiceWorkload(node, serviceCatalog);
+            nodeProt.setLocalServiceWorkload(localServiceWorkload);
+            NodeFacade nodeFacade = NodeFactory.createCTNodeFacade(node, 3000, 0.9f);
+            nodeProt.setNodeFacade(nodeFacade);
             nodeFacade.setTickListener(nodeProt);
             nodeFacade.start();
-            nodeProt.setNodeFacade(nodeFacade);
             ServiceRequestGenerator serviceRequestGenerator = new ServiceRequestGenerator(nodeFacade);
             nodeProt.setServiceRequestGenerator(serviceRequestGenerator);
         }
         return false;
     }
 
-    private void setupNodeState(FogNode node, FogNodeCapacityGenerator fogNodeCapacityGenerator) {
-        long memoryCapacity = fogNodeCapacityGenerator.nextCapacity();
-        node.setMemoryCapacity(memoryCapacity);
+    private ServiceCatalogGenerator createServiceCatalogGenerator(){
+        //TODO parametrize in configs
+        int catalogSize = entropy;
+        long baseServiceMemory = 128;
+        short randomServiceMemoryMultiplier = 2;
+        float targetRT = 70;
+        ServiceCatalogGenerator serviceCatalogGenerator = new ServiceCatalogGenerator(
+                catalogSize, baseServiceMemory, randomServiceMemoryMultiplier, targetRT);
+        return serviceCatalogGenerator;
     }
 
-    //TODO this is a factory method
-    private NodeFacade createNodeFacade(FogNode node) {
-        long controlPeriodMillis = delta;
-        float alpha = 0.9f;//TODO parametrize in configs
-        return new NodeFacade(node.getID() + "", node.getMemoryCapacity(), controlPeriodMillis, alpha); //TODO
+    private Map<Service, ServiceWorkload> initServiceWorkload(FogNode fogNode, Set<Service> serviceCatalog){
+        Map<Service, ServiceWorkload> serviceWorkload = new TreeMap<>();
+        for(Service service : serviceCatalog){
+            serviceWorkload.put(service, initServiceWorkloadForService(fogNode, service));
+        }
+        return serviceWorkload;
+    }
+
+    private ServiceWorkload initServiceWorkloadForService(FogNode fogNode, Service service) {
+        float mean = service.getSLA() * 5f;
+        float std = service.getSLA() * 0.1f;
+        float activeWorkloadProbability = 0.6f;
+        ServiceWorkloadGenerator serviceWorkloadGenerator = new ServiceWorkloadGenerator(mean, std, activeWorkloadProbability);
+        float initialWorkload = serviceWorkloadGenerator.nextWorkload();
+        ServiceWorkload serviceWorkload = new ServiceWorkload(fogNode, service, initialWorkload);
+        System.out.println("########### Initialized Workload for " + service.getId() + ": " + initialWorkload + " ##############");
+        return serviceWorkload;
+    }
+
+    private void setupNodeCapacity(FogNode node, FogNodeCapacityGenerator fogNodeCapacityGenerator) {
+        long memoryCapacity = fogNodeCapacityGenerator.nextCapacity();
+        node.setMemoryCapacity(memoryCapacity);
     }
 }

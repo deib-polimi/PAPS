@@ -9,10 +9,10 @@ public class ServiceWorkload {
     private final Service service;
     private float workload;
 
-    public ServiceWorkload(FogNode source, Service service, float demand){
+    public ServiceWorkload(FogNode source, Service service, float workload){
         this.source = source;
         this.service = service;
-        this.workload = demand;
+        this.workload = workload;
     }
 
     public Service getService() {

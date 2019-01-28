@@ -1,5 +1,6 @@
 package it.polimi.ppap.transport;
 
+import it.polimi.ppap.topology.FogNode;
 import peersim.core.Node;
 
 public abstract class CommunityMessage {
@@ -8,15 +9,15 @@ public abstract class CommunityMessage {
     public static final int LDR_PLAN_MSG = 1;
     public static final int NODE_CRT_MSG = 2;
 
-    final Node sender;
+    final FogNode sender;
     final int code;
 
-    public CommunityMessage(Node sender, int code){
+    public CommunityMessage(FogNode sender, int code){
         this.sender = sender;
         this.code = code;
     }
 
-    public Node getSender() {
+    public FogNode getSender() {
         return sender;
     }
 

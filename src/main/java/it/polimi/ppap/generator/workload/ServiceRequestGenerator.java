@@ -84,18 +84,19 @@ public class ServiceRequestGenerator {
         return () -> {
             short nextScenario = 0; //start with stable rate
             while(activeServices.containsKey(serviceWorkload.getService())) {
-                long workload = (long) serviceWorkload.getWokload();//TODO
+                long workload = (long) serviceWorkload.getWokload();
+                long iterations = random.nextInt(250);
                 switch (nextScenario){
                     case 0:
-                        stableScenario(serviceWorkload.getService(), workload, 250);
+                        stableScenario(serviceWorkload.getService(), workload, iterations);
                         break;
                     case 1:
-                        decreasingScenario(serviceWorkload.getService(), workload, 200);
+                        peakScenario(serviceWorkload.getService(), workload, iterations);
                     case 2:
-                        peakScenario(serviceWorkload.getService(), workload, 200);
+                        decreasingScenario(serviceWorkload.getService(), workload, iterations);
                         break;
                     default:
-                        quietScenario(serviceWorkload.getService(),100,100);
+                        quietScenario(serviceWorkload.getService(),100,iterations);
                         break;
                 }
                 nextScenario = (short)random.nextInt(MAX_WORKLOAD_SCENARIOS);

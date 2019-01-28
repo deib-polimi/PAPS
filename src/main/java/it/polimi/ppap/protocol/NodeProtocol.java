@@ -39,7 +39,8 @@ public class NodeProtocol
     public void updatePlacementAllocation(Map<Service, AggregateServiceDemand> placementAllocation){
         for(Service service : placementAllocation.keySet()){
             if(placementAllocation.containsKey(service) && !nodeFacade.isServing(service)) {
-                placeServiceOnThisNode(new Service(service), placementAllocation);
+                if(placementAllocation.get(service).getAggregateDemand() > 0)
+                    placeServiceOnThisNode(new Service(service), placementAllocation);
             }else if(!placementAllocation.containsKey(service) && nodeFacade.isServing(service)) {
                 removeServiceFromThisNode(service);
             }
@@ -56,25 +57,9 @@ public class NodeProtocol
         float allocation  = placementAllocation.get(service).getAggregateDemand();
         service.setTargetAllocation(allocation);
         nodeFacade.addService(service);
-        placementAllocation.get(service).forEach(serviceDemand -> {
-            activateWorkloadForSource(serviceDemand);
-        });
         //float workload = serviceRequestGenerator.getAggregateWorkload(service);
         //Map.Entry<Float, Float> workloadAllocation = new AbstractMap.SimpleEntry<>(workload, allocation);
         //currentWorkloadAllocation.put(service, workloadAllocation);
-    }
-
-    //TODO this should not be decided here, but previous to allocation (random workload -> demand)
-    private float activateWorkloadForSource(ServiceDemand serviceDemand) {
-        Service service = serviceDemand.getService();
-        float mean = service.getSLA() * 5f / serviceDemand.getDemand();
-        float std = service.getSLA() * 0.1f;
-        ServiceWorkloadGenerator serviceWorkloadGenerator = new ServiceWorkloadGenerator(mean, std);
-        float initialWorkload = serviceWorkloadGenerator.nextWorkload();
-        ServiceWorkload serviceWorkload = new ServiceWorkload(serviceDemand.getSource(), service, initialWorkload);
-        serviceRequestGenerator.activateServiceWorkload(serviceWorkload);
-        System.out.println("########### Initialized Workload for " + service.getId() + ": " + initialWorkload + " ##############");
-        return initialWorkload;
     }
 
     private void removeServiceFromThisNode(Service service) {
@@ -111,7 +96,7 @@ public class NodeProtocol
                 Map.Entry<Float, Float> workloadAllocation = currentWorkloadAllocation.get(service);
                 float currentWorkload = workloadAllocation.getKey();
                 float std = service.getSLA() * 0.1f;
-                ServiceWorkloadGenerator serviceWorkloadGenerator = new ServiceWorkloadGenerator(currentWorkload, std);
+                ServiceWorkloadGenerator serviceWorkloadGenerator = new ServiceWorkloadGenerator(currentWorkload, std, 0.6f);
                 float nextWorkload = serviceWorkloadGenerator.nextWorkload();
                 System.out.println("########### Next Workload for " + service.getId() + ": " + nextWorkload + " ##############");
                 workloadAllocation = new AbstractMap.SimpleEntry<>(nextWorkload, workloadAllocation.getValue());
