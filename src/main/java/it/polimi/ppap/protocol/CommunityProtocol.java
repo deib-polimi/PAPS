@@ -2,12 +2,14 @@ package it.polimi.ppap.protocol;
 
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.service.AggregateServiceDemand;
-import it.polimi.ppap.service.ServiceDemand;
 import it.polimi.ppap.transport.CommunityMessage;
 import it.polimi.ppap.transport.LeaderMessage;
 import it.polimi.ppap.transport.MemberMessage;
 import it.polimi.ppap.topology.FogNode;
 import it.polimi.ppap.solver.OplModSolver;
+import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
+import org.apache.commons.math3.analysis.interpolation.UnivariateInterpolator;
 import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
 import peersim.config.FastConfig;
@@ -16,7 +18,9 @@ import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 import peersim.transport.Transport;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class CommunityProtocol
         extends MemberStateHolder
@@ -79,6 +83,21 @@ public class CommunityProtocol
 
     private void analyze(FogNode node, int pid){
         //System.out.println("Performing ANALYSIS activity");
+        for(Service service : workloadAllocationHistory.keySet()){
+            if(workloadAllocationHistory.get(service).size() > 2) {
+                double x[] = workloadAllocationHistory.get(service).keySet().stream().mapToDouble(e -> (double) 1/e).sorted().toArray();
+                double y[] = workloadAllocationHistory.get(service).values().stream().mapToDouble(e -> (double) 1/e).sorted().toArray();
+                System.out.println(x);
+                System.out.println(y);
+                UnivariateInterpolator interpolator = new SplineInterpolator();
+                UnivariateFunction function = interpolator.interpolate(x, y);
+                double currentWorkload = workloadAllocationHistory.get(service).keySet().stream().mapToDouble(e -> (double) e).average().getAsDouble();
+                double interpolatedAllocation = function.value(1 / currentWorkload);
+                System.out.println("##############################f(" + 1 / currentWorkload + ") = " + interpolatedAllocation);
+            }else{
+
+            }
+        }
         plan(node, pid);
     }
 
@@ -90,7 +109,7 @@ public class CommunityProtocol
 
     private void processMemberMessage(FogNode node, int pid, CommunityMessage msg) {
         MemberMessage memberMessage = (MemberMessage) msg;
-        storeMonitoredDemand(memberMessage.getContent(), msg.getSender(), node, pid);
+        storeWorkloadAllocation(memberMessage.getContent(), msg.getSender(), node, pid);
         incMonitoringCount();
         if(isAllMonitoringReceived(getMonitoringCount(), node, pid)) {
             analyze(node, pid);
@@ -99,12 +118,12 @@ public class CommunityProtocol
 
     }
 
-    private void storeMonitoredDemand(Map<Service, Map.Entry<Float, Float>> currentDemandAllocation, Node sender, Node node, int pid){
-        for(Service service : currentDemandAllocation.keySet()) {
-            Map.Entry<Float, Float> demandAllocation = currentDemandAllocation.get(service);
-            float currentDemand = demandAllocation.getValue();
-            //System.out.println("######### Current Demand from " + sender + " for service " + service + ": " + currentDemand);
-            getNodeServiceDemand().get(sender).put(service, currentDemand);
+    private void storeWorkloadAllocation(Map<Service, Map.Entry<Float, Float>> currentWorkloadAllocation, Node sender, Node node, int pid){
+        for(Service service : currentWorkloadAllocation.keySet()) {
+            if(!workloadAllocationHistory.containsKey(service))
+                workloadAllocationHistory.put(service, new TreeMap<>());
+            Map.Entry<Float, Float> workloadAllocation = currentWorkloadAllocation.get(service);
+            workloadAllocationHistory.get(service).put(workloadAllocation.getKey(), workloadAllocation.getValue());
         }
     }
 

@@ -1,11 +1,11 @@
 # network size
-SIZE 15
+SIZE 5
 
 # connectivity
 CONNECTIVITY SIZE - 1
 
 # number of distinct functions in the system
-ENTROPY 15
+ENTROPY 5
 
 # the maximum capacity available to each node (GB)
 CAPACITY 64
@@ -38,7 +38,7 @@ simulation.logtime CYCLE
 
 ################### topol ===========================
 
-network.node it.polimi.ppap.model.FogNode
+network.node it.polimi.ppap.topology.FogNode
 
 ################### protocols ===========================
 

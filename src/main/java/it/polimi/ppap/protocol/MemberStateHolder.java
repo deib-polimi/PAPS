@@ -7,6 +7,7 @@ import it.polimi.ppap.topology.FogNode;
 import peersim.core.Protocol;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 public abstract class MemberStateHolder implements Protocol {
@@ -37,10 +38,11 @@ public abstract class MemberStateHolder implements Protocol {
         this.monitoringCount = 0;
     }
 
+    Map<Service, Map<Float, Float>> workloadAllocationHistory = new TreeMap<>(); //TODO only leader needs it
 
     //MAPE: Analysis
 
-    Map<FogNode, Map<Service, Float>> nodeServiceDemand = new TreeMap<>();
+    Map<FogNode, Map<Service, Float>> nodeServiceDemand = new TreeMap<>(); //TODO only leader needs it
 
     public Map<FogNode, Map<Service, Float>> getNodeServiceDemand(){
         return nodeServiceDemand;

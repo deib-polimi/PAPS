@@ -59,9 +59,9 @@ public class NodeProtocol
         placementAllocation.get(service).forEach(serviceDemand -> {
             activateWorkloadForSource(serviceDemand);
         });
-        float workload = serviceRequestGenerator.getAggregateWorkload(service);
-        Map.Entry<Float, Float> workloadAllocation = new AbstractMap.SimpleEntry<>(workload, allocation);
-        currentWorkloadAllocation.put(service, workloadAllocation);
+        //float workload = serviceRequestGenerator.getAggregateWorkload(service);
+        //Map.Entry<Float, Float> workloadAllocation = new AbstractMap.SimpleEntry<>(workload, allocation);
+        //currentWorkloadAllocation.put(service, workloadAllocation);
     }
 
     //TODO this should not be decided here, but previous to allocation (random workload -> demand)
@@ -87,26 +87,26 @@ public class NodeProtocol
     //TODO the optimal allocation may be a crazy value; we need to filter this value;
     //TODO also, the optimal allocation refers to the last one, which can be an outlier; we need the whole history
     private void fetchOptimalAllocationFromControl(){
-        for(Service service : currentWorkloadAllocation.keySet()){
+        serviceRequestGenerator.forEach(service -> {
             if(nodeFacade.isServing(service)) {
                 float currentWorkload = serviceRequestGenerator.getAggregateWorkload(service);
                 //System.out.println("######### Current Workload for " + service + ": " + currentWorkload);
                 float optimalAllocation = nodeFacade.getLastOptimalAllocation(service);
-                //System.out.println("######### Optimal Allocation for " + service + ": " + optimalAllocation);
-                //TODO here we should add to a history set containing multiple workload-allocation pairs for later analysis
-                Map.Entry<Float, Float> workloadAllocation = currentWorkloadAllocation.get(service);
-                if(currentWorkload > 0 && optimalAllocation > 0) {
-                    workloadAllocation.setValue(optimalAllocation);
-                }else if(currentWorkload == 0){
-                    workloadAllocation.setValue(0f);
+                if(optimalAllocation > 0) {
+                    //System.out.println("######### Optimal Allocation for " + service + ": " + optimalAllocation);
+                    //TODO here we should add to a history set containing multiple workload-allocation pairs for later analysis
+                    if (currentWorkload > 0 && optimalAllocation > 0) {
+                        Map.Entry<Float, Float> workloadAllocation = new AbstractMap.SimpleEntry<>(currentWorkload, optimalAllocation);
+                        currentWorkloadAllocation.put(service, workloadAllocation);
+                    }
                 }
             }
-        }
+        });
     }
 
     //TODO it is not wise to sync this with the control tick for two reasons: i) makes it unrealistically easy for the CS; 2) workload fluctuation is not cyclic
     private void fluctuateWorkload(){
-        for(Service service : currentWorkloadAllocation.keySet()){
+        serviceRequestGenerator.forEach(service -> {
             if(nodeFacade.isServing(service)) {
                 Map.Entry<Float, Float> workloadAllocation = currentWorkloadAllocation.get(service);
                 float currentWorkload = workloadAllocation.getKey();
@@ -119,6 +119,6 @@ public class NodeProtocol
                 //ServiceWorkload serviceWorkload = new ServiceWorkload(service, currentWorkload);
                 //serviceRequestGenerator.updateWorkloadForService(serviceWorkload);
             }
-        }
+        });
     }
 }

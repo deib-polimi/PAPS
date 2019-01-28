@@ -5,16 +5,15 @@ import it.polimi.deib.ppap.node.commons.NormalDistribution;
 import it.polimi.deib.ppap.node.commons.Utils;
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.deib.ppap.node.services.ServiceRequest;
+import it.polimi.ppap.service.ServiceDemand;
 import it.polimi.ppap.service.ServiceWorkload;
 import it.polimi.ppap.topology.FogNode;
 import org.apache.commons.math3.distribution.ExponentialDistribution;
 import peersim.core.CommonState;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 public class ServiceRequestGenerator {
 
@@ -47,7 +46,14 @@ public class ServiceRequestGenerator {
     }
 
     public float getAggregateWorkload(Service service){
-        return (float) activeServices.get(service).stream().mapToDouble(e -> e.getWokload()).sum();
+        return (float) activeServices.get(service).stream().mapToDouble(e -> e.getWokload()).average().getAsDouble();
+    }
+
+    public void forEach(Consumer<Service> action) {
+        Objects.requireNonNull(action);
+        for (Service t : activeServices.keySet()) {
+            action.accept(t);
+        }
     }
 
     public class ServiceNotRunningExecption extends RuntimeException{}
