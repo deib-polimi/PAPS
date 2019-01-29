@@ -14,13 +14,13 @@ int Fixed = ...;
 {string} Functions = ...;
 int NbDemandSources = ...;
 range DemandSources = 0..NbDemandSources-1;
-int DemandLevel[DemandSources][Functions] = ...;
+float DemandLevel[DemandSources][Functions] = ...;
 int Capacity[Nodes] = ...; //same as 'memory'
 int SupplyCost[DemandSources][Nodes] = ...; //same as 'delay'
 
 //Decision Variables
-dvar boolean Open[Nodes]; //same as 'place'
-dvar boolean Supply[DemandSources][Nodes][Functions]; //same as 'serve'
+//dvar boolean Open[Nodes]; //same as 'place'
+dvar float+ Supply[DemandSources][Nodes][Functions]; //same as 'serve'
 
 //Objective
 minimize
@@ -36,8 +36,9 @@ subject to{
       sum( w in  Nodes ) 
     	Supply[s][w][f] == 1;
   forall( w in Nodes, s in DemandSources, f in Functions )
-    ctUseOpenNodes:
-      Supply[s][w][f] <= Open[w];
+  	Supply[s][w][f] <= 1;
+    //ctUseOpenNodes:
+      //Supply[s][w][f] <= Open[w];
   forall( w in Nodes )
 	ctMaxUseOfWarehouse:         
       sum( s in DemandSources, f in Functions ) 
@@ -45,19 +46,19 @@ subject to{
   forall( w in Nodes, f in Functions )
     ctMaxCostOfWarehouse:    
       sum( s in DemandSources ) 
-        SupplyCost[s][w] * Supply[s][w][f] <= 30;
+        SupplyCost[s][w] * Supply[s][w][f] <= 80;
 }
 
 
 //{int} DemandSourcesof[w in Nodes] = { s | s in DemandSources : Supply[s][w][f] == 1};
 	
 execute DISPLAY_RESULTS{
-	writeln("Open=",Open);
+	//writeln("Open=",Open);
 	for(var s in DemandSources)
 	    for(var f in Functions)
 			for(var w in Nodes)
-		      	if(Supply[s][w][f] == 1)
-			  		writeln("Demand of level ", DemandLevel[s][f],
+		      	if(Supply[s][w][f] > 0)
+			  		writeln("Demand of level ", DemandLevel[s][f] * Supply[s][w][f],
 			  				" from source ", s,
 			  				" for ", f,
 			  				" served by node ", w,

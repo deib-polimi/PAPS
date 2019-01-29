@@ -59,7 +59,7 @@ public class OplModSolver {
     private Map<FogNode, Map<Service, AggregateServiceDemand>>
     parseSolution(String solution, Map<FogNode, Map<Service, Float>> nodeServiceDemand){
         solution = solution.replaceAll("\n|  ", "");
-        Pattern pattern = Pattern.compile("(Supply = (\\[.*\\]);)(Open = (\\[.*\\]);)");
+        Pattern pattern = Pattern.compile("(Supply = (\\[.*\\]);)");
         Matcher match = pattern.matcher(solution);
         if(match.find()){
             String supply = match.group(2);
@@ -72,10 +72,10 @@ public class OplModSolver {
             JsonElement solutionJsonArray = solutionJsonObject.get("solution");
             return parseSourcesJsonArray((JsonArray) solutionJsonArray, nodeServiceDemand);
         }else
-            throw new SolutionMalFormedSolutionException();
+            throw new SolutionMalFormedException();
     }
 
-    public class SolutionMalFormedSolutionException extends RuntimeException{}
+    public class SolutionMalFormedException extends RuntimeException{}
 
     private Map<FogNode, Map<Service, AggregateServiceDemand>>
     parseSourcesJsonArray(JsonArray solutionJsonArray,
@@ -121,7 +121,7 @@ public class OplModSolver {
         while(functionIt.hasNext()){
             JsonPrimitive allocationElement = (JsonPrimitive) functionIt.next();
             Service targetService = targetServiceIt.next();
-            short placed = allocationElement.getAsShort();
+            float placed = allocationElement.getAsFloat();
             float demand = placed * nodeServiceDemand.get(sourceNode).get(targetService);
             AggregateServiceDemand aggregateServiceDemand = serviceAggregateDemand.getOrDefault(
                     targetService, new AggregateServiceDemand());
