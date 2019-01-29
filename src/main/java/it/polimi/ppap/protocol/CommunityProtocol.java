@@ -83,15 +83,15 @@ public class CommunityProtocol
 
     private void analyze(FogNode node, int pid){
         //System.out.println("Performing ANALYSIS activity");
+        nodeServiceDemand.clear();
         Map<Service, UnivariateFunction> workloadDemandFunctionMap = buildServiceUnivariateFunctionMap();
         for(FogNode member : nodeServiceWorkload.keySet()){
             for(ServiceWorkload serviceWorkload : nodeServiceWorkload.get(member)){
                 Service service = serviceWorkload.getService();
-                if(workloadDemandFunctionMap.containsKey(service)){
-                    updateDemandFromWorkload(service, workloadDemandFunctionMap.get(service));
-                }else{
-                    initializeDemand(service);
-                }
+                if(serviceWorkload.getWokload() > 0 && workloadDemandFunctionMap.containsKey(service)) //TODO isActive for god sake?
+                    calculateDemandFromWorkload(serviceWorkload, workloadDemandFunctionMap.get(service));
+                else
+                    initializeDemand(serviceWorkload);
             }
         }
         plan(node, pid);
@@ -114,18 +114,12 @@ public class CommunityProtocol
         return workloadDemandFunctionMap;
     }
 
-    private void updateDemandFromWorkload(Service service, UnivariateFunction workloadDemandFunction) {
-        for(FogNode member : nodeServiceWorkload.keySet()){
-            for(ServiceWorkload serviceWorkload : nodeServiceWorkload.get(member)){
-                if(serviceWorkload.getService().equals(service)){
-                    calculateDemandFromWorkload(service, workloadDemandFunction, member, serviceWorkload);
-                }
-            }
-        }
-    }
-
-    private void calculateDemandFromWorkload(Service service, UnivariateFunction workloadDemandFunction, FogNode member, ServiceWorkload serviceWorkload) {
+    private void calculateDemandFromWorkload(ServiceWorkload serviceWorkload, UnivariateFunction workloadDemandFunction) {
         float workloadFromMember = 1 / serviceWorkload.getWokload();
+        FogNode member = serviceWorkload.getSource();
+        Service service = serviceWorkload.getService();
+        if(!nodeServiceDemand.containsKey(member))
+            nodeServiceDemand.put(member, new HashMap<>());
         try {
             float demandFromMember = (float) workloadDemandFunction.value(workloadFromMember);
             if(demandFromMember > 0)
@@ -152,17 +146,13 @@ public class CommunityProtocol
         return fitWorkload;
     }
 
-    private void initializeDemand(Service service){
-        for(FogNode member : nodeServiceWorkload.keySet()){
-            for(ServiceWorkload serviceWorkload : nodeServiceWorkload.get(member)){
-                if(serviceWorkload.getService().equals(service)){
-                    Map<Service, Float> serviceDemand = nodeServiceDemand.getOrDefault(member, new TreeMap<>());
-                    float demandFromMember = serviceWorkload.getWokload() > 0 ? 1 : 0;
-                    serviceDemand.put(service, demandFromMember);
-                    nodeServiceDemand.put(member, serviceDemand);
-                }
-            }
-        }
+    private void initializeDemand(ServiceWorkload serviceWorkload){
+        Service service = serviceWorkload.getService();
+        FogNode member = serviceWorkload.getSource();
+        Map<Service, Float> serviceDemand = nodeServiceDemand.getOrDefault(member, new TreeMap<>());
+        float demandFromMember = serviceWorkload.getWokload() > 0 ? 1 : 0;
+        serviceDemand.put(service, demandFromMember);
+        nodeServiceDemand.put(member, serviceDemand);
     }
 
     private void plan(FogNode node, int pid){
@@ -269,7 +259,7 @@ public class CommunityProtocol
     private void execute(Map<Service, AggregateServiceDemand> placementAllocation, Node node, int pid){
         //System.out.println("Performing the EXECUTE activity");
         NodeProtocol nodeProtocol = (NodeProtocol) node.getProtocol(nodePid);
-        nodeProtocol.updatePlacementAllocation(placementAllocation);
+        nodeProtocol.updatePlacementAllocation(placementAllocation, nodePid);
     }
 
 

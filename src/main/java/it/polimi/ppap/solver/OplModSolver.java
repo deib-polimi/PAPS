@@ -3,7 +3,6 @@ package it.polimi.ppap.solver;
 import com.google.gson.*;
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.service.AggregateServiceDemand;
-import it.polimi.ppap.service.ServiceDemand;
 import it.polimi.ppap.topology.FogNode;
 
 import java.io.IOException;
@@ -118,19 +117,16 @@ public class OplModSolver {
                            FogNode targetNode,
                            Iterator<JsonElement> functionIt,
                            Iterator<Service> targetServiceIt) {
-
         Map<Service, AggregateServiceDemand> serviceAggregateDemand = nodeServicePlacement.get(targetNode);
         while(functionIt.hasNext()){
             JsonPrimitive allocationElement = (JsonPrimitive) functionIt.next();
             Service targetService = targetServiceIt.next();
             short placed = allocationElement.getAsShort();
-            if(placed == 1) {
-                float demand = nodeServiceDemand.get(sourceNode).get(targetService);
-                AggregateServiceDemand aggregateServiceDemand = serviceAggregateDemand.getOrDefault(
-                        targetService, new AggregateServiceDemand());
-                aggregateServiceDemand.addServiceDemand(sourceNode, targetService, demand);
-                serviceAggregateDemand.put(targetService, aggregateServiceDemand);
-            }
+            float demand = placed * nodeServiceDemand.get(sourceNode).get(targetService);
+            AggregateServiceDemand aggregateServiceDemand = serviceAggregateDemand.getOrDefault(
+                    targetService, new AggregateServiceDemand());
+            serviceAggregateDemand.put(targetService, aggregateServiceDemand);
+            aggregateServiceDemand.addServiceDemand(sourceNode, targetService, demand);
         }
     }
 

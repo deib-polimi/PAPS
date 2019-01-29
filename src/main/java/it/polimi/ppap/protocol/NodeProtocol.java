@@ -5,6 +5,7 @@ import it.polimi.ppap.service.AggregateServiceDemand;
 import it.polimi.ppap.service.ServiceDemand;
 import it.polimi.ppap.service.ServiceWorkload;
 import it.polimi.ppap.generator.initializer.ServiceWorkloadGenerator;
+import it.polimi.ppap.topology.FogNode;
 import peersim.cdsim.CDProtocol;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
@@ -36,14 +37,13 @@ public class NodeProtocol
     @Override
     public void processEvent(Node node, int pid, Object event) {}
 
-    public void updatePlacementAllocation(Map<Service, AggregateServiceDemand> placementAllocation){
-        for(Service service : placementAllocation.keySet()){
-            if(placementAllocation.containsKey(service) && !nodeFacade.isServing(service)) {
-                if(placementAllocation.get(service).getAggregateDemand() > 0)
-                    placeServiceOnThisNode(new Service(service), placementAllocation);
-            }else if(!placementAllocation.containsKey(service) && nodeFacade.isServing(service)) {
+    public void updatePlacementAllocation(Map<Service, AggregateServiceDemand> placementAllocation, int nodePID){
+        for(Service service : placementAllocation.keySet())
+            if(placementAllocation.get(service).getAggregateDemand() > 0) {
+                if (!nodeFacade.isServing(service))
+                    placeServiceOnThisNode(new Service(service), placementAllocation, nodePID);
+            }else if(nodeFacade.isServing(service)) {
                 removeServiceFromThisNode(service);
-            }
         }
     }
 
@@ -52,14 +52,24 @@ public class NodeProtocol
 //--------------------------------------------------------------------------
 
     private void placeServiceOnThisNode(final Service service,
-                                        Map<Service,AggregateServiceDemand> placementAllocation) {
+                                        Map<Service,AggregateServiceDemand> placementAllocation,
+                                        final int nodePID) {
         System.out.println("########### Placing Service " + service.getId() + " Onto Node ##############");
         float allocation  = placementAllocation.get(service).getAggregateDemand();
         service.setTargetAllocation(allocation);
         nodeFacade.addService(service);
-        //float workload = serviceRequestGenerator.getAggregateWorkload(service);
-        //Map.Entry<Float, Float> workloadAllocation = new AbstractMap.SimpleEntry<>(workload, allocation);
-        //currentWorkloadAllocation.put(service, workloadAllocation);
+        placementAllocation.get(service).stream().filter(e -> e.getDemand() > 0).forEach(serviceDemand -> {
+            FogNode source  = serviceDemand.getSource();
+            NodeProtocol sourceProt = (NodeProtocol) source.getProtocol(nodePID);
+            ServiceWorkload serviceWorkload = sourceProt.getLocalServiceWorkload().get(service);
+            activateWorkloadForSource(serviceWorkload);
+        });
+    }
+
+    private void activateWorkloadForSource(ServiceWorkload serviceWorkload) {
+         Service service = serviceWorkload.getService();
+         serviceRequestGenerator.activateServiceWorkload(serviceWorkload);
+         System.out.println("########### Activated Workload for " + service.getId() + ": " + serviceWorkload.getWokload() + " ##############");
     }
 
     private void removeServiceFromThisNode(Service service) {

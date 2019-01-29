@@ -1,5 +1,5 @@
 # network size
-SIZE 5
+SIZE 15
 
 # connectivity
 CONNECTIVITY SIZE - 1

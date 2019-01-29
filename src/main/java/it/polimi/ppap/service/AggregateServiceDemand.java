@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 public class AggregateServiceDemand {
 
@@ -27,6 +28,10 @@ public class AggregateServiceDemand {
         for (ServiceDemand t : sourceDemand) {
             action.accept(t);
         }
+    }
+
+    public Stream<ServiceDemand> stream(){
+        return sourceDemand.stream();
     }
 
 
