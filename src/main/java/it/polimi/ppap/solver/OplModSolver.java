@@ -121,12 +121,12 @@ public class OplModSolver {
         while(functionIt.hasNext()){
             JsonPrimitive allocationElement = (JsonPrimitive) functionIt.next();
             Service targetService = targetServiceIt.next();
-            float placed = allocationElement.getAsFloat();
-            float demand = placed * nodeServiceDemand.get(sourceNode).get(targetService);
+            float placedFraction = allocationElement.getAsFloat();
+            float demand = placedFraction * nodeServiceDemand.get(sourceNode).get(targetService);
             AggregateServiceDemand aggregateServiceDemand = serviceAggregateDemand.getOrDefault(
                     targetService, new AggregateServiceDemand());
             serviceAggregateDemand.put(targetService, aggregateServiceDemand);
-            aggregateServiceDemand.addServiceDemand(sourceNode, targetService, demand);
+            aggregateServiceDemand.addServiceDemand(sourceNode, targetService, demand, placedFraction);
         }
     }
 

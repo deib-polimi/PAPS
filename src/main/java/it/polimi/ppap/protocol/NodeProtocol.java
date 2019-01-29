@@ -5,6 +5,7 @@ import it.polimi.ppap.service.AggregateServiceDemand;
 import it.polimi.ppap.service.ServiceDemand;
 import it.polimi.ppap.service.ServiceWorkload;
 import it.polimi.ppap.generator.initializer.ServiceWorkloadGenerator;
+import it.polimi.ppap.service.ServiceWorkloadFraction;
 import it.polimi.ppap.topology.FogNode;
 import peersim.cdsim.CDProtocol;
 import peersim.core.Node;
@@ -59,17 +60,17 @@ public class NodeProtocol
         service.setTargetAllocation(allocation);
         nodeFacade.addService(service);
         placementAllocation.get(service).stream().filter(e -> e.getDemand() > 0).forEach(serviceDemand -> {
-            FogNode source  = serviceDemand.getSource();
-            NodeProtocol sourceProt = (NodeProtocol) source.getProtocol(nodePID);
-            ServiceWorkload serviceWorkload = sourceProt.getLocalServiceWorkload().get(service);
-            activateWorkloadForSource(serviceWorkload);
+            activateWorkloadForDemandFraction(service, nodePID, serviceDemand);
         });
     }
 
-    private void activateWorkloadForSource(ServiceWorkload serviceWorkload) {
-         Service service = serviceWorkload.getService();
-         serviceRequestGenerator.activateServiceWorkload(serviceWorkload);
-         System.out.println("########### Activated Workload for " + service.getId() + ": " + serviceWorkload.getWokload() + " ##############");
+    private void activateWorkloadForDemandFraction(Service service, int nodePID, ServiceDemand serviceDemand) {
+        FogNode source  = serviceDemand.getSource();
+        NodeProtocol sourceProt = (NodeProtocol) source.getProtocol(nodePID);
+        ServiceWorkload serviceWorkload = sourceProt.getLocalServiceWorkload().get(service);
+        float workloadFraction = serviceDemand.getFraction();
+        serviceRequestGenerator.activateServiceWorkload(new ServiceWorkloadFraction(serviceWorkload, workloadFraction));
+        System.out.println("########### Activated Workload for " + service.getId() + ": " + serviceWorkload.getWorkload() + " ##############");
     }
 
     private void removeServiceFromThisNode(Service service) {

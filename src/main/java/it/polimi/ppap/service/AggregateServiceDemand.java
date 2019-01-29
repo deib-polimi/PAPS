@@ -13,8 +13,8 @@ public class AggregateServiceDemand {
 
     final Set<ServiceDemand> sourceDemand = new TreeSet<>();
 
-    public void addServiceDemand(FogNode source, Service service, float demand){
-        ServiceDemand serviceDemand = new ServiceDemand(source, service, demand);
+    public void addServiceDemand(FogNode source, Service service, float demand, float fraction){
+        ServiceDemand serviceDemand = new ServiceDemand(source, service, demand, fraction);
         sourceDemand.add(serviceDemand);
     }
 

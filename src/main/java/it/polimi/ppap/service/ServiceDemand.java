@@ -8,11 +8,17 @@ public class ServiceDemand implements Comparable{
     private final FogNode source;
     private final Service service;
     private float demand;
+    private float fraction;
 
-    public ServiceDemand(FogNode source, Service service, float demand){
+    public ServiceDemand(FogNode source, Service service, float demand, float fraction){
         this.source = source;
         this.service = service;
         this.demand = demand;
+        this.fraction = fraction;
+    }
+
+    public FogNode getSource() {
+        return source;
     }
 
     public Service getService() {
@@ -23,17 +29,20 @@ public class ServiceDemand implements Comparable{
         return demand;
     }
 
-    public FogNode getSource() {
-        return source;
+    public float getFraction() {
+        return fraction;
     }
 
-    @Override
+    @Override //TODO
     public int compareTo(Object o) {
-        return toString().compareTo(((ServiceDemand)o).toString());
+        ServiceDemand other = (ServiceDemand) o;
+        String combinedId = demand + "_" + service.getId() + "_" + source.getID();
+        String otherCombinedId = other.getDemand() + "_" + other.getService().getId() + "_" + other.getSource().getID();
+        return combinedId.compareTo(otherCombinedId);
     }
 
     @Override
     public String toString() {
-        return service.getId() + "@" + source.getID();
+        return demand + " to " + service + " from " + source;
     }
 }

@@ -19,7 +19,7 @@ public class ServiceWorkload {
         return service;
     }
 
-    public float getWokload() {
+    public float getWorkload() {
         return workload;
     }
 

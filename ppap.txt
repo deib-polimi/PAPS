@@ -5,7 +5,7 @@ SIZE 15
 CONNECTIVITY SIZE - 1
 
 # number of distinct functions in the system
-ENTROPY 5
+ENTROPY 30
 
 # the maximum capacity available to each node (GB)
 CAPACITY 64

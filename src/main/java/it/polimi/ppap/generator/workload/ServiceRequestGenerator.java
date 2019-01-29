@@ -5,9 +5,8 @@ import it.polimi.deib.ppap.node.commons.NormalDistribution;
 import it.polimi.deib.ppap.node.commons.Utils;
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.deib.ppap.node.services.ServiceRequest;
-import it.polimi.ppap.service.ServiceDemand;
 import it.polimi.ppap.service.ServiceWorkload;
-import it.polimi.ppap.topology.FogNode;
+import it.polimi.ppap.service.ServiceWorkloadFraction;
 import org.apache.commons.math3.distribution.ExponentialDistribution;
 import peersim.core.CommonState;
 
@@ -46,7 +45,7 @@ public class ServiceRequestGenerator {
     }
 
     public float getAggregateWorkload(Service service){
-        return (float) activeServices.get(service).stream().mapToDouble(e -> e.getWokload()).average().getAsDouble();
+        return (float) activeServices.get(service).stream().mapToDouble(e -> e.getWorkload()).average().getAsDouble();
     }
 
     public void forEach(Consumer<Service> action) {
@@ -72,7 +71,7 @@ public class ServiceRequestGenerator {
     private Runnable executeRequestsStableScenario(ServiceWorkload serviceWorkload){
         return () -> {
             while(activeServices.containsKey(serviceWorkload.getService())) {
-                long workload = (long) serviceWorkload.getWokload();
+                long workload = (long) serviceWorkload.getWorkload();
                 stableScenario(serviceWorkload.getService(), workload, 250);
             }
         };
@@ -84,7 +83,7 @@ public class ServiceRequestGenerator {
         return () -> {
             short nextScenario = 0; //start with stable rate
             while(activeServices.containsKey(serviceWorkload.getService())) {
-                long workload = (long) serviceWorkload.getWokload();
+                long workload = (long) serviceWorkload.getWorkload();
                 long iterations = random.nextInt(250);
                 switch (nextScenario){
                     case 0:
