@@ -17,5 +17,21 @@ This level is responsible for timely actuation of the number of compute runtime 
 The node level self-adaptation is materialized as a set of control-theoretic controllers (one for each hosted service) supervised by a single entity. Only in case of resource contention, the supervisor enforces the allocation scheme to respect the target values defined by the community level allocation. In all other cases, actual allocation for each hosted service will change according to unpredictable fluctuations in its workload.
 
 
-## Simulator Instructions
+## Simulator Instructions (Development)
 
+### Dependencies
+
+The project (or a module in IntelliJ Idea) has a dependency with another project (module), which can be found [in this repo](https://github.com/deib-polimi/ppap-node). Additionally, you must include in your path the (still missing) libraries in the lib folder (to be updated soon with MVN). 
+
+### Simulation Execution
+
+The simulator is implemented on top of PeerSim, which requires the specification of the simulation parameters in a file (in our case, ppap.txt found in the root foldert). To execute the simulation, you must pass the name of the file (relative path is ok) as the first parameter for the Simulator class found in the peersim package (to be updated soon with a subclass in the root src).
+
+### Simulation Parameters
+
+There are many parameters you can use to adjust the simulation. They are:
+
+* SIZE how many fog nodes within the community 
+* ENTROPY how many services (for now, functions) are admitted in the system 
+* BASE_CAPACITY the minimum capacity of the fog nodes in the community
+* DELTATICK the physical time in milliseconds for the short simulatio cycle, which is used as a control period 
