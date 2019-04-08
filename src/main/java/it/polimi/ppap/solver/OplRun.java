@@ -127,6 +127,10 @@ public class OplRun {
                     opl.printConflict(System.out);
                     System.out.println("CONFLICTS done.");
                 } else {
+                    //opl.getCplex().setParam(IloCplex.Param.Emphasis.MIP, IloCplex.MIPEmphasis.Feasibility);
+                    opl.getCplex().setParam(IloCplex.IntParam.PPriInd, IloCplex.PrimalPricing.Partial);
+                    opl.getCplex().setParam(IloCplex.IntParam.RootAlg, IloCplex.Algorithm.Primal);
+                    opl.getCplex().setParam(IloCplex.IntParam.TuningDisplay, IloCplex.TuningStatus.TimeLim);
                     boolean result = opl.getCplex().solve();
                     if (result) {
                         trace("solve");

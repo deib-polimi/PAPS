@@ -39,6 +39,8 @@ subject to{
   	Supply[s][w][f] <= 1;
     //ctUseOpenNodes:
       //Supply[s][w][f] <= Open[w];
+  forall( w in Nodes, s in DemandSources, f in Functions )
+    Supply[s][w][f] >= 0;
   forall( w in Nodes )
 	ctMaxUseOfWarehouse:         
       sum( s in DemandSources, f in Functions ) 

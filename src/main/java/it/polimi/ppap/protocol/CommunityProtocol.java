@@ -106,9 +106,6 @@ public class CommunityProtocol
                 UnivariateInterpolator interpolator = new SplineInterpolator();
                 UnivariateFunction workloadDemandFunction = interpolator.interpolate(x, y);
                 workloadDemandFunctionMap.put(service, workloadDemandFunction);
-                //double currentWorkload = workloadAllocationHistory.get(service).keySet().stream().mapToDouble(e -> (double) e).average().getAsDouble();
-                //double interpolatedAllocation = workloadDemandFunction.value(1 / currentWorkload);
-                //System.out.println("##############################f(" + 1 / currentWorkload + ") = " + interpolatedAllocation);
             }
         }
         return workloadDemandFunctionMap;
@@ -127,14 +124,14 @@ public class CommunityProtocol
             else
                 nodeServiceDemand.get(member).put(service, 1f);
         }catch (OutOfRangeException exception){
-            float fitWorkload = getDemandFromNearestWorkload(service, member, workloadFromMember);
+            float fitWorkload = estimateDemandFromNearestWorkload(service, member, workloadFromMember);
             float demandFromMember = (float) workloadDemandFunction.value(fitWorkload);
             nodeServiceDemand.get(member).put(service, demandFromMember);
         }
         System.out.println("Allocation demand from member " + service + ": " + nodeServiceDemand.get(member).get(service));
     }
 
-    private float getDemandFromNearestWorkload(Service service, FogNode member, final float unfitWorkload) {
+    private float estimateDemandFromNearestWorkload(Service service, FogNode member, final float unfitWorkload) {
         //TODO if is out of range, which value to use? perhaps the nearest one
         //float demandFromMember = (float) workloadAllocationHistory.get(service).values().stream().mapToDouble(e -> (double) e).max().getAsDouble();
         OptionalDouble optionalWorkload = workloadAllocationHistory.get(service).keySet().stream().filter(e -> e > unfitWorkload).mapToDouble(e-> e).min();
