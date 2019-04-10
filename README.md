@@ -1,5 +1,7 @@
 # PPAP SIMULATOR
 
+<img src="https://github.com/deib-polimi/ppap-simulation/raw/master/docs/PPAP_communities.png" alt="Communities in a complex fog node topology" width="200px"/>
+
 ## PPAP
 
 A PeerSim based implementation of the PPAP framework. The actual version features two of the three framework levels, namely:
