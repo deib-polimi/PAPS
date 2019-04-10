@@ -1,6 +1,6 @@
 # network size
-
 SIZE 50
+
 # connectivity
 CONNECTIVITY SIZE - 1
 

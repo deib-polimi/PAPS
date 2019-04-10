@@ -88,6 +88,7 @@ public class NodeProtocol
                 float currentWorkload = serviceRequestGenerator.getAggregateWorkload(service);
                 //System.out.println("######### Current Workload for " + service + ": " + currentWorkload);
                 float optimalAllocation = nodeFacade.getLastOptimalAllocation(service);
+                optimalAllocation = Math.min(service.getTargetAllocation() * 2, optimalAllocation);
                 if(optimalAllocation > 0) {
                     //System.out.println("######### Optimal Allocation for " + service + ": " + optimalAllocation);
                     //TODO here we should add to a history set containing multiple workload-allocation pairs for later analysis

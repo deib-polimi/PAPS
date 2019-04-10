@@ -85,6 +85,7 @@ public class ServiceRequestGenerator {
             while(activeServices.containsKey(serviceWorkload.getService())) {
                 long workload = (long) serviceWorkload.getWorkload();
                 long iterations = random.nextInt(250);
+                System.out.println("Next scenario: " + iterations);
                 switch (nextScenario){
                     case 0:
                         stableScenario(serviceWorkload.getService(), workload, iterations);
