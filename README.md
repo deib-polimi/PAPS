@@ -25,7 +25,7 @@ The project (or a module in IntelliJ Idea) has a dependency with another project
 
 ### Simulation Execution
 
-The simulator is implemented on top of PeerSim, which requires the specification of the simulation parameters in a file (in our case, ppap.txt found in the root foldert). To execute the simulation, you must pass the name of the file (relative path is ok) as the first parameter for the Simulator class found in the peersim package (to be updated soon with a subclass in the root src).
+The simulator is implemented on top of PeerSim, which requires the specification of the simulation parameters in a file (in our case, ppap.txt found in the root folder). To execute the simulation, you must pass the name of the file (relative path is ok) as the first parameter for the *Simulator* class found in the peersim package (to be updated soon with a subclass in the root src).
 
 ### Simulation Parameters
 
@@ -35,3 +35,7 @@ There are many parameters you can use to adjust the simulation. They are:
 * ENTROPY how many services (for now, functions) are admitted in the system 
 * BASE_CAPACITY the minimum capacity of the fog nodes in the community
 * DELTATICK the physical time in milliseconds for the short simulatio cycle, which is used as a control period 
+
+## Known Caveats 
+
+The simulator uses Java threads to mimick the execution of functions. In its default configuration, the JVM will allocate a considerable amount of memory to each thread stack. To prevent exausting the JVM memory and running into *OutOfMemoryError: unable to create new native thread* errors, we recommend lowering the thread memory through the JVM -Xss parameters (e.g., -Xss228k).
