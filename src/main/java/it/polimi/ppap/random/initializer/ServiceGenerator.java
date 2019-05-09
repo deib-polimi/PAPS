@@ -1,4 +1,4 @@
-package it.polimi.ppap.generator.initializer;
+package it.polimi.ppap.random.initializer;
 
 import it.polimi.deib.ppap.node.services.Service;
 import peersim.core.CommonState;

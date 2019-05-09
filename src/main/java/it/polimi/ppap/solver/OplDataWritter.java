@@ -82,7 +82,7 @@ public class OplDataWritter {
         return sb.toString();
     }
 
-    private String buildSourceNodeDelayMatrix(int demandSourceNumber, int nodesNumber, int maxSourceNodeDelay, int colocatedSourceNodeDelay) {
+    private String buildSourceNodeDelayMatrix(int demandSourceNumber, int nodesNumber, int maxSourceNodeDelay, int fronthaulSourceNodeDelay) {
         StringBuilder sb = new StringBuilder("\n");
         for(int d = 0; d < demandSourceNumber; d++){
             sb.append("[");
@@ -91,7 +91,7 @@ public class OplDataWritter {
                 if(d != n)
                     sourceNodeDelayList.add(getLinearRandomNumber(maxSourceNodeDelay) + ""); //TODO
                 else
-                    sourceNodeDelayList.add(colocatedSourceNodeDelay + "");
+                    sourceNodeDelayList.add(fronthaulSourceNodeDelay + "");
             }
             sb.append(String.join(",", sourceNodeDelayList));
             sb.append("]");

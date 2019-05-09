@@ -1,4 +1,4 @@
-package it.polimi.ppap.generator.workload;
+package it.polimi.ppap.random.workload;
 
 import it.polimi.deib.ppap.node.NodeFacade;
 import it.polimi.deib.ppap.node.commons.NormalDistribution;
@@ -6,7 +6,6 @@ import it.polimi.deib.ppap.node.commons.Utils;
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.deib.ppap.node.services.ServiceRequest;
 import it.polimi.ppap.service.ServiceWorkload;
-import it.polimi.ppap.service.ServiceWorkloadFraction;
 import org.apache.commons.math3.distribution.ExponentialDistribution;
 import peersim.core.CommonState;
 

@@ -19,7 +19,7 @@
 package it.polimi.ppap.control;
 
 import it.polimi.deib.ppap.node.services.Service;
-import it.polimi.ppap.generator.initializer.ServiceDemandGenerator;
+import it.polimi.ppap.random.initializer.ServiceDemandGenerator;
 import it.polimi.ppap.protocol.MemberStateHolder;
 import it.polimi.ppap.topology.FogNode;
 import peersim.config.Configuration;
@@ -93,7 +93,7 @@ public class MemberStateInitializer implements Control {
     private void initializeLeader(){
         Node leader = getLeader();
         MemberStateHolder memberProtocol = (MemberStateHolder) leader.getProtocol(pid);
-        memberProtocol.setLeader(true);
+        memberProtocol.initializeLeader();
     }
 
     private void initializeNodeServiceDemand(Set<Service> serviceCatalog){

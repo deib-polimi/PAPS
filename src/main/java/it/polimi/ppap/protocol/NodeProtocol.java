@@ -4,7 +4,7 @@ import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.service.AggregateServiceDemand;
 import it.polimi.ppap.service.ServiceDemand;
 import it.polimi.ppap.service.ServiceWorkload;
-import it.polimi.ppap.generator.initializer.ServiceWorkloadGenerator;
+import it.polimi.ppap.random.initializer.ServiceWorkloadGenerator;
 import it.polimi.ppap.service.ServiceWorkloadFraction;
 import it.polimi.ppap.topology.FogNode;
 import peersim.cdsim.CDProtocol;
@@ -88,6 +88,7 @@ public class NodeProtocol
                 float currentWorkload = serviceRequestGenerator.getAggregateWorkload(service);
                 //System.out.println("######### Current Workload for " + service + ": " + currentWorkload);
                 float optimalAllocation = nodeFacade.getLastOptimalAllocation(service);
+                //TODO this heuristic must be assessed
                 optimalAllocation = Math.min(service.getTargetAllocation() * 2, optimalAllocation);
                 if(optimalAllocation > 0) {
                     //System.out.println("######### Optimal Allocation for " + service + ": " + optimalAllocation);

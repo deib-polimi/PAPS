@@ -23,6 +23,13 @@ public abstract class MemberStateHolder implements Protocol {
         this.leader = leader;
     }
 
+    public void initializeLeader(){
+        nodeServiceWorkload = new TreeMap<>();
+        workloadAllocationHistory = new TreeMap<>();
+        nodeServiceDemand = new TreeMap<>();
+        setLeader(true);
+    }
+
     //MAPE: Monitoring
 
     int monitoringCount;
@@ -39,13 +46,13 @@ public abstract class MemberStateHolder implements Protocol {
         this.monitoringCount = 0;
     }
 
-    Map<FogNode, Set<ServiceWorkload>> nodeServiceWorkload = new TreeMap<>(); //TODO only leader needs it
+    Map<FogNode, Set<ServiceWorkload>> nodeServiceWorkload;
 
-    Map<Service, Map<Float, Float>> workloadAllocationHistory = new TreeMap<>(); //TODO only leader needs it
+    Map<Service, Map<Float, Float>> workloadAllocationHistory;
 
     //MAPE: Analysis
 
-    Map<FogNode, Map<Service, Float>> nodeServiceDemand = new TreeMap<>(); //TODO only leader needs it
+    Map<FogNode, Map<Service, Float>> nodeServiceDemand;
 
     public Map<FogNode, Map<Service, Float>> getNodeServiceDemand(){
         return nodeServiceDemand;

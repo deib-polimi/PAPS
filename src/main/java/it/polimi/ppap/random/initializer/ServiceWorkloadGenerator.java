@@ -1,6 +1,5 @@
-package it.polimi.ppap.generator.initializer;
+package it.polimi.ppap.random.initializer;
 
-import it.polimi.deib.ppap.node.services.Service;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import peersim.core.CommonState;
 

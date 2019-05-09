@@ -25,9 +25,9 @@ public class OplModSolver {
 
     public void generateData(Map<FogNode, Map<Service, Float>> nodeServiceDemand){
         ClassLoader classLoader = getClass().getClassLoader();
-        String absoluteTemplateFilePath = classLoader.getResource(templateFilePath).getPath();
+        /*String absoluteTemplateFilePath = classLoader.getResource(templateFilePath).getPath();
         String absoluteDataFilePath = classLoader.getResource(oplDataFilePath).getPath();
-        String absoluteModelFilePath = classLoader.getResource(oplModelFilePath).getPath();
+        String absoluteModelFilePath = classLoader.getResource(oplModelFilePath).getPath();*/
         OplDataWritter oplDataWritter = new OplDataWritter(nodeServiceDemand, oplDataFilePath, templateFilePath);//TODO
         try {
             oplDataWritter.generateData();
