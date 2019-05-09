@@ -3,17 +3,17 @@ package it.polimi.ppap.service;
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.topology.FogNode;
 
-public class ServiceDemand implements Comparable{
+public class ServiceAllocation implements Comparable{
 
     private final FogNode source;
     private final Service service;
-    private float demand;
+    private float allocation;
     private float fraction;
 
-    public ServiceDemand(FogNode source, Service service, float demand, float fraction){
+    public ServiceAllocation(FogNode source, Service service, float allocation, float fraction){
         this.source = source;
         this.service = service;
-        this.demand = demand;
+        this.allocation = allocation;
         this.fraction = fraction;
     }
 
@@ -25,8 +25,8 @@ public class ServiceDemand implements Comparable{
         return service;
     }
 
-    public float getDemand() {
-        return demand;
+    public float getAllocation() {
+        return allocation;
     }
 
     public float getFraction() {
@@ -35,14 +35,14 @@ public class ServiceDemand implements Comparable{
 
     @Override //TODO
     public int compareTo(Object o) {
-        ServiceDemand other = (ServiceDemand) o;
-        String combinedId = demand + "_" + service.getId() + "_" + source.getID();
-        String otherCombinedId = other.getDemand() + "_" + other.getService().getId() + "_" + other.getSource().getID();
+        ServiceAllocation other = (ServiceAllocation) o;
+        String combinedId = allocation + "_" + service.getId() + "_" + source.getID();
+        String otherCombinedId = other.getAllocation() + "_" + other.getService().getId() + "_" + other.getSource().getID();
         return combinedId.compareTo(otherCombinedId);
     }
 
     @Override
     public String toString() {
-        return demand + " to " + service + " from " + source;
+        return allocation + " to " + service + " from " + source;
     }
 }
