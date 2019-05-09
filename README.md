@@ -38,6 +38,17 @@ There are many parameters you can use to adjust the simulation. They are:
 * BASE_CAPACITY the minimum capacity of the fog nodes in the community
 * DELTATICK the physical time in milliseconds for the short simulatio cycle, which is used as a control period 
 
-## Known Caveats 
+### Runtime Parameters
+
+#### Program Argument
+ppap.txt
+
+#### Environment Variables
+LD_LIBRARY_PATH=/opt/ibm/ILOG/CPLEX_Studio128/opl/bin/x86-64_linux
+
+<img src="https://github.com/deib-polimi/ppap-simulation/raw/master/docs/Idea_Run_Parameters.png" alt="Communities in a complex fog node topology" />
+
+#### Known Caveats 
 
 The simulator uses Java threads to mimick the execution of functions. In its default configuration, the JVM will allocate a considerable amount of memory to each thread stack. To prevent exausting the JVM memory and running into *OutOfMemoryError: unable to create new native thread* errors, we recommend lowering the thread memory through the JVM -Xss parameters (e.g., -Xss228k).
+
