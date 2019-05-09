@@ -89,7 +89,7 @@ public class CommunityProtocol
             for(ServiceWorkload serviceWorkload : nodeServiceWorkload.get(member)){
                 Service service = serviceWorkload.getService();
                 if(serviceWorkload.getWorkload() > 0 && workloadDemandFunctionMap.containsKey(service)) //TODO isActive for god sake?
-                    calculateDemandFromWorkload(serviceWorkload, workloadDemandFunctionMap.get(service));
+                    updateDemandFromWorkload(serviceWorkload, workloadDemandFunctionMap.get(service));
                 else
                     initializeDemand(serviceWorkload);
             }
@@ -111,7 +111,7 @@ public class CommunityProtocol
         return workloadDemandFunctionMap;
     }
 
-    private void calculateDemandFromWorkload(ServiceWorkload serviceWorkload, UnivariateFunction workloadDemandFunction) {
+    private void updateDemandFromWorkload(ServiceWorkload serviceWorkload, UnivariateFunction workloadDemandFunction) {
         float workloadFromMember = 1 / serviceWorkload.getWorkload();
         FogNode member = serviceWorkload.getSource();
         Service service = serviceWorkload.getService();

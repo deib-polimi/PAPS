@@ -12,6 +12,7 @@ import peersim.core.CommonState;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.stream.DoubleStream;
 
 public class ServiceRequestGenerator {
 
@@ -44,7 +45,12 @@ public class ServiceRequestGenerator {
     }
 
     public float getAggregateWorkload(Service service){
-        return (float) activeServices.get(service).stream().mapToDouble(e -> e.getWorkload()).average().getAsDouble();
+        //100ms -> 10/s
+        //200ms -> 5/s
+        //total: 15/s -> 66,666ms
+        DoubleStream workloadStream = activeServices.get(service).stream().mapToDouble(e -> 1000 / e.getWorkload());
+        Double frequencySum = workloadStream.sum();
+        return (float) (1000 / frequencySum);
     }
 
     public void forEach(Consumer<Service> action) {
