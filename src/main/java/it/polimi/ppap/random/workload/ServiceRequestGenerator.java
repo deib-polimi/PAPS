@@ -6,6 +6,7 @@ import it.polimi.deib.ppap.node.commons.Utils;
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.deib.ppap.node.services.ServiceRequest;
 import it.polimi.ppap.service.ServiceWorkload;
+import it.polimi.ppap.topology.FogNode;
 import org.apache.commons.math3.distribution.ExponentialDistribution;
 import peersim.core.CommonState;
 
@@ -20,12 +21,13 @@ public class ServiceRequestGenerator {
 
     final Map<Service, Set<ServiceWorkload>> activeServices = new ConcurrentHashMap<>();
     final NodeFacade nodeFacade;
+    final FogNode fogNode;
     final Random random = CommonState.r;
 
     // Interface
 
-    public ServiceRequestGenerator(NodeFacade nodeFacade){
-        this.nodeFacade = nodeFacade;
+    public ServiceRequestGenerator(FogNode fogNode, NodeFacade nodeFacade){
+        this.fogNode = fogNode; this.nodeFacade = nodeFacade;
     }
 
     public void activateServiceWorkload(ServiceWorkload serviceWorkload){
@@ -77,7 +79,8 @@ public class ServiceRequestGenerator {
         return () -> {
             while(activeServices.containsKey(serviceWorkload.getService())) {
                 long workload = (long) serviceWorkload.getWorkload();
-                stableScenario(serviceWorkload.getService(), workload, 250);
+                int delay = serviceWorkload.getInterNodeDelay(fogNode);
+                stableScenario(serviceWorkload.getService(), workload, delay, 250);
             }
         };
     }
@@ -89,16 +92,17 @@ public class ServiceRequestGenerator {
             short nextScenario = 0; //start with stable rate
             while(activeServices.containsKey(serviceWorkload.getService())) {
                 long workload = (long) serviceWorkload.getWorkload();
+                int delay = serviceWorkload.getInterNodeDelay(fogNode);
                 long iterations = random.nextInt(250);
                 System.out.println("Next scenario: " + iterations);
                 switch (nextScenario){
                     case 0:
-                        stableScenario(serviceWorkload.getService(), workload, iterations);
+                        stableScenario(serviceWorkload.getService(), workload, delay, iterations);
                         break;
                     case 1:
-                        peakScenario(serviceWorkload.getService(), workload, iterations);
+                        peakScenario(serviceWorkload.getService(), workload, delay, iterations);
                     case 2:
-                        decreasingScenario(serviceWorkload.getService(), workload, iterations);
+                        decreasingScenario(serviceWorkload.getService(), workload, delay, iterations);
                         break;
                     default:
                         quietScenario(serviceWorkload.getService(),100,iterations);
@@ -109,14 +113,14 @@ public class ServiceRequestGenerator {
         };
     }
 
-    private void stableScenario(Service service, long workload, long iterations) {
+    private void stableScenario(Service service, long workload, int delay, long iterations) {
         // stable system
         System.out.println("### " + service + " entered the STABLE SCENARIO ###");
         NormalDistribution normalDistribution = Utils.getNormalDistribution(service.getSLA() * 0.8, service.getSLA() * 0.8 *0.1);
         ExponentialDistribution exponentialDistribution = new ExponentialDistribution(workload);
         for (int i = 0; i < iterations && activeServices.containsKey(service); i++) {
             long executionTime = (long) normalDistribution.random();//execution time <= SLA
-            nodeFacade.execute(new ServiceRequest(service, executionTime));
+            nodeFacade.execute(new ServiceRequest(service, executionTime, delay));
             try {
                 long nextArrivalTime = (long) exponentialDistribution.sample();
                 Thread.sleep(nextArrivalTime);
@@ -126,13 +130,13 @@ public class ServiceRequestGenerator {
         }
     }
 
-    private void peakScenario(Service service, long workload, long iterations) {
+    private void peakScenario(Service service, long workload, int delay, long iterations) {
         // peak inter-arrival rate
         System.out.println("### " + service + " entered the PEAK SCENARIO ###");
         NormalDistribution normalDistribution = Utils.getNormalDistribution(service.getSLA() * 0.8, service.getSLA() * 0.8 *0.1);
         ExponentialDistribution exponentialDistribution = new ExponentialDistribution(workload);
         for (int i = 0; i < iterations && activeServices.containsKey(service); i++) {
-            nodeFacade.execute(new ServiceRequest(service, (long) normalDistribution.random()));
+            nodeFacade.execute(new ServiceRequest(service, (long) normalDistribution.random(), delay));
 
             try {
                 Thread.sleep((long) (exponentialDistribution.sample() * 0.3));
@@ -142,13 +146,13 @@ public class ServiceRequestGenerator {
         }
     }
 
-    private void decreasingScenario(Service service, long workload, long iterations) {
+    private void decreasingScenario(Service service, long workload, int delay, long iterations) {
         // decreasing inter-arrival rate
         System.out.println("### " + service + " entered the DECREASING SCENARIO ###");
         NormalDistribution normalDistribution = Utils.getNormalDistribution(service.getSLA() * 0.8, service.getSLA() * 0.8 *0.1);
         ExponentialDistribution exponentialDistribution = new ExponentialDistribution(workload);
         for (int i = 0; i < iterations && activeServices.containsKey(service); i++) {
-            nodeFacade.execute(new ServiceRequest(service, (long) normalDistribution.random()));
+            nodeFacade.execute(new ServiceRequest(service, (long) normalDistribution.random(), delay));
             try {
                 Thread.sleep((long) (exponentialDistribution.sample() * 0.8));
             } catch (InterruptedException e) {

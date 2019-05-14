@@ -20,20 +20,23 @@ package it.polimi.ppap.control;
 
 import it.polimi.deib.ppap.node.NodeFacade;
 import it.polimi.deib.ppap.node.services.Service;
+import it.polimi.ppap.protocol.NodeStateHolder;
 import it.polimi.ppap.random.initializer.FogNodeCapacityGenerator;
 import it.polimi.ppap.random.initializer.ServiceCatalogGenerator;
 import it.polimi.ppap.random.initializer.ServiceWorkloadGenerator;
 import it.polimi.ppap.random.workload.ServiceRequestGenerator;
 import it.polimi.ppap.service.ServiceWorkload;
 import it.polimi.ppap.topology.FogNode;
-import it.polimi.ppap.protocol.NodeStateHolder;
 import it.polimi.ppap.topology.NodeFactory;
 import peersim.config.Configuration;
+import peersim.config.FastConfig;
 import peersim.core.Control;
+import peersim.core.Linkable;
 import peersim.core.Network;
 import peersim.vector.SingleValue;
 
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -136,7 +139,7 @@ public class NodeStateInitializer implements Control {
             nodeProt.setNodeFacade(nodeFacade);
             nodeFacade.setTickListener(nodeProt);
             nodeFacade.start();
-            ServiceRequestGenerator serviceRequestGenerator = new ServiceRequestGenerator(nodeFacade);
+            ServiceRequestGenerator serviceRequestGenerator = new ServiceRequestGenerator(node, nodeFacade);
             nodeProt.setServiceRequestGenerator(serviceRequestGenerator);
         }
         return false;

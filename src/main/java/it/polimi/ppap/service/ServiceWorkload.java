@@ -26,4 +26,8 @@ public class ServiceWorkload {
     public FogNode getSource(){
         return source;
     }
+
+    public int getInterNodeDelay(FogNode target) {
+        return source.getLinkDelay(target.getID());
+    }
 }

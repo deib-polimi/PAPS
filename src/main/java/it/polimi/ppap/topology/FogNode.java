@@ -3,9 +3,14 @@ package it.polimi.ppap.topology;
 import peersim.core.GeneralNode;
 import peersim.core.Node;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class FogNode extends GeneralNode implements Node, Comparable{
 
     private long memoryCapacity;
+
+    private Map<Long, Integer> linksDelay = new HashMap<>();
 
     public long getMemoryCapacity() {
         return memoryCapacity;
@@ -28,5 +33,13 @@ public class FogNode extends GeneralNode implements Node, Comparable{
     @Override
     public String toString() {
         return "FogNode " + getID();
+    }
+
+    public void addLinkDelay(long id, int linkDelay) {
+        linksDelay.put(id, linkDelay);
+    }
+
+    public int getLinkDelay(long id){
+        return linksDelay.get(id);
     }
 }

@@ -1,0 +1,7 @@
+Fixed = $MIGRATION_COST;
+Nodes = {$NODE_NAME_LIST};
+Capacity = [$CAPACITY_LIST];
+Functions = {$FUNCTION_NAME_LIST};
+NbDemandSources = $DEMAND_SOURCE_N;
+DemandLevel = [$DEMAND_LEVEL_MATRIX];
+SupplyCost = [$SOURCE_NODE_DELAY_MATRIX];

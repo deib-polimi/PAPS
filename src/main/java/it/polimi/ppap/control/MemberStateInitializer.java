@@ -23,11 +23,14 @@ import it.polimi.ppap.random.initializer.ServiceDemandGenerator;
 import it.polimi.ppap.protocol.MemberStateHolder;
 import it.polimi.ppap.topology.FogNode;
 import peersim.config.Configuration;
+import peersim.config.FastConfig;
 import peersim.core.Control;
+import peersim.core.Linkable;
 import peersim.core.Network;
 import peersim.core.Node;
 import peersim.vector.SingleValue;
 
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -39,6 +42,8 @@ import java.util.Set;
  * @version $Revision: 1.12 $
  */
 public class MemberStateInitializer implements Control {
+
+    Random rand = new Random();
 
     // ------------------------------------------------------------------------
     // Constants
@@ -94,6 +99,21 @@ public class MemberStateInitializer implements Control {
         Node leader = getLeader();
         MemberStateHolder memberProtocol = (MemberStateHolder) leader.getProtocol(pid);
         memberProtocol.initializeLeader();
+        for(int i=0; i<Network.size(); ++i) {
+            FogNode fogNode = (FogNode) Network.get(i);
+            initInterNodeDelay(fogNode);
+        }
+
+    }
+
+    private void initInterNodeDelay(FogNode fogNode){
+        Linkable linkable =
+                (Linkable) fogNode.getProtocol(FastConfig.getLinkable(pid));
+        fogNode.addLinkDelay(fogNode.getID(), getLinearRandomNumber(10));//ŦODO
+        for(int i = 0; i < linkable.degree(); i++) {
+            FogNode member = (FogNode) linkable.getNeighbor(i);
+            fogNode.addLinkDelay(member.getID(), getLinearRandomNumber(30));//TODO
+        }
     }
 
     private void initializeNodeServiceDemand(Set<Service> serviceCatalog){
@@ -110,5 +130,19 @@ public class MemberStateInitializer implements Control {
                 memberProtocol.updateServiceDemand(member, service, demand);
             }
         }
+    }
+
+    public int getLinearRandomNumber(int maxSize){
+        //Get a linearly multiplied random number
+        int randomMultiplier = maxSize * (maxSize + 1) / 2;
+        int randomInt = rand.nextInt(randomMultiplier);
+
+        //Linearly iterate through the possible values to find the correct one
+        int linearRandomNumber = 0;
+        for(int i=maxSize; randomInt >= 0; i--){
+            randomInt -= i;
+            linearRandomNumber++;
+        }
+        return linearRandomNumber;
     }
 }

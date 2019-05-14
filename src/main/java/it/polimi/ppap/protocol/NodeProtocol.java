@@ -43,6 +43,8 @@ public class NodeProtocol
             if(placementAllocation.get(service).getAggregateAllocation() > 0) {
                 if (!nodeFacade.isServing(service))
                     placeServiceOnThisNode(new Service(service), placementAllocation, nodePID);
+                else
+                    updateServiceAllocation(service, placementAllocation, nodePID);
             }else if(nodeFacade.isServing(service)) {
                 removeServiceFromThisNode(service);
         }
@@ -56,13 +58,16 @@ public class NodeProtocol
                                         Map<Service,AggregateServiceAllocation> placementAllocation,
                                         final int nodePID) {
         System.out.println("########### Placing Service " + service.getId() + " Onto Node ##############");
-        float allocation  = placementAllocation.get(service).getAggregateAllocation();
         nodeFacade.addService(service);
-
-        service.setTargetAllocation(allocation);
+        updateServiceAllocation(service, placementAllocation, nodePID);
         placementAllocation.get(service).stream().filter(e -> e.getAllocation() > 0).forEach(serviceDemand -> {
             activateWorkloadForDemandFraction(service, nodePID, serviceDemand);
         });
+    }
+
+    private void updateServiceAllocation(Service service, Map<Service, AggregateServiceAllocation> placementAllocation, int nodePID) {
+        float allocation  = placementAllocation.get(service).getAggregateAllocation();
+        nodeFacade.setTargetAllocation(service, allocation);
     }
 
     private void activateWorkloadForDemandFraction(Service service, int nodePID, ServiceAllocation serviceDemand) {
