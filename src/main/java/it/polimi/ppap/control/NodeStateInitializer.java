@@ -20,10 +20,10 @@ package it.polimi.ppap.control;
 
 import it.polimi.deib.ppap.node.NodeFacade;
 import it.polimi.deib.ppap.node.services.Service;
-import it.polimi.ppap.generator.initializer.FogNodeCapacityGenerator;
-import it.polimi.ppap.generator.initializer.ServiceCatalogGenerator;
-import it.polimi.ppap.generator.initializer.ServiceWorkloadGenerator;
-import it.polimi.ppap.generator.workload.ServiceRequestGenerator;
+import it.polimi.ppap.random.initializer.FogNodeCapacityGenerator;
+import it.polimi.ppap.random.initializer.ServiceCatalogGenerator;
+import it.polimi.ppap.random.initializer.ServiceWorkloadGenerator;
+import it.polimi.ppap.random.workload.ServiceRequestGenerator;
 import it.polimi.ppap.service.ServiceWorkload;
 import it.polimi.ppap.topology.FogNode;
 import it.polimi.ppap.protocol.NodeStateHolder;
@@ -33,7 +33,6 @@ import peersim.core.Control;
 import peersim.core.Network;
 import peersim.vector.SingleValue;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;

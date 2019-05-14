@@ -1,8 +1,7 @@
 package it.polimi.ppap.protocol;
 
 import it.polimi.deib.ppap.node.services.Service;
-import it.polimi.ppap.service.AggregateServiceDemand;
-import it.polimi.ppap.service.ServiceDemand;
+import it.polimi.ppap.service.AggregateServiceAllocation;
 import it.polimi.ppap.service.ServiceWorkload;
 import it.polimi.ppap.topology.FogNode;
 import peersim.core.Protocol;
@@ -23,6 +22,13 @@ public abstract class MemberStateHolder implements Protocol {
         this.leader = leader;
     }
 
+    public void initializeLeader(){
+        nodeServiceWorkload = new TreeMap<>();
+        workloadAllocationHistory = new TreeMap<>();
+        nodeServiceDemand = new TreeMap<>();
+        setLeader(true);
+    }
+
     //MAPE: Monitoring
 
     int monitoringCount;
@@ -39,13 +45,13 @@ public abstract class MemberStateHolder implements Protocol {
         this.monitoringCount = 0;
     }
 
-    Map<FogNode, Set<ServiceWorkload>> nodeServiceWorkload = new TreeMap<>(); //TODO only leader needs it
+    Map<FogNode, Set<ServiceWorkload>> nodeServiceWorkload;
 
-    Map<Service, Map<Float, Float>> workloadAllocationHistory = new TreeMap<>(); //TODO only leader needs it
+    Map<Service, Map<Float, Float>> workloadAllocationHistory;
 
     //MAPE: Analysis
 
-    Map<FogNode, Map<Service, Float>> nodeServiceDemand = new TreeMap<>(); //TODO only leader needs it
+    Map<FogNode, Map<Service, Float>> nodeServiceDemand;
 
     public Map<FogNode, Map<Service, Float>> getNodeServiceDemand(){
         return nodeServiceDemand;
@@ -62,13 +68,13 @@ public abstract class MemberStateHolder implements Protocol {
     //MAPE: Planning
 
     //for a given target host, defines what are the service source-demand pairs
-    Map<FogNode, Map<Service, AggregateServiceDemand>> nodeServiceAllocation = new TreeMap<>();
+    Map<FogNode, Map<Service, AggregateServiceAllocation>> nodeServiceAllocation = new TreeMap<>();
 
-    public Map<FogNode, Map<Service, AggregateServiceDemand>> getNodeServiceAllocation() {
+    public Map<FogNode, Map<Service, AggregateServiceAllocation>> getNodeServiceAllocation() {
         return nodeServiceAllocation;
     }
 
-    public void setNodeServiceAllocation(Map<FogNode, Map<Service, AggregateServiceDemand>> nodeServiceAllocation) {
+    public void setNodeServiceAllocation(Map<FogNode, Map<Service, AggregateServiceAllocation>> nodeServiceAllocation) {
         this.nodeServiceAllocation = nodeServiceAllocation;
     }
 

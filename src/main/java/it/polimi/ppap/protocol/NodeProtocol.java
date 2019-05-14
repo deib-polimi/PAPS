@@ -1,10 +1,10 @@
 package it.polimi.ppap.protocol;
 
 import it.polimi.deib.ppap.node.services.Service;
-import it.polimi.ppap.service.AggregateServiceDemand;
-import it.polimi.ppap.service.ServiceDemand;
+import it.polimi.ppap.service.AggregateServiceAllocation;
+import it.polimi.ppap.service.ServiceAllocation;
 import it.polimi.ppap.service.ServiceWorkload;
-import it.polimi.ppap.generator.initializer.ServiceWorkloadGenerator;
+import it.polimi.ppap.random.initializer.ServiceWorkloadGenerator;
 import it.polimi.ppap.service.ServiceWorkloadFraction;
 import it.polimi.ppap.topology.FogNode;
 import peersim.cdsim.CDProtocol;
@@ -38,9 +38,9 @@ public class NodeProtocol
     @Override
     public void processEvent(Node node, int pid, Object event) {}
 
-    public void updatePlacementAllocation(Map<Service, AggregateServiceDemand> placementAllocation, int nodePID){
+    public void updatePlacementAllocation(Map<Service, AggregateServiceAllocation> placementAllocation, int nodePID){
         for(Service service : placementAllocation.keySet())
-            if(placementAllocation.get(service).getAggregateDemand() > 0) {
+            if(placementAllocation.get(service).getAggregateAllocation() > 0) {
                 if (!nodeFacade.isServing(service))
                     placeServiceOnThisNode(new Service(service), placementAllocation, nodePID);
             }else if(nodeFacade.isServing(service)) {
@@ -53,18 +53,18 @@ public class NodeProtocol
 //--------------------------------------------------------------------------
 
     private void placeServiceOnThisNode(final Service service,
-                                        Map<Service,AggregateServiceDemand> placementAllocation,
+                                        Map<Service,AggregateServiceAllocation> placementAllocation,
                                         final int nodePID) {
         System.out.println("########### Placing Service " + service.getId() + " Onto Node ##############");
-        float allocation  = placementAllocation.get(service).getAggregateDemand();
+        float allocation  = placementAllocation.get(service).getAggregateAllocation();
         service.setTargetAllocation(allocation);
         nodeFacade.addService(service);
-        placementAllocation.get(service).stream().filter(e -> e.getDemand() > 0).forEach(serviceDemand -> {
+        placementAllocation.get(service).stream().filter(e -> e.getAllocation() > 0).forEach(serviceDemand -> {
             activateWorkloadForDemandFraction(service, nodePID, serviceDemand);
         });
     }
 
-    private void activateWorkloadForDemandFraction(Service service, int nodePID, ServiceDemand serviceDemand) {
+    private void activateWorkloadForDemandFraction(Service service, int nodePID, ServiceAllocation serviceDemand) {
         FogNode source  = serviceDemand.getSource();
         NodeProtocol sourceProt = (NodeProtocol) source.getProtocol(nodePID);
         ServiceWorkload serviceWorkload = sourceProt.getLocalServiceWorkload().get(service);
@@ -88,6 +88,7 @@ public class NodeProtocol
                 float currentWorkload = serviceRequestGenerator.getAggregateWorkload(service);
                 //System.out.println("######### Current Workload for " + service + ": " + currentWorkload);
                 float optimalAllocation = nodeFacade.getLastOptimalAllocation(service);
+                //TODO this heuristic must be assessed
                 optimalAllocation = Math.min(service.getTargetAllocation() * 2, optimalAllocation);
                 if(optimalAllocation > 0) {
                     //System.out.println("######### Optimal Allocation for " + service + ": " + optimalAllocation);

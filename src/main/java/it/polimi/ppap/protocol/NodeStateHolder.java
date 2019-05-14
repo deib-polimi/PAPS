@@ -2,7 +2,7 @@ package it.polimi.ppap.protocol;
 
 import it.polimi.deib.ppap.node.NodeFacade;
 import it.polimi.deib.ppap.node.services.Service;
-import it.polimi.ppap.generator.workload.ServiceRequestGenerator;
+import it.polimi.ppap.random.workload.ServiceRequestGenerator;
 import it.polimi.ppap.service.ServiceWorkload;
 import peersim.core.Protocol;
 
@@ -28,7 +28,7 @@ public abstract class NodeStateHolder implements Protocol, NodeFacade.TickListen
     }
 
     /**
-     * For each service hosted by this node, keeps track of theworkload (interarrival time) -> allocation (CTNs)
+     * For each service hosted by this node, keeps track of the workload (interarrival time) -> allocation (CTNs)
      */
     Map<Service, Map.Entry<Float, Float>> currentWorkloadAllocation;
 
@@ -50,10 +50,10 @@ public abstract class NodeStateHolder implements Protocol, NodeFacade.TickListen
 
     @Override
     public Object clone() {
-        NodeStateHolder svh=null;
+        NodeStateHolder svh = null;
         try {
-            svh=(NodeStateHolder)super.clone();
-        }catch(CloneNotSupportedException e) {
+            svh = (NodeStateHolder) super.clone();
+        } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }
         return svh;
