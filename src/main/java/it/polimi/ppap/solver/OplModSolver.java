@@ -16,18 +16,14 @@ import java.util.regex.Pattern;
 
 public class OplModSolver {
 
-    final static String CPLEX_PATH = "/opt/ibm/ILOG/CPLEX_Studio128/opl/bin/x86-64_linux";
+    final static String CPLEX_PATH = "/opt/ibm/ILOG/CPLEX_Studio129/opl/bin/x86-64_linux";
 
-    String templateFilePath = "templates/ppap.dat";
-    String oplDataFilePath = "data/ppap.dat";
-    String oplModelFilePath = "model/ppap.mod";
-    String oplResultsFilePath = "results/solution.dat";
+    String templateFilePath = "res/templates/ppap.dat";
+    String oplDataFilePath = "res/data/ppap.dat";
+    String oplModelFilePath = "res/model/ppap.mod";
+    String oplResultsFilePath = "res/results/solution.dat";
 
     public void generateData(Map<FogNode, Map<Service, Float>> nodeServiceDemand){
-        ClassLoader classLoader = getClass().getClassLoader();
-        /*String absoluteTemplateFilePath = classLoader.getResource(templateFilePath).getPath();
-        String absoluteDataFilePath = classLoader.getResource(oplDataFilePath).getPath();
-        String absoluteModelFilePath = classLoader.getResource(oplModelFilePath).getPath();*/
         OplDataWritter oplDataWritter = new OplDataWritter(nodeServiceDemand, oplDataFilePath, templateFilePath);//TODO
         try {
             oplDataWritter.generateData();
@@ -38,10 +34,9 @@ public class OplModSolver {
 
     public Map<FogNode, Map<Service, AggregateServiceAllocation>>
     solve(Map<FogNode, Map<Service, Float>> nodeServiceDemand){
-        ClassLoader classLoader = getClass().getClassLoader();
-        String absoluteDataFilePath = classLoader.getResource(oplDataFilePath).getPath();
-        String absoluteModelFilePath = classLoader.getResource(oplModelFilePath).getPath();
-        String absoluteResultsFilePath = classLoader.getResource(oplResultsFilePath).getPath();
+        String absoluteDataFilePath = oplDataFilePath;
+        String absoluteModelFilePath = oplModelFilePath;
+        String absoluteResultsFilePath = oplResultsFilePath;
         OplRun.oplRun(new String[]{"-v", "-de", absoluteResultsFilePath, absoluteModelFilePath, absoluteDataFilePath});
         String solution = null;
         try {

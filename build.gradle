@@ -7,9 +7,43 @@ sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+
 }
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+        }
+        resources {
+            srcDir 'src/main/resources'
+        }
+    }
+
+}
+
+
+
+
+version = '1.0'
+
 
 dependencies {
     compile group: 'com.google.code.gson', name: 'gson', version: '2.3.1'
+    compile group: 'com.google.code.gson', name: 'gson', version: '2.3.1'
+    compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile group: 'junit', name: 'junit', version: '4.12'
+
+}
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Version': version,
+                'Main-Class': 'peersim.Simulator',
+                'Manifest-Version': 1.0
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.filter( {! (it.name =~ /oplall.jar/ )}).collect { it.isDirectory() ? it : zipTree(it) } }
+
+    with jar
 }

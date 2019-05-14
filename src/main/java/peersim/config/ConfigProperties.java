@@ -169,8 +169,7 @@ public void load( String fileName ) throws IOException {
 */
 public void loadSystemResource( String n ) throws IOException {
 	
-	ClassLoader cl = getClass().getClassLoader();
-	load( cl.getResourceAsStream( n ) );
+	load( getClass().getResourceAsStream( n ) );
 }
 
 // -------------------------------------------------------------------
