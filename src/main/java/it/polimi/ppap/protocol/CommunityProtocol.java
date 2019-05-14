@@ -118,6 +118,7 @@ public class CommunityProtocol
         if(!nodeServiceDemand.containsKey(member))
             nodeServiceDemand.put(member, new HashMap<>());
         try {
+            //float demandFromMember = (float) workloadDemandFunction.value(workloadFromMember);
             float demandFromMember = (float) workloadDemandFunction.value(workloadFromMember);
             if(demandFromMember > 0)
                 nodeServiceDemand.get(member).put(service, demandFromMember);

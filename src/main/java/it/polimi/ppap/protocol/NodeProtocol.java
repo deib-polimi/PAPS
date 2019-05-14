@@ -57,8 +57,9 @@ public class NodeProtocol
                                         final int nodePID) {
         System.out.println("########### Placing Service " + service.getId() + " Onto Node ##############");
         float allocation  = placementAllocation.get(service).getAggregateAllocation();
-        service.setTargetAllocation(allocation);
         nodeFacade.addService(service);
+
+        service.setTargetAllocation(allocation);
         placementAllocation.get(service).stream().filter(e -> e.getAllocation() > 0).forEach(serviceDemand -> {
             activateWorkloadForDemandFraction(service, nodePID, serviceDemand);
         });
@@ -89,7 +90,7 @@ public class NodeProtocol
                 //System.out.println("######### Current Workload for " + service + ": " + currentWorkload);
                 float optimalAllocation = nodeFacade.getLastOptimalAllocation(service);
                 //TODO this heuristic must be assessed
-                optimalAllocation = Math.min(service.getTargetAllocation() * 2, optimalAllocation);
+//                optimalAllocation = Math.min(service.getTargetAllocation() * 2, optimalAllocation);
                 if(optimalAllocation > 0) {
                     //System.out.println("######### Optimal Allocation for " + service + ": " + optimalAllocation);
                     //TODO here we should add to a history set containing multiple workload-allocation pairs for later analysis

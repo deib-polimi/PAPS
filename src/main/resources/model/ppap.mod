@@ -47,8 +47,8 @@ subject to{
         DemandLevel[s][f] * Supply[s][w][f] <= Capacity[w];
   forall( w in Nodes, f in Functions )
     ctMaxCostOfWarehouse:    
-      sum( s in DemandSources ) 
-        SupplyCost[s][w] * Supply[s][w][f] <= 80;
+      sum( s in DemandSources )
+        SupplyCost[s][w] * ftoi(Supply[s][w][f]) <= 80;
 }
 
 

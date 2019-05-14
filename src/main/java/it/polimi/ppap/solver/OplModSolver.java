@@ -102,7 +102,7 @@ public class OplModSolver {
         while(nodeIt.hasNext()){
             FogNode targetNode = targetNodeIt.next();
             if(!nodeServicePlacement.containsKey(targetNode))
-                nodeServicePlacement.put(targetNode, new TreeMap<Service,AggregateServiceAllocation>());
+                nodeServicePlacement.put(targetNode, new TreeMap());
             JsonArray functionArray = (JsonArray) nodeIt.next();
             Iterator<JsonElement> functionIt = functionArray.iterator();
             Iterator<Service> targetServiceIt = nodeServiceDemand.get(sourceNode).keySet().iterator();

@@ -32,14 +32,14 @@ import peersim.util.IncrementalStats;
  * @author Alberto Montresor
  * @version $Revision: 1.17 $
  */
-public class DemandFluctuation implements Control {
+public class WorkflowFluctuation implements Control {
 
     // /////////////////////////////////////////////////////////////////////
     // Constants
     // /////////////////////////////////////////////////////////////////////
 
     /** TODO
-     *
+     *w
      * @config
      */
     private static final String PAR_DELTA = "delta";
@@ -77,7 +77,7 @@ public class DemandFluctuation implements Control {
     /**
      * Creates a new observer reading configuration parameters.
      */
-    public DemandFluctuation(String name) {
+    public WorkflowFluctuation(String name) {
         this.name = name;
         pid = Configuration.getPid(name + "." + PAR_PROT);
         delta = Configuration.getDouble(name + "." + PAR_DELTA, -1);
