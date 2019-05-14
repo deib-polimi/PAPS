@@ -139,16 +139,12 @@ public class OplDataWritter {
 
 
     private String readTemplateFile() throws IOException {
-        ClassLoader classLoader = getClass().getClassLoader();
-        String absoluteTemplateFilePath = classLoader.getResource(templateFilePath).getPath();
-        String content = new String ( Files.readAllBytes( Paths.get(absoluteTemplateFilePath) ) );
+        String content = new String ( Files.readAllBytes( Paths.get(templateFilePath) ) );
         return content;
     }
 
     private void openFile() throws IOException {
-        ClassLoader classLoader = getClass().getClassLoader();
-        String absoluteDataFilePath = classLoader.getResource(oplDataFilePath).getPath();
-        File outputFile = new File(absoluteDataFilePath);
+        File outputFile = new File(oplDataFilePath);
         if(outputFile.exists()) {
             outputFile.delete();
             outputFile.createNewFile();

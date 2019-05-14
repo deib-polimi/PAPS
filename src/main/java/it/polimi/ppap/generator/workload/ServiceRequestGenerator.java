@@ -128,6 +128,7 @@ public class ServiceRequestGenerator {
         ExponentialDistribution exponentialDistribution = new ExponentialDistribution(workload);
         for (int i = 0; i < iterations && activeServices.containsKey(service); i++) {
             nodeFacade.execute(new ServiceRequest(service, (long) normalDistribution.random()));
+
             try {
                 Thread.sleep((long) (exponentialDistribution.sample() * 0.3));
             } catch (InterruptedException e) {
