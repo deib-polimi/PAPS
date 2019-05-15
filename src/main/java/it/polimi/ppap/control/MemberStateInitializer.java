@@ -116,22 +116,6 @@ public class MemberStateInitializer implements Control {
         }
     }
 
-    private void initializeNodeServiceDemand(Set<Service> serviceCatalog){
-        //TODO parametrize in configs
-        Node leader = getLeader();
-        int minServiceDemand = 0;
-        int maxServiceDemand = 5;
-        ServiceDemandGenerator serviceDemandGenerator = new ServiceDemandGenerator(minServiceDemand, maxServiceDemand);
-        MemberStateHolder memberProtocol = (MemberStateHolder) leader.getProtocol(pid);
-        for(int i=0; i<Network.size(); ++i) {
-            FogNode member = (FogNode)Network.get(i);
-            for(Service service : serviceCatalog){
-                float demand = serviceDemandGenerator.nextDemand();
-                memberProtocol.updateServiceDemand(member, service, demand);
-            }
-        }
-    }
-
     public int getLinearRandomNumber(int maxSize){
         //Get a linearly multiplied random number
         int randomMultiplier = maxSize * (maxSize + 1) / 2;

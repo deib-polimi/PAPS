@@ -3,6 +3,7 @@ package it.polimi.ppap.solver;
 import com.google.gson.*;
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.service.AggregateServiceAllocation;
+import it.polimi.ppap.service.ServiceDemand;
 import it.polimi.ppap.topology.FogNode;
 
 import java.io.IOException;
@@ -23,7 +24,7 @@ public class OplModSolver {
     String oplModelFilePath = "res/model/ppap.mod";
     String oplResultsFilePath = "res/results/solution.dat";
 
-    public void generateData(Map<FogNode, Map<Service, Float>> nodeServiceDemand){
+    public void generateData(Map<FogNode, Map<Service, ServiceDemand>> nodeServiceDemand){
         OplDataWritter oplDataWritter = new OplDataWritter(nodeServiceDemand, oplDataFilePath, templateFilePath);//TODO
         try {
             oplDataWritter.generateData();
@@ -33,7 +34,7 @@ public class OplModSolver {
     }
 
     public Map<FogNode, Map<Service, AggregateServiceAllocation>>
-    solve(Map<FogNode, Map<Service, Float>> nodeServiceDemand){
+    solve(Map<FogNode, Map<Service, ServiceDemand>> nodeServiceDemand){
         String absoluteDataFilePath = oplDataFilePath;
         String absoluteModelFilePath = oplModelFilePath;
         String absoluteResultsFilePath = oplResultsFilePath;
@@ -52,7 +53,7 @@ public class OplModSolver {
 
 
     private Map<FogNode, Map<Service, AggregateServiceAllocation>>
-    parseSolution(String solution, Map<FogNode, Map<Service, Float>> nodeServiceDemand){
+    parseSolution(String solution, Map<FogNode, Map<Service, ServiceDemand>> nodeServiceDemand){
         solution = solution.replaceAll("\n|  ", "");
         Pattern pattern = Pattern.compile("(Supply = (\\[.*\\]);)");
         Matcher match = pattern.matcher(solution);
@@ -74,7 +75,7 @@ public class OplModSolver {
 
     private Map<FogNode, Map<Service, AggregateServiceAllocation>>
     parseSourcesJsonArray(JsonArray solutionJsonArray,
-                          Map<FogNode, Map<Service, Float>> nodeServiceDemand){
+                          Map<FogNode, Map<Service, ServiceDemand>> nodeServiceDemand){
         Iterator<JsonElement> sourceIt = solutionJsonArray.iterator();
         Map<FogNode, Map<Service, AggregateServiceAllocation>> nodeServicePlacement = new TreeMap<>();
         Iterator<FogNode> sourceNodeIt = nodeServiceDemand.keySet().iterator();
@@ -89,7 +90,7 @@ public class OplModSolver {
     }
 
     private void
-    parseNodeJsonArray(Map<FogNode, Map<Service, Float>> nodeServiceDemand,
+    parseNodeJsonArray(Map<FogNode, Map<Service, ServiceDemand>> nodeServiceDemand,
                        Map<FogNode, Map<Service, AggregateServiceAllocation>> nodeServicePlacement,
                        Iterator<JsonElement> nodeIt,
                        FogNode sourceNode,
@@ -106,7 +107,7 @@ public class OplModSolver {
     }
 
     private void
-    parseFunctiosJsonArray(Map<FogNode, Map<Service, Float>> nodeServiceDemand,
+    parseFunctiosJsonArray(Map<FogNode, Map<Service, ServiceDemand>> nodeServiceDemand,
                            Map<FogNode, Map<Service, AggregateServiceAllocation>> nodeServicePlacement,
                            FogNode sourceNode,
                            FogNode targetNode,
@@ -117,7 +118,7 @@ public class OplModSolver {
             JsonPrimitive allocationElement = (JsonPrimitive) functionIt.next();
             Service targetService = targetServiceIt.next();
             float placedFraction = allocationElement.getAsFloat();
-            float demand = placedFraction * nodeServiceDemand.get(sourceNode).get(targetService);
+            float demand = placedFraction * nodeServiceDemand.get(sourceNode).get(targetService).getDemand();
             AggregateServiceAllocation aggregateServiceDemand = serviceAggregateDemand.getOrDefault(
                     targetService, new AggregateServiceAllocation());
             serviceAggregateDemand.put(targetService, aggregateServiceDemand);

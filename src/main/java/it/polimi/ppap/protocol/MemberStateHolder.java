@@ -2,6 +2,7 @@ package it.polimi.ppap.protocol;
 
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.service.AggregateServiceAllocation;
+import it.polimi.ppap.service.ServiceDemand;
 import it.polimi.ppap.service.ServiceWorkload;
 import it.polimi.ppap.topology.FogNode;
 import peersim.core.Protocol;
@@ -51,17 +52,17 @@ public abstract class MemberStateHolder implements Protocol {
 
     //MAPE: Analysis
 
-    Map<FogNode, Map<Service, Float>> nodeServiceDemand;
+    Map<FogNode, Map<Service, ServiceDemand>> nodeServiceDemand;
 
-    public Map<FogNode, Map<Service, Float>> getNodeServiceDemand(){
+    public Map<FogNode, Map<Service, ServiceDemand>> getNodeServiceDemand(){
         return nodeServiceDemand;
     }
 
     public void updateServiceDemand(FogNode node, Service service, float demand){
         if(!nodeServiceDemand.containsKey(node))
             nodeServiceDemand.put(node, new TreeMap<>());
-        Map<Service, Float> serviceDemand = nodeServiceDemand.get(node);
-        serviceDemand.put(service, demand);
+        Map<Service, ServiceDemand> serviceDemand = nodeServiceDemand.get(node);
+        serviceDemand.put(service, new ServiceDemand(node, service, demand));//TODO replace or update?
         nodeServiceDemand.put(node, serviceDemand);
     }
 

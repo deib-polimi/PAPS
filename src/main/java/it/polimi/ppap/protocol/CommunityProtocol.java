@@ -2,6 +2,7 @@ package it.polimi.ppap.protocol;
 
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.service.AggregateServiceAllocation;
+import it.polimi.ppap.service.ServiceDemand;
 import it.polimi.ppap.service.ServiceWorkload;
 import it.polimi.ppap.transport.CommunityMessage;
 import it.polimi.ppap.transport.LeaderMessage;
@@ -121,13 +122,13 @@ public class CommunityProtocol
             //float demandFromMember = (float) workloadDemandFunction.value(workloadFromMember);
             float demandFromMember = (float) workloadDemandFunction.value(workloadFromMember);
             if(demandFromMember > 0)
-                nodeServiceDemand.get(member).put(service, demandFromMember);
+                updateServiceDemand(member, service, demandFromMember);
             else
-                nodeServiceDemand.get(member).put(service, 1f);
+                updateServiceDemand(member, service, 1f);
         }catch (OutOfRangeException exception){
             float fitWorkload = estimateDemandFromNearestWorkload(service, member, workloadFromMember);
             float demandFromMember = (float) workloadDemandFunction.value(fitWorkload);
-            nodeServiceDemand.get(member).put(service, demandFromMember);
+            updateServiceDemand(member, service, demandFromMember);
         }
         System.out.println("Allocation demand from member " + service + ": " + nodeServiceDemand.get(member).get(service));
     }
@@ -147,9 +148,9 @@ public class CommunityProtocol
     private void initializeDemand(ServiceWorkload serviceWorkload){
         Service service = serviceWorkload.getService();
         FogNode member = serviceWorkload.getSource();
-        Map<Service, Float> serviceDemand = nodeServiceDemand.getOrDefault(member, new TreeMap<>());
+        Map<Service, ServiceDemand> serviceDemand = nodeServiceDemand.getOrDefault(member, new TreeMap<>());
         float demandFromMember = serviceWorkload.getWorkload() > 0 ? 1 : 0;
-        serviceDemand.put(service, demandFromMember);
+        updateServiceDemand(member, service, demandFromMember);
         nodeServiceDemand.put(member, serviceDemand);
     }
 

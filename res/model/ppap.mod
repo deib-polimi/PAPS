@@ -17,6 +17,7 @@ range DemandSources = 0..NbDemandSources-1;
 float DemandLevel[DemandSources][Functions] = ...;
 int Capacity[Nodes] = ...; //same as 'memory'
 int SupplyCost[DemandSources][Nodes] = ...; //same as 'delay'
+int CostLimit = ...;
 
 //Decision Variables
 //dvar boolean Open[Nodes]; //same as 'place'
@@ -45,10 +46,10 @@ subject to{
 	ctMaxUseOfWarehouse:         
       sum( s in DemandSources, f in Functions ) 
         DemandLevel[s][f] * Supply[s][w][f] <= Capacity[w];
-  forall( w in Nodes, f in Functions )
-    ctMaxCostOfWarehouse:    
-      sum( s in DemandSources )
-        SupplyCost[s][w] * Supply[s][w][f] <= 80;
+  forall( w in Nodes, f in Functions, s in DemandSources )
+  	ctMaxCostOfWarehouse:
+      	//sum( s in DemandSources )
+  		SupplyCost[s][w] * Supply[s][w][f] <= CostLimit;
 }
 
 

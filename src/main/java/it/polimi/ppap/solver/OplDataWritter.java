@@ -1,6 +1,7 @@
 package it.polimi.ppap.solver;
 
 import it.polimi.deib.ppap.node.services.Service;
+import it.polimi.ppap.service.ServiceDemand;
 import it.polimi.ppap.topology.FogNode;
 import peersim.core.Node;
 
@@ -27,10 +28,11 @@ public class OplDataWritter {
     private final String DEMAND_SOURCE_N = "$DEMAND_SOURCE_N";
     private final String DEMAND_LEVEL_MATRIX = "$DEMAND_LEVEL_MATRIX";
     private final String SOURCE_NODE_DELAY_MATRIX = "$SOURCE_NODE_DELAY_MATRIX";
+    private final String MAX_DELAY = "$MAX_DELAY";
 
-    final Map<FogNode, Map<Service, Float>> nodeServiceDemand;
+    final Map<FogNode, Map<Service, ServiceDemand>> nodeServiceDemand;
 
-    public OplDataWritter(Map<FogNode, Map<Service, Float>> nodeServiceDemand, String oplDataFilePath, String templateFilePath){
+    public OplDataWritter(Map<FogNode, Map<Service, ServiceDemand>> nodeServiceDemand, String oplDataFilePath, String templateFilePath){
         this.oplDataFilePath = oplDataFilePath;
         this.templateFilePath = templateFilePath;
         this.nodeServiceDemand = nodeServiceDemand;
@@ -60,8 +62,11 @@ public class OplDataWritter {
         template = template.replace(DEMAND_SOURCE_N, nodeServiceDemand.size() + "");
         String demandLevelMatrix = buildDemandLevelMatrix();
         template = template.replace(DEMAND_LEVEL_MATRIX, demandLevelMatrix);
-        String sourceNodeDelayMatrix = buildSourceNodeDelayMatrix(nodeServiceDemand.size(), nodeServiceDemand.size(), maxSourceNodeDelay, colocatedSourceNodeDelay);
+        String sourceNodeDelayMatrix = buildSourceNodeDelayMatrix();
+        //buildSourceNodeDelayMatrix(nodeServiceDemand.size(), nodeServiceDemand.size(), maxSourceNodeDelay, colocatedSourceNodeDelay);
         template = template.replace(SOURCE_NODE_DELAY_MATRIX, sourceNodeDelayMatrix);
+        String maxDelay = "10";
+        template = template.replace(MAX_DELAY, maxDelay);
         writer.write(template);
     }
 
@@ -71,11 +76,26 @@ public class OplDataWritter {
             sb.append("[");
             List<String> functionDemandList = new ArrayList<>();
             for(Service service : nodeServiceDemand.get(node).keySet()){
-                int serviceDemand = (int) Math.ceil(nodeServiceDemand.get(node).get(service));
+                int serviceDemand = (int) Math.ceil(nodeServiceDemand.get(node).get(service).getDemand());
                 int memoryMultiplier = (int)(service.getMemory() / 128); //TODO
                 functionDemandList.add(((int)serviceDemand * memoryMultiplier) + "");
             }
             sb.append(String.join(",", functionDemandList));
+            sb.append("]");
+            sb.append("\n");
+        }
+        return sb.toString();
+    }
+
+    private String buildSourceNodeDelayMatrix(){
+        StringBuilder sb = new StringBuilder("\n");
+        for(FogNode sourceNode : nodeServiceDemand.keySet()){
+            sb.append("[");
+            List<String> interNodeDelayList = new ArrayList<>();
+            for(FogNode targetNode : nodeServiceDemand.keySet()){
+                interNodeDelayList.add(sourceNode.getLinkDelay(targetNode.getID()) + "");
+            }
+            sb.append(String.join(",", interNodeDelayList));
             sb.append("]");
             sb.append("\n");
         }
