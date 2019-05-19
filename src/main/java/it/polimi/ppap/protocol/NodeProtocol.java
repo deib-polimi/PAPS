@@ -114,7 +114,7 @@ public class NodeProtocol
             if(nodeFacade.isServing(service)) {
                 Map.Entry<Float, Float> workloadAllocation = currentWorkloadAllocation.get(service);
                 float currentWorkload = workloadAllocation.getKey();
-                float std = service.getSLA() * 0.1f;
+                float std = service.getRT() * 0.1f;
                 ServiceWorkloadGenerator serviceWorkloadGenerator = new ServiceWorkloadGenerator(currentWorkload, std, 0.6f);
                 float nextWorkload = serviceWorkloadGenerator.nextWorkload();
                 System.out.println("########### Next Workload for " + service.getId() + ": " + nextWorkload + " ##############");

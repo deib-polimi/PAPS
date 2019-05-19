@@ -116,7 +116,7 @@ public class ServiceRequestGenerator {
     private void stableScenario(Service service, long workload, int delay, long iterations) {
         // stable system
         System.out.println("### " + service + " entered the STABLE SCENARIO ###");
-        NormalDistribution normalDistribution = Utils.getNormalDistribution(service.getSLA() * 0.8, service.getSLA() * 0.8 *0.1);
+        NormalDistribution normalDistribution = Utils.getNormalDistribution(service.getRT() * 0.8, service.getRT() * 0.8 *0.1);
         ExponentialDistribution exponentialDistribution = new ExponentialDistribution(workload);
         for (int i = 0; i < iterations && activeServices.containsKey(service); i++) {
             long executionTime = (long) normalDistribution.random();//execution time <= SLA
@@ -133,7 +133,7 @@ public class ServiceRequestGenerator {
     private void peakScenario(Service service, long workload, int delay, long iterations) {
         // peak inter-arrival rate
         System.out.println("### " + service + " entered the PEAK SCENARIO ###");
-        NormalDistribution normalDistribution = Utils.getNormalDistribution(service.getSLA() * 0.8, service.getSLA() * 0.8 *0.1);
+        NormalDistribution normalDistribution = Utils.getNormalDistribution(service.getRT() * 0.8, service.getRT() * 0.8 *0.1);
         ExponentialDistribution exponentialDistribution = new ExponentialDistribution(workload);
         for (int i = 0; i < iterations && activeServices.containsKey(service); i++) {
             nodeFacade.execute(new ServiceRequest(service, (long) normalDistribution.random(), delay));
@@ -149,7 +149,7 @@ public class ServiceRequestGenerator {
     private void decreasingScenario(Service service, long workload, int delay, long iterations) {
         // decreasing inter-arrival rate
         System.out.println("### " + service + " entered the DECREASING SCENARIO ###");
-        NormalDistribution normalDistribution = Utils.getNormalDistribution(service.getSLA() * 0.8, service.getSLA() * 0.8 *0.1);
+        NormalDistribution normalDistribution = Utils.getNormalDistribution(service.getRT() * 0.8, service.getRT() * 0.8 *0.1);
         ExponentialDistribution exponentialDistribution = new ExponentialDistribution(workload);
         for (int i = 0; i < iterations && activeServices.containsKey(service); i++) {
             nodeFacade.execute(new ServiceRequest(service, (long) normalDistribution.random(), delay));

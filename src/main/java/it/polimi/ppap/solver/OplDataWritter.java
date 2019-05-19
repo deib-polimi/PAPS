@@ -64,7 +64,7 @@ public class OplDataWritter {
         String sourceNodeDelayMatrix = buildSourceNodeDelayMatrix();
         //buildSourceNodeDelayMatrix(nodeServiceDemand.size(), nodeServiceDemand.size(), maxSourceNodeDelay, colocatedSourceNodeDelay);
         template = template.replace(SOURCE_NODE_DELAY_MATRIX, sourceNodeDelayMatrix);
-        String maxDelay = "10";
+        String maxDelay = buildServiceDelayConstraintVector();
         template = template.replace(MAX_DELAY, maxDelay);
         writer.write(template);
     }
@@ -102,14 +102,14 @@ public class OplDataWritter {
     }
 
     private String buildServiceDelayConstraintVector(){
-        StringBuilder sb = new StringBuilder("\n");
+        StringBuilder sb = new StringBuilder("");
         sb.append("[");
-        List<String> interNodeDelayList = new ArrayList<>();
+        List<String> delayConstraintList = new ArrayList<>();
         for(Service service : admittedServices){
-            int delayLimit = (int) service.getSLA();
-            interNodeDelayList.add(delayLimit + "");
+            int delayConstraint = (int) (service.getRT() - service.getET());//TODO introduce coefficient
+            delayConstraintList.add(delayConstraint + "");
         }
-        sb.append(String.join(",", interNodeDelayList));
+        sb.append(String.join(",", delayConstraintList));
         sb.append("]");
         return sb.toString();
     }
@@ -162,8 +162,7 @@ public class OplDataWritter {
 
     private String buildFunctionsList() {
         List<String> functionsList = new ArrayList<>();
-        Node firstNode = nodeServiceDemand.keySet().iterator().next();
-        for(Service service : nodeServiceDemand.get(firstNode).keySet())
+        for(Service service : admittedServices)
             functionsList.add("\"" + service + "\"");
         return String.join(",", functionsList);
     }

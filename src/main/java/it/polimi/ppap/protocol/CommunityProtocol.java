@@ -1,10 +1,7 @@
 package it.polimi.ppap.protocol;
 
 import it.polimi.deib.ppap.node.services.Service;
-import it.polimi.ppap.service.AggregateServiceAllocation;
-import it.polimi.ppap.service.ServiceCatalog;
-import it.polimi.ppap.service.ServiceDemand;
-import it.polimi.ppap.service.ServiceWorkload;
+import it.polimi.ppap.service.*;
 import it.polimi.ppap.transport.CommunityMessage;
 import it.polimi.ppap.transport.LeaderMessage;
 import it.polimi.ppap.transport.MemberMessage;
@@ -101,7 +98,7 @@ public class CommunityProtocol
 
     private Map<Service, UnivariateFunction> buildServiceUnivariateFunctionMap() {
         Map<Service, UnivariateFunction> workloadDemandFunctionMap = new HashMap<>();
-        for(Service service : workloadAllocationHistory.keySet()){
+        for(Service service : ServiceCatalog.getServiceCatalog()){
             if(workloadAllocationHistory.containsKey(service) && workloadAllocationHistory.get(service).size() > 2) {
                 double x[] = workloadAllocationHistory.get(service).keySet().stream().mapToDouble(e -> (double) e).toArray();
                 double y[] = workloadAllocationHistory.get(service).values().stream().mapToDouble(e -> (double) e).toArray();
@@ -149,10 +146,9 @@ public class CommunityProtocol
     private void initializeDemand(ServiceWorkload serviceWorkload){
         Service service = serviceWorkload.getService();
         FogNode member = serviceWorkload.getSource();
-        Map<Service, ServiceDemand> serviceDemand = nodeServiceDemand.getOrDefault(member, new TreeMap<>());
         float demandFromMember = serviceWorkload.getWorkload() > 0 ? 1 : 0;
         updateServiceDemand(member, service, demandFromMember);
-        nodeServiceDemand.put(member, serviceDemand);
+        System.out.println("Initialized demand from member " + service + ": " + nodeServiceDemand.get(member).get(service));
     }
 
     private void plan(FogNode node, int pid){
@@ -174,8 +170,11 @@ public class CommunityProtocol
 
     private void updateNodeServiceWorkload(FogNode sender, Map<Service, ServiceWorkload> localServiceWorkload){
         Set<ServiceWorkload> serviceWorkloads = new HashSet<>();
-        for(Service service : localServiceWorkload.keySet())
-            serviceWorkloads.add(localServiceWorkload.get(service));
+        for(Service service : ServiceCatalog.getServiceCatalog())
+            if(localServiceWorkload.containsKey(service))
+                serviceWorkloads.add(localServiceWorkload.get(service));
+            else
+                serviceWorkloads.add(new ServiceWorkload(sender, service, 0f));
         nodeServiceWorkload.put(sender, serviceWorkloads);
     }
 

@@ -1,11 +1,11 @@
 # network size
-SIZE 10
+SIZE 5
 
 # connectivity
 CONNECTIVITY SIZE - 1
 
 # number of distinct functions in the system
-ENTROPY 100
+ENTROPY 10
 
 # the maximum capacity available to each node (GB)
 CAPACITY ENTROPY

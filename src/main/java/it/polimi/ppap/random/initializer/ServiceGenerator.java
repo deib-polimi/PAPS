@@ -24,7 +24,7 @@ public class ServiceGenerator {
         String id = getNextServiceId();
         long memory = getNextServiceMemoryRequirement();
         incServiceCount();
-        return new Service(id, memory, targetRT);
+        return new Service(id, memory, (targetRT * 1.10f), targetRT);
     }
 
     private long getNextServiceMemoryRequirement() {

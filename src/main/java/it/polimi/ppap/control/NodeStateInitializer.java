@@ -150,8 +150,8 @@ public class NodeStateInitializer implements Control {
     }
 
     private ServiceWorkload initServiceWorkloadForService(FogNode fogNode, Service service) {
-        float mean = service.getSLA() * 5f;
-        float std = service.getSLA() * 0.1f;
+        float mean = service.getRT() * 5f;
+        float std = service.getRT() * 0.1f;
         float activeWorkloadProbability = 0.6f;
         ServiceWorkloadGenerator serviceWorkloadGenerator = new ServiceWorkloadGenerator(mean, std, activeWorkloadProbability);
         float initialWorkload = serviceWorkloadGenerator.nextWorkload();
