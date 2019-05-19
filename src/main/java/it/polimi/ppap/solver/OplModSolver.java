@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,8 +25,8 @@ public class OplModSolver {
     String oplModelFilePath = "res/model/ppap.mod";
     String oplResultsFilePath = "res/results/solution.dat";
 
-    public void generateData(Map<FogNode, Map<Service, ServiceDemand>> nodeServiceDemand){
-        OplDataWritter oplDataWritter = new OplDataWritter(nodeServiceDemand, oplDataFilePath, templateFilePath);//TODO
+    public void generateData(Set<Service> admittedServices, Map<FogNode, Map<Service, ServiceDemand>> nodeServiceDemand){
+        OplDataWritter oplDataWritter = new OplDataWritter(admittedServices, nodeServiceDemand, oplDataFilePath, templateFilePath);//TODO
         try {
             oplDataWritter.generateData();
         } catch (IOException e) {

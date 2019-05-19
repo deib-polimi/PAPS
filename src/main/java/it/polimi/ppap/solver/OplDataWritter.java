@@ -10,10 +10,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public class OplDataWritter {
 
@@ -30,12 +27,14 @@ public class OplDataWritter {
     private final String SOURCE_NODE_DELAY_MATRIX = "$SOURCE_NODE_DELAY_MATRIX";
     private final String MAX_DELAY = "$MAX_DELAY";
 
+    final Set<Service> admittedServices;
     final Map<FogNode, Map<Service, ServiceDemand>> nodeServiceDemand;
 
-    public OplDataWritter(Map<FogNode, Map<Service, ServiceDemand>> nodeServiceDemand, String oplDataFilePath, String templateFilePath){
+    public OplDataWritter(Set<Service> admittedServices, Map<FogNode, Map<Service, ServiceDemand>> nodeServiceDemand, String oplDataFilePath, String templateFilePath){
+        this.admittedServices = admittedServices;
+        this.nodeServiceDemand = nodeServiceDemand;
         this.oplDataFilePath = oplDataFilePath;
         this.templateFilePath = templateFilePath;
-        this.nodeServiceDemand = nodeServiceDemand;
     }
 
     public void generateData() throws IOException {
@@ -99,6 +98,19 @@ public class OplDataWritter {
             sb.append("]");
             sb.append("\n");
         }
+        return sb.toString();
+    }
+
+    private String buildServiceDelayConstraintVector(){
+        StringBuilder sb = new StringBuilder("\n");
+        sb.append("[");
+        List<String> interNodeDelayList = new ArrayList<>();
+        for(Service service : admittedServices){
+            int delayLimit = (int) service.getSLA();
+            interNodeDelayList.add(delayLimit + "");
+        }
+        sb.append(String.join(",", interNodeDelayList));
+        sb.append("]");
         return sb.toString();
     }
 

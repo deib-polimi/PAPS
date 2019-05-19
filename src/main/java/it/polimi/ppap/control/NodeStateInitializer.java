@@ -20,6 +20,7 @@ package it.polimi.ppap.control;
 
 import it.polimi.deib.ppap.node.NodeFacade;
 import it.polimi.deib.ppap.node.services.Service;
+import it.polimi.ppap.service.ServiceCatalog;
 import it.polimi.ppap.protocol.NodeStateHolder;
 import it.polimi.ppap.random.initializer.FogNodeCapacityGenerator;
 import it.polimi.ppap.random.initializer.ServiceCatalogGenerator;
@@ -29,14 +30,11 @@ import it.polimi.ppap.service.ServiceWorkload;
 import it.polimi.ppap.topology.FogNode;
 import it.polimi.ppap.topology.NodeFactory;
 import peersim.config.Configuration;
-import peersim.config.FastConfig;
 import peersim.core.Control;
-import peersim.core.Linkable;
 import peersim.core.Network;
 import peersim.vector.SingleValue;
 
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -126,14 +124,12 @@ public class NodeStateInitializer implements Control {
     public boolean execute() {
         //TODO parametrize in configs
         FogNodeCapacityGenerator fogNodeCapacityGenerator = new FogNodeCapacityGenerator(1024* 32, 1024, (short) capacity);
-        ServiceCatalogGenerator serviceCatalogGenerator = createServiceCatalogGenerator();
-        Set<Service> serviceCatalog = serviceCatalogGenerator.generateCatalog();
         for(int i=0; i<Network.size(); ++i) {
             FogNode node = (FogNode) Network.get(i);
             setupNodeCapacity(node, fogNodeCapacityGenerator);
             NodeStateHolder nodeProt = (NodeStateHolder) node.getProtocol(pid);
             nodeProt.setCurrentWorkloadAllocation(new TreeMap<>());
-            Map<Service, ServiceWorkload> localServiceWorkload = initServiceWorkload(node, serviceCatalog);
+            Map<Service, ServiceWorkload> localServiceWorkload = initServiceWorkload(node, ServiceCatalog.getServiceCatalog());
             nodeProt.setLocalServiceWorkload(localServiceWorkload);
             NodeFacade nodeFacade = NodeFactory.createCTNodeFacade(node, 3000, 0.9f);
             nodeProt.setNodeFacade(nodeFacade);
@@ -143,17 +139,6 @@ public class NodeStateInitializer implements Control {
             nodeProt.setServiceRequestGenerator(serviceRequestGenerator);
         }
         return false;
-    }
-
-    private ServiceCatalogGenerator createServiceCatalogGenerator(){
-        //TODO parametrize in configs
-        int catalogSize = entropy;
-        long baseServiceMemory = 128;
-        short randomServiceMemoryMultiplier = 2;
-        float targetRT = 70;
-        ServiceCatalogGenerator serviceCatalogGenerator = new ServiceCatalogGenerator(
-                catalogSize, baseServiceMemory, randomServiceMemoryMultiplier, targetRT);
-        return serviceCatalogGenerator;
     }
 
     private Map<Service, ServiceWorkload> initServiceWorkload(FogNode fogNode, Set<Service> serviceCatalog){

@@ -2,6 +2,7 @@ package it.polimi.ppap.protocol;
 
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.service.AggregateServiceAllocation;
+import it.polimi.ppap.service.ServiceCatalog;
 import it.polimi.ppap.service.ServiceDemand;
 import it.polimi.ppap.service.ServiceWorkload;
 import it.polimi.ppap.transport.CommunityMessage;
@@ -198,7 +199,7 @@ public class CommunityProtocol
     //TODO async system call to CPLEX solver; otherwise complex optimization will make the simulation to stop
     private void solvePlacementAllocation(){
         OplModSolver oplModSolver = new OplModSolver();
-        oplModSolver.generateData(getNodeServiceDemand());
+        oplModSolver.generateData(ServiceCatalog.getServiceCatalog(),getNodeServiceDemand());
         setNodeServiceAllocation(oplModSolver.solve(getNodeServiceDemand()));
     }
 

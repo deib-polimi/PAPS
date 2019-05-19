@@ -1,17 +1,17 @@
 # network size
-SIZE 5
+SIZE 10
 
 # connectivity
 CONNECTIVITY SIZE - 1
 
 # number of distinct functions in the system
-ENTROPY 50
+ENTROPY 100
 
 # the maximum capacity available to each node (GB)
 CAPACITY ENTROPY
 
-# the maximum variation of demand at each cycle
-DELTADEMAND 0
+# the maximum variation of workflow at each cycle
+DELTA_WORKFLOW 0
 
 # the physical time in milliseconds between two small cycles
 DELTATICK 3000
@@ -45,13 +45,11 @@ network.node it.polimi.ppap.topology.FogNode
 protocol.link peersim.core.IdleProtocol
 
 protocol.np it.polimi.ppap.protocol.NodeProtocol
-protocol.np.step CYCLE / 10
 protocol.np.step NODE_CYCLE
 
 protocol.cp it.polimi.ppap.protocol.CommunityProtocol
 protocol.cp.linkable link
 protocol.cp.step COMMUNITY_CYCLE
-protocol.cp.step CYCLE
 protocol.cp.transport tr
 protocol.cp.nodeprotocol np
 
@@ -75,6 +73,9 @@ init.rndlink.undir true
 #init.vals.max SIZE
 #init.vals.min 1
 
+init.ss it.polimi.ppap.control.ServiceCatalogInitializer
+init.ss.entropy ENTROPY
+
 init.ms it.polimi.ppap.control.MemberStateInitializer
 init.ms.protocol cp
 
@@ -92,6 +93,10 @@ init.npsch CDScheduler
 init.npsch.protocol np
 init.npsch.randstart
 
+include.init rndlink ss ms ns cpsch npsch
+
+
+
 
 ################ control ==============================
 
@@ -99,10 +104,10 @@ init.npsch.randstart
 #control.0.protocol cp
 #control.0.step CYCLE
 
-control.df DemandFluctuation
+control.df WorkflowFluctuation
 control.df.protocol cp
 control.df.step NODE_CYCLE
-control.df.delta DELTADEMAND
+control.df.delta DELTA_WORKFLOW
 
 control.df TimeTick
 control.df.protocol cp

@@ -87,7 +87,7 @@ public class MemberStateInitializer implements Control {
     */
     public boolean execute() {
         initializeLeader();
-        //initializeNodeServiceDemand(serviceCatalog);
+        //initializeNodeServiceDemand(serviceCatalogue);
         return false;
     }
 
