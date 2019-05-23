@@ -117,7 +117,6 @@ public class CommunityProtocol
         if(!nodeServiceDemand.containsKey(member))
             nodeServiceDemand.put(member, new HashMap<>());
         try {
-            //float demandFromMember = (float) workloadDemandFunction.value(workloadFromMember);
             float demandFromMember = (float) workloadDemandFunction.value(workloadFromMember);
             if(demandFromMember > 0)
                 updateServiceDemand(member, service, demandFromMember);
@@ -148,7 +147,7 @@ public class CommunityProtocol
         FogNode member = serviceWorkload.getSource();
         float demandFromMember = serviceWorkload.getWorkload() > 0 ? 1 : 0;
         updateServiceDemand(member, service, demandFromMember);
-        System.out.println("Initialized demand from member " + service + ": " + nodeServiceDemand.get(member).get(service));
+        System.out.println("Initialized demand " + nodeServiceDemand.get(member).get(service));
     }
 
     private void plan(FogNode node, int pid){
