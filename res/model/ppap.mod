@@ -1,14 +1,3 @@
-// --------------------------------------------------------------------------
-// Licensed Materials - Property of IBM
-//
-// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55
-// Copyright IBM Corporation 1998, 2013. All Rights Reserved.
-//
-// Note to U.S. Government Users Restricted Rights:
-// Use, duplication or disclosure restricted by GSA ADP Schedule
-// Contract with IBM Corp.
-// --------------------------------------------------------------------------
-
 int Fixed = ...;
 {string} Nodes = ...;
 {string} Functions = ...;
@@ -17,7 +6,7 @@ range DemandSources = 0..NbDemandSources-1;
 float DemandLevel[DemandSources][Functions] = ...;
 int Capacity[Nodes] = ...; //same as 'memory'
 int SupplyCost[DemandSources][Nodes] = ...; //same as 'delay'
-int CostLimit[Functions] = ...;
+int DelayLimit[Functions] = ...;
 
 //Decision Variables
 //dvar boolean Open[Nodes]; //same as 'place'
@@ -32,26 +21,24 @@ minimize
     
 //Constraints
 subject to{
+  forall( w in Nodes, s in DemandSources, f in Functions)
+    ctMaxDelay:
+      SupplyCost[s][w] * Supply[s][w][f] <= DelayLimit[f] * Supply[s][w][f];
   forall( s in DemandSources, f in Functions )
 	ctEachStoreHasOneWarehouse:
       sum( w in  Nodes ) 
     	Supply[s][w][f] == 1;
   forall( w in Nodes, s in DemandSources, f in Functions )
-  	Supply[s][w][f] <= 1;
-    //ctUseOpenNodes:
-      //Supply[s][w][f] <= Open[w];
+    ctSupplyLEDemand:
+  	  Supply[s][w][f] <= 1;
   forall( w in Nodes, s in DemandSources, f in Functions )
-    Supply[s][w][f] >= 0;
+    ctSupplyGEZero:
+      Supply[s][w][f] >= 0;
   forall( w in Nodes )
 	ctMaxUseOfWarehouse:         
       sum( s in DemandSources, f in Functions ) 
         DemandLevel[s][f] * Supply[s][w][f] <= Capacity[w];
-  forall( w in Nodes, s in DemandSources, f in Functions)
-  	//ctMaxCostOfWarehouse:
-      	//sum( s in DemandSources )
-  	SupplyCost[s][w] * Supply[s][w][f] <= CostLimit[f];
 }
-
 
 //{int} DemandSourcesof[w in Nodes] = { s | s in DemandSources : Supply[s][w][f] == 1};
 	

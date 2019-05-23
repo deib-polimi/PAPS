@@ -35,19 +35,24 @@ public class OplModSolver {
     }
 
     public Map<FogNode, Map<Service, AggregateServiceAllocation>>
-    solve(Map<FogNode, Map<Service, ServiceDemand>> nodeServiceDemand){
+    solve(Map<FogNode, Map<Service, ServiceDemand>> nodeServiceDemand, boolean relaxations){
         String absoluteDataFilePath = oplDataFilePath;
         String absoluteModelFilePath = oplModelFilePath;
         String absoluteResultsFilePath = oplResultsFilePath;
-        OplRun.oplRun(new String[]{"-v", "-de", absoluteResultsFilePath, absoluteModelFilePath, absoluteDataFilePath});
-        String solution = null;
+        if(!relaxations)
+            OplRun.oplRun(new String[]{"-v", "-de", absoluteResultsFilePath, absoluteModelFilePath, absoluteDataFilePath});
+        else
+            OplRun.oplRun(new String[]{"-relax", "-v", "-de", absoluteResultsFilePath, absoluteModelFilePath, absoluteDataFilePath});
+        String output;
+        Map<FogNode, Map<Service, AggregateServiceAllocation>> solution;
         try {
-            solution = readResultsFromFile(absoluteResultsFilePath);
+            output = readResultsFromFile(absoluteResultsFilePath);
+            solution = parseSolution(output, nodeServiceDemand);
         } catch (IOException e) {
             e.printStackTrace();
             throw new OplSolutionNotFoundException();
         }
-        return parseSolution(solution, nodeServiceDemand);
+        return solution;
     }
 
     public class OplSolutionNotFoundException extends RuntimeException{}

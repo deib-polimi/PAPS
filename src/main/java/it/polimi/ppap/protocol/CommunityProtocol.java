@@ -87,7 +87,7 @@ public class CommunityProtocol
         for(FogNode member : nodeServiceWorkload.keySet()){
             for(ServiceWorkload serviceWorkload : nodeServiceWorkload.get(member)){
                 Service service = serviceWorkload.getService();
-                if(serviceWorkload.getWorkload() > 0 && workloadDemandFunctionMap.containsKey(service)) //TODO isActive for god sake?
+                if(serviceWorkload.isActive() && workloadDemandFunctionMap.containsKey(service))
                     updateDemandFromWorkload(serviceWorkload, workloadDemandFunctionMap.get(service));
                 else
                     initializeDemand(serviceWorkload);
@@ -198,7 +198,8 @@ public class CommunityProtocol
     private void solvePlacementAllocation(){
         OplModSolver oplModSolver = new OplModSolver();
         oplModSolver.generateData(ServiceCatalog.getServiceCatalog(), getNodeServiceDemand(), getOptimizationBeta());
-        setNodeServiceAllocation(oplModSolver.solve(getNodeServiceDemand()));
+        //setNodeServiceAllocation(oplModSolver.solve(getNodeServiceDemand(), false));
+        setNodeServiceAllocation(oplModSolver.solve(getNodeServiceDemand(), true));
     }
 
     private void sendPlanToMembers(FogNode node, int pid){

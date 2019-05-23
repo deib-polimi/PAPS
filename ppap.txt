@@ -9,22 +9,22 @@ SIZE 5
 CONNECTIVITY SIZE - 1
 
 # number of distinct functions in the system
-ENTROPY 10
+ENTROPY 100
 
 # the maximum capacity available to each node (GB)
-CAPACITY ENTROPY / 1
+CAPACITY 17
 
 # the maximum variation of workflow at each cycle
 DELTA_WORKFLOW 0
 
 # control theoretic scaling (0 or 1)
-CONTROL_THEORETIC 1
+CONTROL_THEORETIC 0
 
 # the CT alpha parameter [0, 1]; defines the aggressiveness of the controller
 ALPHA = 0.9
 
 # the optimization beta parameter [0, 1]; defines the max network latency as a fraction of (RT_SLA - ET_MAX)
-BETA = 0.5
+BETA = 0.75
 
 # the physical time in milliseconds between two short cycles
 DELTATICK 3000

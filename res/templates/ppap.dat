@@ -5,4 +5,4 @@ Functions = {$FUNCTION_NAME_LIST};
 NbDemandSources = $DEMAND_SOURCE_N;
 DemandLevel = [$DEMAND_LEVEL_MATRIX];
 SupplyCost = [$SOURCE_NODE_DELAY_MATRIX];
-CostLimit = $MAX_DELAY;
+DelayLimit = $MAX_DELAY;

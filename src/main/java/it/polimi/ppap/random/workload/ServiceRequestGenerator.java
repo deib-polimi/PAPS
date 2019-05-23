@@ -134,12 +134,12 @@ public class ServiceRequestGenerator {
         // peak inter-arrival rate
         System.out.println("### " + service + " entered the PEAK SCENARIO ###");
         NormalDistribution normalDistribution = Utils.getNormalDistribution(service.getET() * 0.8, service.getET() * 0.8 *0.1);
-        ExponentialDistribution exponentialDistribution = new ExponentialDistribution(workload);
+        ExponentialDistribution exponentialDistribution = new ExponentialDistribution(workload  * 0.3);
         for (int i = 0; i < iterations && activeServices.containsKey(service); i++) {
             nodeFacade.execute(new ServiceRequest(service, (long) normalDistribution.random(), delay));
 
             try {
-                Thread.sleep((long) (exponentialDistribution.sample() * 0.3));
+                Thread.sleep((long) (exponentialDistribution.sample()));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -150,11 +150,11 @@ public class ServiceRequestGenerator {
         // decreasing inter-arrival rate
         System.out.println("### " + service + " entered the DECREASING SCENARIO ###");
         NormalDistribution normalDistribution = Utils.getNormalDistribution(service.getET() * 0.8, service.getET() * 0.8 *0.1);
-        ExponentialDistribution exponentialDistribution = new ExponentialDistribution(workload);
+        ExponentialDistribution exponentialDistribution = new ExponentialDistribution(workload  * 1.2);
         for (int i = 0; i < iterations && activeServices.containsKey(service); i++) {
             nodeFacade.execute(new ServiceRequest(service, (long) normalDistribution.random(), delay));
             try {
-                Thread.sleep((long) (exponentialDistribution.sample() * 0.8));
+                Thread.sleep((long) (exponentialDistribution.sample()));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
