@@ -10,7 +10,7 @@ public class FogNode extends GeneralNode implements Node, Comparable{
 
     private long memoryCapacity;
 
-    private Map<Long, Integer> linksDelay = new HashMap<>();
+    private Map<Long, Integer> linksDelay;
 
     public long getMemoryCapacity() {
         return memoryCapacity;
@@ -22,6 +22,14 @@ public class FogNode extends GeneralNode implements Node, Comparable{
 
     public FogNode(String prefix){
         super(prefix);
+    }
+
+    @Override
+    public Object clone() {
+        FogNode result = null;
+        result=(FogNode)super.clone();
+        result.linksDelay = new HashMap<>();
+        return result;
     }
 
     @Override

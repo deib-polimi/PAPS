@@ -20,11 +20,11 @@ public class ServiceGenerator {
         this.serviceMemoryMultiplier = serviceMemoryMultiplier;
     }
 
-    public  Service nextService(float targetRT){
+    public  Service nextService(float rtSLA, float etMax){
         String id = getNextServiceId();
         long memory = getNextServiceMemoryRequirement();
         incServiceCount();
-        return new Service(id, memory, (targetRT * 1.10f), targetRT);
+        return new Service(id, memory, rtSLA, etMax);
     }
 
     private long getNextServiceMemoryRequirement() {

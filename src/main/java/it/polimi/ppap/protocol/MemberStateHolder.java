@@ -24,10 +24,11 @@ public abstract class MemberStateHolder implements Protocol {
         this.leader = leader;
     }
 
-    public void initializeLeader(){
+    public void initializeLeader(float beta){
         nodeServiceWorkload = new TreeMap<>();
         workloadAllocationHistory = new TreeMap<>();
         nodeServiceDemand = new TreeMap<>();
+        optimizationBeta = beta;
         setLeader(true);
     }
 
@@ -69,7 +70,12 @@ public abstract class MemberStateHolder implements Protocol {
 
     //MAPE: Planning
 
-    //for a given target host, defines what are the service source-demand pairs
+    float optimizationBeta;
+
+    public float getOptimizationBeta() {
+        return optimizationBeta;
+    }
+
     Map<FogNode, Map<Service, AggregateServiceAllocation>> nodeServiceAllocation = new TreeMap<>();
 
     public Map<FogNode, Map<Service, AggregateServiceAllocation>> getNodeServiceAllocation() {

@@ -198,7 +198,7 @@ public class CommunityProtocol
     //TODO async system call to CPLEX solver; otherwise complex optimization will make the simulation to stop
     private void solvePlacementAllocation(){
         OplModSolver oplModSolver = new OplModSolver();
-        oplModSolver.generateData(ServiceCatalog.getServiceCatalog(),getNodeServiceDemand());
+        oplModSolver.generateData(ServiceCatalog.getServiceCatalog(), getNodeServiceDemand(), getOptimizationBeta());
         setNodeServiceAllocation(oplModSolver.solve(getNodeServiceDemand()));
     }
 

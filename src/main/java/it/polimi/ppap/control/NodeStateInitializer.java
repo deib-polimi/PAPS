@@ -39,11 +39,9 @@ import java.util.Set;
 import java.util.TreeMap;
 
 /**
- * Initialize an aggregation protocol using a peak distribution; only one peak
- * is allowed. Note that any protocol implementing
- * {@link SingleValue} can be initialized by this component.
+ * TODO
  *
- * @author Alberto Montresor
+ * @author Danilo Filgueira
  * @version $Revision: 1.12 $
  */
 public class NodeStateInitializer implements Control {
@@ -52,7 +50,8 @@ public class NodeStateInitializer implements Control {
     // Constants
     // ------------------------------------------------------------------------
 
-    /** TODO
+    /**
+     * The
      *
      * @config
      */
@@ -81,11 +80,20 @@ public class NodeStateInitializer implements Control {
     private static final String PAR_ENTROPY = "entropy";
 
     /**
-     * The number of distinct functions in the system.
+     * If the control-theoretic scaling is activated.
      *
      * @config
      */
     private static final String PAR_CT = "control";
+
+    /**
+     * Defines the aggressiveness of the control theoretic allocation.
+     *
+     *
+     * @config
+     */
+    private static final String PAR_ALPHA = "alpha";
+
 
     // ------------------------------------------------------------------------
     // Fields
@@ -100,14 +108,17 @@ public class NodeStateInitializer implements Control {
      */
     private final int delta;
 
-    /** TODO; obtained from config property {@link #PAR_CAPACITY}. */
+    /** The memory capacity of the node in GB; obtained from config property {@link #PAR_CAPACITY}. */
     private final int capacity;
 
-    /** TODO; obtained from config property {@link #PAR_ENTROPY}. */
+    /** The number of functions admitted in the system; obtained from config property {@link #PAR_ENTROPY}. */
     private final int entropy;
 
-    /** TODO; obtained from config property {@link #PAR_CT}. */
+    /** The activation of the control-theoretic scaling; obtained from config property {@link #PAR_CT}. */
     private final boolean CT;
+
+    /** The alpha parameter defining the aggressiveness of the control-theoretic scaling; obtained from config property {@link #PAR_ALPHA}. */
+    private final float alpha;
 
 
     // ------------------------------------------------------------------------
@@ -123,6 +134,7 @@ public class NodeStateInitializer implements Control {
         capacity = Configuration.getInt(prefix + "." + PAR_CAPACITY);
         entropy = Configuration.getInt(prefix + "." + PAR_ENTROPY);
         CT = Configuration.getInt(prefix + "." + PAR_CT) == 1;
+        alpha = (float) Configuration.getDouble(prefix + "." + PAR_ALPHA);
     }
 
     // ------------------------------------------------------------------------
@@ -142,7 +154,7 @@ public class NodeStateInitializer implements Control {
             nodeProt.setCurrentWorkloadAllocation(new TreeMap<>());
             Map<Service, ServiceWorkload> localServiceWorkload = initServiceWorkload(node, ServiceCatalog.getServiceCatalog());
             nodeProt.setLocalServiceWorkload(localServiceWorkload);
-            NodeFacade nodeFacade = NodeFactory.createCTNodeFacade(node, 3000, 0.9f, CT);
+            NodeFacade nodeFacade = NodeFactory.createCTNodeFacade(node, delta, alpha, CT);
             nodeProt.setNodeFacade(nodeFacade);
             nodeFacade.setTickListener(nodeProt);
             nodeFacade.start();

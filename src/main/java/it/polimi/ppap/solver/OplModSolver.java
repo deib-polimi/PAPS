@@ -25,8 +25,8 @@ public class OplModSolver {
     String oplModelFilePath = "res/model/ppap.mod";
     String oplResultsFilePath = "res/results/solution.dat";
 
-    public void generateData(Set<Service> admittedServices, Map<FogNode, Map<Service, ServiceDemand>> nodeServiceDemand){
-        OplDataWritter oplDataWritter = new OplDataWritter(admittedServices, nodeServiceDemand, oplDataFilePath, templateFilePath);//TODO
+    public void generateData(Set<Service> admittedServices, Map<FogNode, Map<Service, ServiceDemand>> nodeServiceDemand, float optimizationBeta){
+        OplDataWritter oplDataWritter = new OplDataWritter(admittedServices, nodeServiceDemand, optimizationBeta, oplDataFilePath, templateFilePath);//TODO
         try {
             oplDataWritter.generateData();
         } catch (IOException e) {

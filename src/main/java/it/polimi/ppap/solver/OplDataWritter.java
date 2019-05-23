@@ -30,11 +30,12 @@ public class OplDataWritter {
     final Set<Service> admittedServices;
     final Map<FogNode, Map<Service, ServiceDemand>> nodeServiceDemand;
 
-    public OplDataWritter(Set<Service> admittedServices, Map<FogNode, Map<Service, ServiceDemand>> nodeServiceDemand, String oplDataFilePath, String templateFilePath){
+    public OplDataWritter(Set<Service> admittedServices, Map<FogNode, Map<Service, ServiceDemand>> nodeServiceDemand, float optimizationBeta, String oplDataFilePath, String templateFilePath){
         this.admittedServices = admittedServices;
         this.nodeServiceDemand = nodeServiceDemand;
         this.oplDataFilePath = oplDataFilePath;
         this.templateFilePath = templateFilePath;
+        this.optimizationBeta = optimizationBeta;
     }
 
     public void generateData() throws IOException {
@@ -48,6 +49,7 @@ public class OplDataWritter {
     final int baseCapacity = 1024;
     final int colocatedSourceNodeDelay = 2;
     final int maxSourceNodeDelay = 30;
+    final float optimizationBeta;
 
     private void writeFile() throws IOException {
         String template = readTemplateFile();
@@ -106,7 +108,7 @@ public class OplDataWritter {
         sb.append("[");
         List<String> delayConstraintList = new ArrayList<>();
         for(Service service : admittedServices){
-            int delayConstraint = (int) (service.getRT() - service.getET());//TODO introduce coefficient
+            int delayConstraint = (int) (optimizationBeta * (service.getRT() - service.getET()));
             delayConstraintList.add(delayConstraint + "");
         }
         sb.append(String.join(",", delayConstraintList));

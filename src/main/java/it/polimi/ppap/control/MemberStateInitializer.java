@@ -24,10 +24,7 @@ import it.polimi.ppap.protocol.MemberStateHolder;
 import it.polimi.ppap.topology.FogNode;
 import peersim.config.Configuration;
 import peersim.config.FastConfig;
-import peersim.core.Control;
-import peersim.core.Linkable;
-import peersim.core.Network;
-import peersim.core.Node;
+import peersim.core.*;
 import peersim.vector.SingleValue;
 
 import java.util.Random;
@@ -43,7 +40,7 @@ import java.util.Set;
  */
 public class MemberStateInitializer implements Control {
 
-    Random rand = new Random();
+    Random rand = CommonState.r;
 
     // ------------------------------------------------------------------------
     // Constants
@@ -57,6 +54,13 @@ public class MemberStateInitializer implements Control {
      */
     private static final String PAR_PROT = "protocol";
 
+    /**
+     * The (RT_SLA - ET_MAX) fraction used as constraint for the inter-node delay in the optimization formulation.
+     *
+     * @config
+     */
+    private static final String PAR_BETA = "beta";
+
 
     // ------------------------------------------------------------------------
     // Fields
@@ -64,6 +68,9 @@ public class MemberStateInitializer implements Control {
 
     /** Protocol identifier; obtained from config property {@link #PAR_PROT}. */
     private final int pid;
+
+    /** Optimization parameter beta; obtained from config property {@link #PAR_BETA}. */
+    private final float beta;
 
 
     // ------------------------------------------------------------------------
@@ -76,6 +83,7 @@ public class MemberStateInitializer implements Control {
     public MemberStateInitializer(String prefix) {
 
         pid = Configuration.getPid(prefix + "." + PAR_PROT);
+        beta = (float) Configuration.getDouble(prefix + "." + PAR_BETA);
     }
 
     // ------------------------------------------------------------------------
@@ -98,7 +106,7 @@ public class MemberStateInitializer implements Control {
     private void initializeLeader(){
         Node leader = getLeader();
         MemberStateHolder memberProtocol = (MemberStateHolder) leader.getProtocol(pid);
-        memberProtocol.initializeLeader();
+        memberProtocol.initializeLeader(beta);
         for(int i=0; i<Network.size(); ++i) {
             FogNode fogNode = (FogNode) Network.get(i);
             initInterNodeDelay(fogNode);
@@ -109,7 +117,7 @@ public class MemberStateInitializer implements Control {
     private void initInterNodeDelay(FogNode fogNode){
         Linkable linkable =
                 (Linkable) fogNode.getProtocol(FastConfig.getLinkable(pid));
-        fogNode.addLinkDelay(fogNode.getID(), getLinearRandomNumber(10));//ŦODO
+        fogNode.addLinkDelay(fogNode.getID(), getLinearRandomNumber(10));//TODO
         for(int i = 0; i < linkable.degree(); i++) {
             FogNode member = (FogNode) linkable.getNeighbor(i);
             fogNode.addLinkDelay(member.getID(), getLinearRandomNumber(30));//TODO

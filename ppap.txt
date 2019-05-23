@@ -20,12 +20,19 @@ DELTA_WORKFLOW 0
 # control theoretic scaling (0 or 1)
 CONTROL_THEORETIC 1
 
+# the CT alpha parameter [0, 1]; defines the aggressiveness of the controller
+ALPHA = 0.9
+
+# the optimization beta parameter [0, 1]; defines the max network latency as a fraction of (RT_SLA - ET_MAX)
+BETA = 0.5
+
 # the physical time in milliseconds between two short cycles
 DELTATICK 3000
 
-
 NODE_CYCLE CYCLE / 5
 COMMUNITY_CYCLE CYCLE
+
+################### networking =========================
 
 # parameters of message transfer
 # delay values here are relative to cycle length, in percentage,
@@ -41,7 +48,7 @@ simulation.endtime CYCLE*CYCLES
 simulation.logtime CYCLE
 
 
-################### topol ===========================
+################### topology ============================
 
 network.node it.polimi.ppap.topology.FogNode
 
@@ -83,6 +90,7 @@ init.ss.entropy ENTROPY
 
 init.ms it.polimi.ppap.control.MemberStateInitializer
 init.ms.protocol cp
+init.ms.beta BETA
 
 init.ns it.polimi.ppap.control.NodeStateInitializer
 init.ns.protocol np
@@ -90,6 +98,7 @@ init.ns.delta DELTATICK
 init.ns.capacity CAPACITY
 init.ns.entropy ENTROPY
 init.ns.control CONTROL_THEORETIC
+init.ns.alpha ALPHA
 
 init.cpsch CDScheduler
 init.cpsch.protocol cp

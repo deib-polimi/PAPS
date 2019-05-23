@@ -86,9 +86,10 @@ public class ServiceCatalogInitializer implements Control {
         int catalogSize = entropy;
         long baseServiceMemory = 128;
         short randomServiceMemoryMultiplier = 2;
-        float targetRT = 70;
+        float rtSLA = 100;
+        float etMax = 70;
         ServiceCatalogGenerator serviceCatalogGenerator = new ServiceCatalogGenerator(
-                catalogSize, baseServiceMemory, randomServiceMemoryMultiplier, targetRT);
+                catalogSize, baseServiceMemory, randomServiceMemoryMultiplier, rtSLA, etMax);
         return serviceCatalogGenerator;
     }
 
