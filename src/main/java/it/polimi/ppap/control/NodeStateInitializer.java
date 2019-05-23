@@ -80,6 +80,13 @@ public class NodeStateInitializer implements Control {
      */
     private static final String PAR_ENTROPY = "entropy";
 
+    /**
+     * The number of distinct functions in the system.
+     *
+     * @config
+     */
+    private static final String PAR_CT = "control";
+
     // ------------------------------------------------------------------------
     // Fields
     // ------------------------------------------------------------------------
@@ -99,6 +106,9 @@ public class NodeStateInitializer implements Control {
     /** TODO; obtained from config property {@link #PAR_ENTROPY}. */
     private final int entropy;
 
+    /** TODO; obtained from config property {@link #PAR_CT}. */
+    private final boolean CT;
+
 
     // ------------------------------------------------------------------------
     // Constructor
@@ -112,6 +122,7 @@ public class NodeStateInitializer implements Control {
         delta = Configuration.getInt(prefix + "." + PAR_DELTA);
         capacity = Configuration.getInt(prefix + "." + PAR_CAPACITY);
         entropy = Configuration.getInt(prefix + "." + PAR_ENTROPY);
+        CT = Configuration.getInt(prefix + "." + PAR_CT) == 1;
     }
 
     // ------------------------------------------------------------------------
@@ -131,7 +142,7 @@ public class NodeStateInitializer implements Control {
             nodeProt.setCurrentWorkloadAllocation(new TreeMap<>());
             Map<Service, ServiceWorkload> localServiceWorkload = initServiceWorkload(node, ServiceCatalog.getServiceCatalog());
             nodeProt.setLocalServiceWorkload(localServiceWorkload);
-            NodeFacade nodeFacade = NodeFactory.createCTNodeFacade(node, 3000, 0.9f);
+            NodeFacade nodeFacade = NodeFactory.createCTNodeFacade(node, 3000, 0.9f, CT);
             nodeProt.setNodeFacade(nodeFacade);
             nodeFacade.setTickListener(nodeProt);
             nodeFacade.start();

@@ -1,3 +1,7 @@
+# parameters of periodic execution
+CYCLES 100
+CYCLE SIZE*10000
+
 # network size
 SIZE 5
 
@@ -8,17 +12,18 @@ CONNECTIVITY SIZE - 1
 ENTROPY 10
 
 # the maximum capacity available to each node (GB)
-CAPACITY ENTROPY
+CAPACITY ENTROPY / 1
 
 # the maximum variation of workflow at each cycle
 DELTA_WORKFLOW 0
 
-# the physical time in milliseconds between two small cycles
+# control theoretic scaling (0 or 1)
+CONTROL_THEORETIC 1
+
+# the physical time in milliseconds between two short cycles
 DELTATICK 3000
 
-# parameters of periodic execution
-CYCLES 100
-CYCLE SIZE*10000
+
 NODE_CYCLE CYCLE / 5
 COMMUNITY_CYCLE CYCLE
 
@@ -84,6 +89,7 @@ init.ns.protocol np
 init.ns.delta DELTATICK
 init.ns.capacity CAPACITY
 init.ns.entropy ENTROPY
+init.ns.control CONTROL_THEORETIC
 
 init.cpsch CDScheduler
 init.cpsch.protocol cp
@@ -93,9 +99,8 @@ init.npsch CDScheduler
 init.npsch.protocol np
 init.npsch.randstart
 
+# active controls
 include.init rndlink ss ms ns cpsch npsch
-
-
 
 
 ################ control ==============================
