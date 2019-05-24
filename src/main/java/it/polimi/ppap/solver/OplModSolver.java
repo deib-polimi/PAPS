@@ -6,6 +6,7 @@ import it.polimi.ppap.service.AggregateServiceAllocation;
 import it.polimi.ppap.service.ServiceDemand;
 import it.polimi.ppap.topology.FogNode;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -36,18 +37,19 @@ public class OplModSolver {
 
     public Map<FogNode, Map<Service, AggregateServiceAllocation>>
     solve(Map<FogNode, Map<Service, ServiceDemand>> nodeServiceDemand, boolean relaxations){
-        String absoluteDataFilePath = oplDataFilePath;
-        String absoluteModelFilePath = oplModelFilePath;
-        String absoluteResultsFilePath = oplResultsFilePath;
-        if(!relaxations)
-            OplRun.oplRun(new String[]{"-v", "-de", absoluteResultsFilePath, absoluteModelFilePath, absoluteDataFilePath});
-        else
-            OplRun.oplRun(new String[]{"-relax", "-v", "-de", absoluteResultsFilePath, absoluteModelFilePath, absoluteDataFilePath});
-        String output;
-        Map<FogNode, Map<Service, AggregateServiceAllocation>> solution;
         try {
-            output = readResultsFromFile(absoluteResultsFilePath);
-            solution = parseSolution(output, nodeServiceDemand);
+            new File(oplResultsFilePath).delete();
+            if(!relaxations)
+                OplRun.oplRun(new String[]{"-v", "-de", oplResultsFilePath, oplModelFilePath, oplDataFilePath});
+            else
+                OplRun.oplRun(new String[]{"-relax", "-v", "-de", oplResultsFilePath, oplModelFilePath, oplDataFilePath});
+            String output;
+            Map<FogNode, Map<Service, AggregateServiceAllocation>> solution;
+            if(new File(oplResultsFilePath).exists()) {
+                output = readResultsFromFile(oplResultsFilePath);
+                return parseSolution(output, nodeServiceDemand);
+            }else
+                throw new OplSolutionNotFoundException();
         } catch (SolutionMalFormedException mfe){
             mfe.printStackTrace();
             throw new OplSolutionNotFoundException();
@@ -55,7 +57,6 @@ public class OplModSolver {
             ioe.printStackTrace();
             throw new OplSolutionNotFoundException();
         }
-        return solution;
     }
 
     public class OplSolutionNotFoundException extends RuntimeException{}

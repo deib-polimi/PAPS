@@ -1,5 +1,6 @@
 package it.polimi.ppap.protocol;
 
+import it.polimi.deib.ppap.node.NodeFacade;
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.service.*;
 import it.polimi.ppap.transport.CommunityMessage;
@@ -25,16 +26,35 @@ public class CommunityProtocol
         extends MemberStateHolder
         implements CDProtocol, EDProtocol {
 
+    /**
+     *
+     */
     private static final String PAR_NODE_PROTOCOL = "nodeprotocol";
+
+    /**
+     * The control period.
+     *
+     * @config
+     */
+    private static final String PAR_DELTA_TICK = "deltatick";
 
     //--------------------------------------------------------------------------
     // Initialization
     //--------------------------------------------------------------------------
 
+    /**
+     * TODO
+     */
     private final int nodePid;
+
+    /**
+     * TODO
+     */
+    private final int deltaTick;
 
     public CommunityProtocol(String prefix){
         nodePid = Configuration.getPid(prefix + "." + PAR_NODE_PROTOCOL);
+        deltaTick = Configuration.getInt(prefix + "." + PAR_DELTA_TICK);
     }
 
     //--------------------------------------------------------------------------
@@ -83,14 +103,19 @@ public class CommunityProtocol
     private void analyze(FogNode node, int pid){
         //System.out.println("Performing ANALYSIS activity");
         nodeServiceDemand.clear();
-        Map<Service, UnivariateFunction> workloadDemandFunctionMap = buildServiceUnivariateFunctionMap();
+        //Map<Service, UnivariateFunction> workloadDemandFunctionMap = buildServiceUnivariateFunctionMap();
         for(FogNode member : nodeServiceWorkload.keySet()){
             for(ServiceWorkload serviceWorkload : nodeServiceWorkload.get(member)){
                 Service service = serviceWorkload.getService();
-                if(serviceWorkload.isActive() && workloadDemandFunctionMap.containsKey(service))
+                if(serviceWorkload.isActive()) {
+                    float demandFromMember = NodeFacade.getStaticAllocation(serviceWorkload.getWorkload(), service.getRT(), deltaTick);
+                    updateServiceDemand(member, service, demandFromMember);
+                }else
+                    initializeDemand(serviceWorkload);
+                /*if(serviceWorkload.isActive() && workloadDemandFunctionMap.containsKey(service))
                     updateDemandFromWorkload(serviceWorkload, workloadDemandFunctionMap.get(service));
                 else
-                    initializeDemand(serviceWorkload);
+                    initializeDemand(serviceWorkload);*/
             }
         }
         plan(node, pid);
@@ -99,15 +124,21 @@ public class CommunityProtocol
     private Map<Service, UnivariateFunction> buildServiceUnivariateFunctionMap() {
         Map<Service, UnivariateFunction> workloadDemandFunctionMap = new HashMap<>();
         for(Service service : ServiceCatalog.getServiceCatalog()){
-            if(workloadAllocationHistory.containsKey(service) && workloadAllocationHistory.get(service).size() > 2) {
-                double x[] = workloadAllocationHistory.get(service).keySet().stream().mapToDouble(e -> (double) e).toArray();
-                double y[] = workloadAllocationHistory.get(service).values().stream().mapToDouble(e -> (double) e).toArray();
-                UnivariateInterpolator interpolator = new SplineInterpolator();
-                UnivariateFunction workloadDemandFunction = interpolator.interpolate(x, y);
-                workloadDemandFunctionMap.put(service, workloadDemandFunction);
-            }
+            Optional<UnivariateFunction> workloadDemandFunction = createUnivariateFunction(workloadDemandFunctionMap, service);
+            if(workloadDemandFunction.isPresent())
+                workloadDemandFunctionMap.put(service, workloadDemandFunction.get());
         }
         return workloadDemandFunctionMap;
+    }
+
+    private Optional<UnivariateFunction> createUnivariateFunction(Map<Service, UnivariateFunction> workloadDemandFunctionMap, Service service) {
+        if(workloadAllocationHistory.containsKey(service) && workloadAllocationHistory.get(service).size() > 2) {
+            double x[] = workloadAllocationHistory.get(service).keySet().stream().mapToDouble(e -> (double) e).toArray();
+            double y[] = workloadAllocationHistory.get(service).values().stream().mapToDouble(e -> (double) e).toArray();
+            UnivariateInterpolator interpolator = new SplineInterpolator();
+            return Optional.of(interpolator.interpolate(x, y));
+        } else
+            return Optional.empty();
     }
 
     private void updateDemandFromWorkload(ServiceWorkload serviceWorkload, UnivariateFunction workloadDemandFunction) {

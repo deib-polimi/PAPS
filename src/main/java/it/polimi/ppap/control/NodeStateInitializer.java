@@ -49,7 +49,7 @@ public class NodeStateInitializer implements Control {
     // ------------------------------------------------------------------------
 
     /**
-     * The
+     * The control period.
      *
      * @config
      */

@@ -1,5 +1,5 @@
 # network size
-SIZE 20
+SIZE 50
 
 # number of distinct functions in the system
 ENTROPY 100
@@ -20,7 +20,7 @@ CONTROL_THEORETIC 1
 ALPHA = 0.9
 
 # the optimization beta parameter [0, 1]; defines the max network latency as a fraction of (RT_SLA - ET_MAX)
-BETA = 0.75
+BETA = 0.5
 
 # the physical time in milliseconds between two short cycles
 DELTATICK 3000
@@ -29,7 +29,7 @@ DELTATICK 3000
 CYCLES 100
 CYCLE SIZE*10000
 
-NODE_CYCLE CYCLE / 10
+NODE_CYCLE CYCLE / 5
 COMMUNITY_CYCLE CYCLE
 
 ################### networking =========================
@@ -64,6 +64,7 @@ protocol.cp.linkable link
 protocol.cp.step COMMUNITY_CYCLE
 protocol.cp.transport tr
 protocol.cp.nodeprotocol np
+protocol.cp.deltatick DELTATICK
 
 protocol.urt UniformRandomTransport
 protocol.urt.mindelay (CYCLE*MINDELAY)/100
