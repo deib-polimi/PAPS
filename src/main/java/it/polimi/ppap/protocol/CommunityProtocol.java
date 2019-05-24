@@ -198,8 +198,11 @@ public class CommunityProtocol
     private void solvePlacementAllocation(){
         OplModSolver oplModSolver = new OplModSolver();
         oplModSolver.generateData(ServiceCatalog.getServiceCatalog(), getNodeServiceDemand(), getOptimizationBeta());
-        //setNodeServiceAllocation(oplModSolver.solve(getNodeServiceDemand(), false));
-        setNodeServiceAllocation(oplModSolver.solve(getNodeServiceDemand(), true));
+        try {
+            setNodeServiceAllocation(oplModSolver.solve(getNodeServiceDemand(), false));
+        } catch (OplModSolver.OplSolutionNotFoundException ex){
+            setNodeServiceAllocation(oplModSolver.solve(getNodeServiceDemand(), true));
+        }
     }
 
     private void sendPlanToMembers(FogNode node, int pid){

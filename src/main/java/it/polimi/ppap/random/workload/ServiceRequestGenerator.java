@@ -94,7 +94,7 @@ public class ServiceRequestGenerator {
                 long workload = (long) serviceWorkload.getWorkload();
                 int delay = serviceWorkload.getInterNodeDelay(fogNode);
                 long iterations = random.nextInt(250);
-                System.out.println("Next scenario: " + iterations);
+                //System.out.println("Next scenario: " + iterations);
                 switch (nextScenario){
                     case 0:
                         stableScenario(serviceWorkload.getService(), workload, delay, iterations);
@@ -115,7 +115,7 @@ public class ServiceRequestGenerator {
 
     private void stableScenario(Service service, long workload, int delay, long iterations) {
         // stable system
-        System.out.println("### " + service + " entered the STABLE SCENARIO ###");
+        //System.out.println("### " + service + " entered the STABLE SCENARIO ###");
         NormalDistribution normalDistribution = Utils.getNormalDistribution(service.getET() * 0.8, service.getET() * 0.8 *0.1);
         ExponentialDistribution exponentialDistribution = new ExponentialDistribution(workload);
         for (int i = 0; i < iterations && activeServices.containsKey(service); i++) {
@@ -132,7 +132,7 @@ public class ServiceRequestGenerator {
 
     private void peakScenario(Service service, long workload, int delay, long iterations) {
         // peak inter-arrival rate
-        System.out.println("### " + service + " entered the PEAK SCENARIO ###");
+        //System.out.println("### " + service + " entered the PEAK SCENARIO ###");
         NormalDistribution normalDistribution = Utils.getNormalDistribution(service.getET() * 0.8, service.getET() * 0.8 *0.1);
         ExponentialDistribution exponentialDistribution = new ExponentialDistribution(workload  * 0.3);
         for (int i = 0; i < iterations && activeServices.containsKey(service); i++) {
@@ -148,7 +148,7 @@ public class ServiceRequestGenerator {
 
     private void decreasingScenario(Service service, long workload, int delay, long iterations) {
         // decreasing inter-arrival rate
-        System.out.println("### " + service + " entered the DECREASING SCENARIO ###");
+        //System.out.println("### " + service + " entered the DECREASING SCENARIO ###");
         NormalDistribution normalDistribution = Utils.getNormalDistribution(service.getET() * 0.8, service.getET() * 0.8 *0.1);
         ExponentialDistribution exponentialDistribution = new ExponentialDistribution(workload  * 1.2);
         for (int i = 0; i < iterations && activeServices.containsKey(service); i++) {
@@ -163,7 +163,7 @@ public class ServiceRequestGenerator {
 
     private void quietScenario(Service service, long meanInterval, long iterations) {
         // clients disappear
-        System.out.println("### " + service + " entered the QUIET SCENARIO ###");
+        //System.out.println("### " + service + " entered the QUIET SCENARIO ###");
         ExponentialDistribution exponentialDistribution = new ExponentialDistribution(meanInterval);
         for (int i = 0; i < iterations / 10; i++) {
             try {

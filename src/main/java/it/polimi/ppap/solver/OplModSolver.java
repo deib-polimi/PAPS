@@ -48,8 +48,11 @@ public class OplModSolver {
         try {
             output = readResultsFromFile(absoluteResultsFilePath);
             solution = parseSolution(output, nodeServiceDemand);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (SolutionMalFormedException mfe){
+            mfe.printStackTrace();
+            throw new OplSolutionNotFoundException();
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
             throw new OplSolutionNotFoundException();
         }
         return solution;

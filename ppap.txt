@@ -1,24 +1,20 @@
-# parameters of periodic execution
-CYCLES 100
-CYCLE SIZE*10000
-
 # network size
-SIZE 5
-
-# connectivity
-CONNECTIVITY SIZE - 1
+SIZE 20
 
 # number of distinct functions in the system
 ENTROPY 100
 
+# connectivity
+CONNECTIVITY SIZE - 1
+
 # the maximum capacity available to each node (GB)
-CAPACITY 17
+CAPACITY 65
 
 # the maximum variation of workflow at each cycle
 DELTA_WORKFLOW 0
 
 # control theoretic scaling (0 or 1)
-CONTROL_THEORETIC 0
+CONTROL_THEORETIC 1
 
 # the CT alpha parameter [0, 1]; defines the aggressiveness of the controller
 ALPHA = 0.9
@@ -29,7 +25,11 @@ BETA = 0.75
 # the physical time in milliseconds between two short cycles
 DELTATICK 3000
 
-NODE_CYCLE CYCLE / 5
+# parameters of periodic execution
+CYCLES 100
+CYCLE SIZE*10000
+
+NODE_CYCLE CYCLE / 10
 COMMUNITY_CYCLE CYCLE
 
 ################### networking =========================
@@ -113,10 +113,6 @@ include.init rndlink ss ms ns cpsch npsch
 
 
 ################ control ==============================
-
-#control.0 SingleValueObserver
-#control.0.protocol cp
-#control.0.step CYCLE
 
 control.df WorkflowFluctuation
 control.df.protocol cp

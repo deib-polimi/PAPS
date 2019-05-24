@@ -108,6 +108,10 @@ public class OplRun {
             trace("main");
         } else {
             opl.generate();
+            //opl.getCplex().setParam(IloCplex.Param.Emphasis.MIP, IloCplex.MIPEmphasis.Feasibility);
+            opl.getCplex().setParam(IloCplex.IntParam.PPriInd, IloCplex.PrimalPricing.Partial);
+            opl.getCplex().setParam(IloCplex.IntParam.RootAlg, IloCplex.Algorithm.Primal);
+            opl.getCplex().setParam(IloCplex.IntParam.TuningDisplay, IloCplex.TuningStatus.TimeLim);
             trace("generate model");
             if (opl.hasCplex()) {
                 if (_cl.getExportName() != null) {
@@ -124,6 +128,11 @@ public class OplRun {
                         trace("post process");
                         if (_cl.isVerbose()) {
                             opl.printSolution(System.out);
+                            if(_cl.getExternalDataName() != null) {
+                                FileOutputStream ofs = new FileOutputStream(_cl.getExternalDataName());
+                                opl.printSolution(ofs);
+                                ofs.close();
+                            }
                         }
                     }
                 } else if (_cl.isConflict()) {
@@ -131,10 +140,6 @@ public class OplRun {
                     opl.printConflict(System.out);
                     System.out.println("CONFLICTS done.");
                 } else {
-                    //opl.getCplex().setParam(IloCplex.Param.Emphasis.MIP, IloCplex.MIPEmphasis.Feasibility);
-                    opl.getCplex().setParam(IloCplex.IntParam.PPriInd, IloCplex.PrimalPricing.Partial);
-                    opl.getCplex().setParam(IloCplex.IntParam.RootAlg, IloCplex.Algorithm.Primal);
-                    opl.getCplex().setParam(IloCplex.IntParam.TuningDisplay, IloCplex.TuningStatus.TimeLim);
                     boolean result = opl.getCplex().solve();
                     if (result) {
                         trace("solve");
@@ -170,7 +175,9 @@ public class OplRun {
                     opl.postProcess();
                     trace("post process");
                     if (_cl.isVerbose()) {
-                        opl.printSolution(System.out);
+                        FileOutputStream ofs = new FileOutputStream(_cl.getExternalDataName());
+                        opl.printSolution(ofs);
+                        ofs.close();
                     }
                 } else {
                     trace("no solution");

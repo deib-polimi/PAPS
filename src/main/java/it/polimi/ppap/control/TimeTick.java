@@ -18,8 +18,11 @@
 
 package it.polimi.ppap.control;
 
+import it.polimi.ppap.protocol.NodeStateHolder;
 import peersim.config.Configuration;
+import peersim.core.CommonState;
 import peersim.core.Control;
+import peersim.core.Network;
 import peersim.util.IncrementalStats;
 
 /**
@@ -93,9 +96,16 @@ public class TimeTick implements Control {
      */
     public boolean execute() {
 
-        System.out.println("TICK +" + delta + "ms");
+        int count = Network.size();
         try {
-            Thread.sleep(delta);
+            //Thread.sleep(delta);
+            while(count > 0) {
+                synchronized (CommonState.r) {
+                    CommonState.r.wait();//TODO common object, testing wait-notify
+                }
+                count--;
+            }
+            System.out.println("TICK +" + delta + "ms");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

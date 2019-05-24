@@ -8,6 +8,7 @@ import it.polimi.ppap.random.initializer.ServiceWorkloadGenerator;
 import it.polimi.ppap.service.ServiceWorkloadFraction;
 import it.polimi.ppap.topology.FogNode;
 import peersim.cdsim.CDProtocol;
+import peersim.core.CommonState;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 
@@ -32,6 +33,9 @@ public class NodeProtocol
     @Override
     public void afterTick() {
         fetchOptimalAllocationFromControl();
+        synchronized (CommonState.r) {
+            CommonState.r.notify();
+        }
         //fluctuateWorkload();
     }
 
