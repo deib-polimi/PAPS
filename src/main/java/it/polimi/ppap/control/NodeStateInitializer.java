@@ -99,6 +99,14 @@ public class NodeStateInitializer implements Control {
      */
     private static final String PAR_ALPHA = "alpha";
 
+    /**
+     * Defines the probability of the workload for a function to be active on that source.
+     *
+     *
+     * @config
+     */
+    private static final String PAR_GAMA = "gama";
+
 
     // ------------------------------------------------------------------------
     // Fields
@@ -128,6 +136,10 @@ public class NodeStateInitializer implements Control {
     /** The alpha parameter defining the aggressiveness of the control-theoretic scaling; obtained from config property {@link #PAR_ALPHA}. */
     private final float alpha;
 
+    /** The gama parameter defining the probability of an active workload for a function at a source (node); obtained from config property {@link #PAR_GAMA}. */
+    private final float gama;
+
+
 
     // ------------------------------------------------------------------------
     // Constructor
@@ -144,6 +156,7 @@ public class NodeStateInitializer implements Control {
         workload = Configuration.getInt(prefix + "." + PAR_WORKLOAD);
         CT = Configuration.getInt(prefix + "." + PAR_CT) == 1;
         alpha = (float) Configuration.getDouble(prefix + "." + PAR_ALPHA);
+        gama = (float) Configuration.getDouble(prefix + "." + PAR_GAMA);
     }
 
     // ------------------------------------------------------------------------
@@ -184,7 +197,7 @@ public class NodeStateInitializer implements Control {
     private ServiceWorkload initServiceWorkloadForService(FogNode fogNode, Service service) {
         float mean = workload;
         float std = workload * 0.1f;
-        float activeWorkloadProbability = 0.6f;
+        float activeWorkloadProbability = gama;
         ServiceWorkloadGenerator serviceWorkloadGenerator = new ServiceWorkloadGenerator(mean, std, activeWorkloadProbability);
         float initialWorkload = serviceWorkloadGenerator.nextWorkload();
         ServiceWorkload serviceWorkload = new ServiceWorkload(fogNode, service, initialWorkload);

@@ -18,17 +18,16 @@
 
 package it.polimi.ppap.control;
 
-import it.polimi.deib.ppap.node.services.Service;
-import it.polimi.ppap.random.initializer.ServiceDemandGenerator;
 import it.polimi.ppap.protocol.MemberStateHolder;
+import it.polimi.ppap.random.initializer.NetworkDelayGenerator;
 import it.polimi.ppap.topology.FogNode;
 import peersim.config.Configuration;
 import peersim.config.FastConfig;
-import peersim.core.*;
+import peersim.core.Control;
+import peersim.core.Linkable;
+import peersim.core.Network;
+import peersim.core.Node;
 import peersim.vector.SingleValue;
-
-import java.util.Random;
-import java.util.Set;
 
 /**
  * Initialize an aggregation protocol using a peak distribution; only one peak
@@ -40,7 +39,7 @@ import java.util.Set;
  */
 public class MemberStateInitializer implements Control {
 
-    Random rand = CommonState.r;
+    final NetworkDelayGenerator networkDelayGenerator = new NetworkDelayGenerator();
 
     // ------------------------------------------------------------------------
     // Constants
@@ -94,8 +93,7 @@ public class MemberStateInitializer implements Control {
     * @return always false
     */
     public boolean execute() {
-        initializeLeader();
-        //initializeNodeServiceDemand(serviceCatalogue);
+        initLeader();
         return false;
     }
 
@@ -103,7 +101,7 @@ public class MemberStateInitializer implements Control {
         return Network.get(0);
     }
 
-    private void initializeLeader(){
+    private void initLeader(){
         Node leader = getLeader();
         MemberStateHolder memberProtocol = (MemberStateHolder) leader.getProtocol(pid);
         memberProtocol.initializeLeader(beta);
@@ -117,24 +115,10 @@ public class MemberStateInitializer implements Control {
     private void initInterNodeDelay(FogNode fogNode){
         Linkable linkable =
                 (Linkable) fogNode.getProtocol(FastConfig.getLinkable(pid));
-        fogNode.addLinkDelay(fogNode.getID(), getLinearRandomNumber(10));//TODO
+        fogNode.addLinkDelay(fogNode.getID(), networkDelayGenerator.nextDelay(10));//TODO
         for(int i = 0; i < linkable.degree(); i++) {
             FogNode member = (FogNode) linkable.getNeighbor(i);
-            fogNode.addLinkDelay(member.getID(), getLinearRandomNumber(30));//TODO
+            fogNode.addLinkDelay(member.getID(), networkDelayGenerator.nextDelay(30));//TODO
         }
-    }
-
-    public int getLinearRandomNumber(int maxSize){
-        //Get a linearly multiplied random number
-        int randomMultiplier = maxSize * (maxSize + 1) / 2;
-        int randomInt = rand.nextInt(randomMultiplier);
-
-        //Linearly iterate through the possible values to find the correct one
-        int linearRandomNumber = 0;
-        for(int i=maxSize; randomInt >= 0; i--){
-            randomInt -= i;
-            linearRandomNumber++;
-        }
-        return linearRandomNumber;
     }
 }

@@ -1,20 +1,29 @@
+# verbosity TODO
+DEBUG 0
+
 # network size
-SIZE 50
+SIZE 250
 
 # connectivity
 CONNECTIVITY SIZE - 1
 
 # the maximum capacity available to each node (GB)
-CAPACITY 64
+CAPACITY 32
 
 # number of distinct functions in the system
-ENTROPY 100
+ENTROPY 10
+
+# the memory requirement for admitted functions
+MEMORY 128
 
 # Response Time SLA (ms)
 RT_SLA 120
 
 # Max Execution Time SLA (ms)
 ET_MAX 90
+
+# The probability of an active workload for a function at a source node
+GAMA 0.3
 
 # the mean workload passed to a
 WORKLOAD RT_SLA * 2
@@ -23,7 +32,7 @@ WORKLOAD RT_SLA * 2
 DELTA_WORKLOAD 0
 
 # control theoretic scaling (0 or 1)
-CONTROL_THEORETIC 1
+CT_SCALING 1
 
 # the CT alpha parameter [0, 1]; defines the aggressiveness of the controller
 ALPHA 0.9
@@ -32,7 +41,7 @@ ALPHA 0.9
 BETA 0.5
 
 # the physical time in milliseconds between two short cycles
-DELTATICK 5000
+CONTROL_PERIOD 5000
 
 # parameters of periodic execution
 CYCLES 100
@@ -73,7 +82,7 @@ protocol.cp.linkable link
 protocol.cp.step COMMUNITY_CYCLE
 protocol.cp.transport tr
 protocol.cp.nodeprotocol np
-protocol.cp.deltatick DELTATICK
+protocol.cp.deltatick CONTROL_PERIOD
 
 protocol.urt UniformRandomTransport
 protocol.urt.mindelay (CYCLE*MINDELAY)/100
@@ -101,11 +110,12 @@ init.ms.beta BETA
 
 init.ns it.polimi.ppap.control.NodeStateInitializer
 init.ns.protocol np
-init.ns.delta DELTATICK
+init.ns.delta CONTROL_PERIOD
 init.ns.capacity CAPACITY
 init.ns.entropy ENTROPY
-init.ns.control CONTROL_THEORETIC
+init.ns.control CT_SCALING
 init.ns.alpha ALPHA
+init.ns.gama GAMA
 init.ns.workload WORKLOAD
 
 init.cpsch CDScheduler
@@ -130,4 +140,4 @@ control.df.delta DELTA_WORKLOAD
 control.df TimeTick
 control.df.protocol cp
 control.df.step NODE_CYCLE
-control.df.delta DELTATICK
+control.df.delta CONTROL_PERIOD

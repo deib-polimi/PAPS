@@ -108,8 +108,7 @@ public class CommunityProtocol
             for(ServiceWorkload serviceWorkload : nodeServiceWorkload.get(member)){
                 Service service = serviceWorkload.getService();
                 if(serviceWorkload.isActive()) {
-                    float demandFromMember = NodeFacade.getStaticAllocation(serviceWorkload.getWorkload(), service.getRT(), deltaTick);
-                    updateServiceDemand(member, service, demandFromMember);
+                    updateDemandFromStaticAllocation(member, serviceWorkload, service);
                 }else
                     initializeDemand(serviceWorkload);
                 /*if(serviceWorkload.isActive() && workloadDemandFunctionMap.containsKey(service))
@@ -119,6 +118,11 @@ public class CommunityProtocol
             }
         }
         plan(node, pid);
+    }
+
+    private void updateDemandFromStaticAllocation(FogNode member, ServiceWorkload serviceWorkload, Service service) {
+        float demandFromMember = NodeFacade.getStaticAllocation(serviceWorkload.getWorkload(), service.getRT(), deltaTick);
+        updateServiceDemand(member, service, demandFromMember);
     }
 
     private Map<Service, UnivariateFunction> buildServiceUnivariateFunctionMap() {
@@ -176,9 +180,11 @@ public class CommunityProtocol
     private void initializeDemand(ServiceWorkload serviceWorkload){
         Service service = serviceWorkload.getService();
         FogNode member = serviceWorkload.getSource();
-        float demandFromMember = serviceWorkload.getWorkload() > 0 ? 1 : 0;
-        updateServiceDemand(member, service, demandFromMember);
-        System.out.println("Initialized demand " + nodeServiceDemand.get(member).get(service));
+        if(serviceWorkload.isActive()) {
+            updateServiceDemand(member, service, 1f);
+            System.out.println("Initialized demand " + nodeServiceDemand.get(member).get(service));
+        }else
+            updateServiceDemand(member, service, 0);
     }
 
     private void plan(FogNode node, int pid){
@@ -255,7 +261,7 @@ public class CommunityProtocol
     }
 
     // -----------------
-    // MEMBER's BEHAVIOR
+    // COMMON MEMBER's BEHAVIOR
 
     private void performMemberBehavior(FogNode node, int pid){
         monitor(node, pid);
