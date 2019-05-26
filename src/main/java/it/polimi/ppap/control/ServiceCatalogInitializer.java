@@ -41,12 +41,12 @@ public class ServiceCatalogInitializer implements Control {
     // Constants
     // ------------------------------------------------------------------------
 
-    /**
-     * The number of distinct functions in the system.
-     *
-     * @config
-     */
     private static final String PAR_ENTROPY = "entropy";
+
+    private static final String PAR_RT_SLA = "rtsla";
+
+    private static final String PAR_ET_MAX = "etmax";
+
 
     // ------------------------------------------------------------------------
     // Fields
@@ -54,6 +54,12 @@ public class ServiceCatalogInitializer implements Control {
 
     /** TODO; obtained from config property {@link #PAR_ENTROPY}. */
     private final int entropy;
+
+    /** TODO; obtained from config property {@link #PAR_RT_SLA}. */
+    private final int rtSLA;
+
+    /** TODO; obtained from config property {@link #PAR_ET_MAX}. */
+    private final int etMax;
 
 
     // ------------------------------------------------------------------------
@@ -65,6 +71,8 @@ public class ServiceCatalogInitializer implements Control {
      */
     public ServiceCatalogInitializer(String prefix) {
         entropy = Configuration.getInt(prefix + "." + PAR_ENTROPY);
+        rtSLA = Configuration.getInt(prefix + "." + PAR_RT_SLA);
+        etMax = Configuration.getInt(prefix + "." + PAR_ET_MAX);
     }
 
     // ------------------------------------------------------------------------
@@ -86,8 +94,6 @@ public class ServiceCatalogInitializer implements Control {
         int catalogSize = entropy;
         long baseServiceMemory = 128;
         short randomServiceMemoryMultiplier = 2;
-        float rtSLA = 100;
-        float etMax = 70;
         ServiceCatalogGenerator serviceCatalogGenerator = new ServiceCatalogGenerator(
                 catalogSize, baseServiceMemory, randomServiceMemoryMultiplier, rtSLA, etMax);
         return serviceCatalogGenerator;

@@ -78,6 +78,13 @@ public class NodeStateInitializer implements Control {
     private static final String PAR_ENTROPY = "entropy";
 
     /**
+     * The mean for randomly generating the workload.
+     *
+     * @config
+     */
+    private static final String PAR_WORKLOAD = "workload";
+
+    /**
      * If the control-theoretic scaling is activated.
      *
      * @config
@@ -112,6 +119,9 @@ public class NodeStateInitializer implements Control {
     /** The number of functions admitted in the system; obtained from config property {@link #PAR_ENTROPY}. */
     private final int entropy;
 
+    /** The mean for generating the workload for the admitted functions*/
+    private final int workload;
+
     /** The activation of the control-theoretic scaling; obtained from config property {@link #PAR_CT}. */
     private final boolean CT;
 
@@ -131,6 +141,7 @@ public class NodeStateInitializer implements Control {
         delta = Configuration.getInt(prefix + "." + PAR_DELTA);
         capacity = Configuration.getInt(prefix + "." + PAR_CAPACITY);
         entropy = Configuration.getInt(prefix + "." + PAR_ENTROPY);
+        workload = Configuration.getInt(prefix + "." + PAR_WORKLOAD);
         CT = Configuration.getInt(prefix + "." + PAR_CT) == 1;
         alpha = (float) Configuration.getDouble(prefix + "." + PAR_ALPHA);
     }
@@ -171,8 +182,8 @@ public class NodeStateInitializer implements Control {
     }
 
     private ServiceWorkload initServiceWorkloadForService(FogNode fogNode, Service service) {
-        float mean = service.getRT() * 1f;
-        float std = service.getRT() * 0.1f;
+        float mean = workload;
+        float std = workload * 0.1f;
         float activeWorkloadProbability = 0.6f;
         ServiceWorkloadGenerator serviceWorkloadGenerator = new ServiceWorkloadGenerator(mean, std, activeWorkloadProbability);
         float initialWorkload = serviceWorkloadGenerator.nextWorkload();

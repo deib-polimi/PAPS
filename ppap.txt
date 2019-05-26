@@ -1,35 +1,44 @@
 # network size
 SIZE 50
 
-# number of distinct functions in the system
-ENTROPY 100
-
 # connectivity
 CONNECTIVITY SIZE - 1
 
 # the maximum capacity available to each node (GB)
-CAPACITY 65
+CAPACITY 64
 
-# the maximum variation of workflow at each cycle
-DELTA_WORKFLOW 0
+# number of distinct functions in the system
+ENTROPY 100
+
+# Response Time SLA (ms)
+RT_SLA 120
+
+# Max Execution Time SLA (ms)
+ET_MAX 90
+
+# the mean workload passed to a
+WORKLOAD RT_SLA * 2
+
+# the maximum variation of the workload at each cycle
+DELTA_WORKLOAD 0
 
 # control theoretic scaling (0 or 1)
 CONTROL_THEORETIC 1
 
 # the CT alpha parameter [0, 1]; defines the aggressiveness of the controller
-ALPHA = 0.9
+ALPHA 0.9
 
 # the optimization beta parameter [0, 1]; defines the max network latency as a fraction of (RT_SLA - ET_MAX)
-BETA = 0.5
+BETA 0.5
 
 # the physical time in milliseconds between two short cycles
-DELTATICK 3000
+DELTATICK 5000
 
 # parameters of periodic execution
 CYCLES 100
 CYCLE SIZE*10000
 
-NODE_CYCLE CYCLE / 5
+NODE_CYCLE CYCLE / 10
 COMMUNITY_CYCLE CYCLE
 
 ################### networking =========================
@@ -81,13 +90,10 @@ init.rndlink.k CONNECTIVITY
 init.rndlink.protocol link
 init.rndlink.undir true
 
-#init.vals LinearDistribution
-#init.vals.protocol cp
-#init.vals.max SIZE
-#init.vals.min 1
-
 init.ss it.polimi.ppap.control.ServiceCatalogInitializer
 init.ss.entropy ENTROPY
+init.ss.rtsla RT_SLA
+init.ss.etmax ET_MAX
 
 init.ms it.polimi.ppap.control.MemberStateInitializer
 init.ms.protocol cp
@@ -100,6 +106,7 @@ init.ns.capacity CAPACITY
 init.ns.entropy ENTROPY
 init.ns.control CONTROL_THEORETIC
 init.ns.alpha ALPHA
+init.ns.workload WORKLOAD
 
 init.cpsch CDScheduler
 init.cpsch.protocol cp
@@ -118,7 +125,7 @@ include.init rndlink ss ms ns cpsch npsch
 control.df WorkflowFluctuation
 control.df.protocol cp
 control.df.step NODE_CYCLE
-control.df.delta DELTA_WORKFLOW
+control.df.delta DELTA_WORKLOAD
 
 control.df TimeTick
 control.df.protocol cp
