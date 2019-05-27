@@ -32,9 +32,12 @@ import peersim.config.Configuration;
 import peersim.core.Control;
 import peersim.core.Network;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
 
 /**
  * TODO
@@ -107,6 +110,13 @@ public class NodeStateInitializer implements Control {
      */
     private static final String PAR_GAMA = "gama";
 
+    /**
+     * Defines the probability of the workload for a function to be active on that source.
+     *
+     *
+     * @config
+     */
+    private static final String PAR_RESULTS = "results";
 
     // ------------------------------------------------------------------------
     // Fields
@@ -139,6 +149,11 @@ public class NodeStateInitializer implements Control {
     /** The gama parameter defining the probability of an active workload for a function at a source (node); obtained from config property {@link #PAR_GAMA}. */
     private final float gama;
 
+    /** The gama parameter defining the probability of an active workload for a function at a source (node); obtained from config property {@link #PAR_GAMA}. */
+    private final String results;
+
+    private Logger logger;
+
 
 
     // ------------------------------------------------------------------------
@@ -157,6 +172,12 @@ public class NodeStateInitializer implements Control {
         CT = Configuration.getInt(prefix + "." + PAR_CT) == 1;
         alpha = (float) Configuration.getDouble(prefix + "." + PAR_ALPHA);
         gama = (float) Configuration.getDouble(prefix + "." + PAR_GAMA);
+        results = Configuration.getString(prefix + "." + PAR_RESULTS);
+        try {
+            logger = createLogger();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     // ------------------------------------------------------------------------
@@ -167,23 +188,50 @@ public class NodeStateInitializer implements Control {
     * @return always false
     */
     public boolean execute() {
-        //TODO parametrize in configs
-        FogNodeCapacityGenerator fogNodeCapacityGenerator = new FogNodeCapacityGenerator(1024 * (capacity - 1), 1024, (short) 1);
+        //TODO base capacity is now 0
+        FogNodeCapacityGenerator fogNodeCapacityGenerator = new FogNodeCapacityGenerator(1024 * (capacity), 0, (short) 1);
         for(int i=0; i<Network.size(); ++i) {
             FogNode node = (FogNode) Network.get(i);
             initNodeCapacity(node, fogNodeCapacityGenerator);
             NodeStateHolder nodeProt = (NodeStateHolder) node.getProtocol(pid);
-            nodeProt.setCurrentWorkloadAllocation(new TreeMap<>());
+            initWorkloadAllocation(nodeProt);
             Map<Service, ServiceWorkload> localServiceWorkload = initServiceWorkload(node, ServiceCatalog.getServiceCatalog());
             nodeProt.setLocalServiceWorkload(localServiceWorkload);
-            NodeFacade nodeFacade = NodeFactory.createCTNodeFacade(node, delta, alpha, CT);
-            nodeProt.setNodeFacade(nodeFacade);
-            nodeFacade.setTickListener(nodeProt);
-            nodeFacade.start();
-            ServiceRequestGenerator serviceRequestGenerator = new ServiceRequestGenerator(node, nodeFacade);
-            nodeProt.setServiceRequestGenerator(serviceRequestGenerator);
+            NodeFacade nodeFacade = addNodeFacade(node, nodeProt);
+            addServiceRequestGenerator(node, nodeProt, nodeFacade);
         }
         return false;
+    }
+
+    private void initWorkloadAllocation(NodeStateHolder nodeProt) {
+        nodeProt.setCurrentWorkloadAllocation(new TreeMap<>());
+    }
+
+    private NodeFacade addNodeFacade(FogNode node, NodeStateHolder nodeProt) {
+        NodeFacade nodeFacade = NodeFactory.createCTNodeFacade(node, delta, alpha, CT);
+        addLogger(nodeFacade);
+        nodeProt.setNodeFacade(nodeFacade);
+        nodeFacade.setTickListener(nodeProt);
+        nodeFacade.start();
+        return nodeFacade;
+    }
+
+    private void addLogger(NodeFacade nodeFacade) {
+        if(logger != null)
+            nodeFacade.setLogger(logger);
+    }
+
+    private void addServiceRequestGenerator(FogNode node, NodeStateHolder nodeProt, NodeFacade nodeFacade) {
+        ServiceRequestGenerator serviceRequestGenerator = new ServiceRequestGenerator(node, nodeFacade);
+        nodeProt.setServiceRequestGenerator(serviceRequestGenerator);
+    }
+
+    private Logger createLogger() throws IOException {
+        Logger logger = Logger.getLogger(NodeFacade.class.getName());
+        FileHandler fh;
+        fh = new FileHandler(results, true);
+        logger.addHandler(fh);
+        return logger;
     }
 
     private Map<Service, ServiceWorkload> initServiceWorkload(FogNode fogNode, Set<Service> serviceCatalog){

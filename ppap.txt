@@ -117,6 +117,7 @@ init.ns.control CT_SCALING
 init.ns.alpha ALPHA
 init.ns.gama GAMA
 init.ns.workload WORKLOAD
+init.ns.results results/output.csv
 
 init.cpsch CDScheduler
 init.cpsch.protocol cp
