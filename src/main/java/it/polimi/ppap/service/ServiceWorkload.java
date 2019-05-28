@@ -23,6 +23,10 @@ public class ServiceWorkload {
         return workload;
     }
 
+    public void setWorkload(float workload) {
+        this.workload = workload;
+    }
+
     public boolean isActive(){
         return this.workload > 0;
     }

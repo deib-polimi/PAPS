@@ -21,23 +21,24 @@ minimize
     
 //Constraints
 subject to{
+  //Maximum network delay
   forall( w in Nodes, s in DemandSources, f in Functions)
     ctMaxDelay:
       SupplyCost[s][w] * Supply[s][w][f] <= DelayLimit[f] * Supply[s][w][f];
+  //Maximum supply equals 100% node capacity
   forall( s in DemandSources, f in Functions )
-	ctEachStoreHasOneWarehouse:
-      sum( w in  Nodes ) 
+	ctEachContainerIsHosted:
+      sum( w in  Nodes )
     	Supply[s][w][f] == 1;
-  forall( w in Nodes, s in DemandSources, f in Functions )
-    ctSupplyLEDemand:
-  	  Supply[s][w][f] <= 1;
-  forall( w in Nodes, s in DemandSources, f in Functions )
-    ctSupplyGEZero:
-      Supply[s][w][f] >= 0;
+  //Maximum supply equals 100% node capacity
   forall( w in Nodes )
-	ctMaxUseOfWarehouse:         
+	ctMaxUseOfNodeCapacity:
       sum( s in DemandSources, f in Functions ) 
         DemandLevel[s][f] * Supply[s][w][f] <= Capacity[w];
+  //Supply can not be negative (redundant, since Supply is float+)
+    //forall( w in Nodes, s in DemandSources, f in Functions )
+      //ctSupplyGEZero:
+        //Supply[s][w][f] >= 0;
 }
 
 //{int} DemandSourcesof[w in Nodes] = { s | s in DemandSources : Supply[s][w][f] == 1};
