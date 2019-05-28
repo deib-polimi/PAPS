@@ -2,13 +2,13 @@
 DEBUG 0
 
 # network size
-SIZE 250
+SIZE 50
 
 # connectivity
 CONNECTIVITY SIZE - 1
 
 # the maximum capacity available to each node (GB)
-CAPACITY 32
+CAPACITY 96
 
 # number of distinct functions in the system
 ENTROPY 10
@@ -28,8 +28,11 @@ GAMA 0.3
 # the mean workload passed to a
 WORKLOAD RT_SLA * 2
 
+# if the workload fluctuates due to client mobility (0 or 1)
+CHURN 1
+
 # the maximum variation of the workload at each cycle
-DELTA_WORKLOAD 0
+DELTA_WORKLOAD GAMA / 10
 
 # control theoretic scaling (0 or 1)
 CT_SCALING 1
@@ -38,7 +41,7 @@ CT_SCALING 1
 ALPHA 0.9
 
 # the optimization beta parameter [0, 1]; defines the max network latency as a fraction of (RT_SLA - ET_MAX)
-BETA 0.5
+BETA 1
 
 # the physical time in milliseconds between two short cycles
 CONTROL_PERIOD 5000
@@ -47,7 +50,7 @@ CONTROL_PERIOD 5000
 CYCLES 100
 CYCLE SIZE*10000
 
-NODE_CYCLE CYCLE / 10
+NODE_CYCLE CYCLE / 3
 COMMUNITY_CYCLE CYCLE
 
 ################### networking =========================
@@ -64,7 +67,6 @@ random.seed 1234567890
 network.size SIZE
 simulation.endtime CYCLE*CYCLES
 simulation.logtime CYCLE
-
 
 ################### topology ============================
 
@@ -133,12 +135,15 @@ include.init rndlink ss ms ns cpsch npsch
 
 ################ control ==============================
 
-control.df WorkflowFluctuation
-control.df.protocol cp
-control.df.step NODE_CYCLE
-control.df.delta DELTA_WORKLOAD
+control.tt TimeTick
+control.tt.protocol cp
+control.tt.step NODE_CYCLE
+control.tt.delta CONTROL_PERIOD
 
-control.df TimeTick
-control.df.protocol cp
-control.df.step NODE_CYCLE
-control.df.delta CONTROL_PERIOD
+control.wf WorkloadFluctuation
+control.wf.protocol np
+control.wf.active CHURN
+control.wf.step NODE_CYCLE * 3
+control.wf.delta DELTA_WORKLOAD
+control.wf.gama GAMA
+control.wf.workload WORKLOAD

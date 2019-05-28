@@ -45,6 +45,8 @@ public class WorkloadFluctuation implements Control {
     // Constants
     // /////////////////////////////////////////////////////////////////////
 
+    private static final String PAR_ACTIVE = "active";
+
     private static final String PAR_DELTA = "delta";
 
     private static final String PAR_PROT = "protocol";
@@ -62,6 +64,12 @@ public class WorkloadFluctuation implements Control {
      * constructor parameter.
      */
     private final String name;
+
+    /**
+     * Accuracy for standard deviation used to stop the simulation; obtained
+     * from config property {@link #PAR_WORKLOAD}.
+     */
+    private final boolean active;
 
     /**
      * Accuracy for standard deviation used to stop the simulation; obtained
@@ -90,7 +98,8 @@ public class WorkloadFluctuation implements Control {
     public WorkloadFluctuation(String prefix) {
         this.name = prefix;
         pid = Configuration.getPid(prefix + "." + PAR_PROT);
-        delta = Configuration.getDouble(prefix + "." + PAR_DELTA, -1);
+        active = Configuration.getDouble(prefix + "." + PAR_ACTIVE, 0) > 0;
+        delta = Configuration.getDouble(prefix + "." + PAR_DELTA, 0);
         gama = (float) Configuration.getDouble(prefix + "." + PAR_GAMA);
         workload = Configuration.getInt(prefix + "." + PAR_WORKLOAD);
     }
@@ -99,16 +108,13 @@ public class WorkloadFluctuation implements Control {
     // Methods
     // /////////////////////////////////////////////////////////////////////
 
-    /**
-     * Print statistics for an average aggregation computation. Statistics
-     * printed are defined by {@link IncrementalStats#toString}. The current
-     * timestamp is also printed as a first field.
-     *
-     * @return if the standard deviation is less than the given
-     *         {@value #PAR_DELTA}.
-     */
     public boolean execute() {
+        if(active)
+            processWorkloadFluctuation();
+        return false;
+    }
 
+    private void processWorkloadFluctuation() {
         float mean = workload;
         float std = workload * 0.1f;
         float changeProbability = gama;
@@ -118,7 +124,6 @@ public class WorkloadFluctuation implements Control {
             Map<Service, ServiceWorkload> nodeServiceWorkload = protocol.getLocalServiceWorkload();
             fluctuateWorkload(mean, std, changeProbability, nodeServiceWorkload);
         }
-        return false;
     }
 
     private void fluctuateWorkload(float mean, float std, float activateProbability, Map<Service, ServiceWorkload> nodeServiceWorkload) {
@@ -127,10 +132,13 @@ public class WorkloadFluctuation implements Control {
         for(Service service : ServiceCatalog.getServiceCatalog()) {
             ServiceWorkload serviceWorkload = nodeServiceWorkload.get(service);
             if(CommonState.r.nextFloat() < changeProbability){
-                if(serviceWorkload.isActive())
+                if(serviceWorkload.isActive()) {
                     serviceWorkload.setWorkload(0);
-                else
+                    System.out.println("########### Deactivated Workload for service " + service.getId() + "##############");
+                }else {
                     serviceWorkload.setWorkload(serviceWorkloadGenerator.nextWorkload());
+                    System.out.println("########### Activated Workload for service " + service.getId() + ": " + serviceWorkload + " ##############");
+                }
             }
         }
     }

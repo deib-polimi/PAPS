@@ -64,7 +64,7 @@ public class OplRun {
         //System.out.println(System.getenv("DYLD_LIBRARY_PATH"));
         //System.out.println(System.getenv("LD_LIBRARY_PATH"));
 
-        IloOplFactory.setDebugMode(true);
+        IloOplFactory.setDebugMode(false);
         IloOplFactory oplF = new IloOplFactory();
 
         if (_cl.getCompileName() != null) {
