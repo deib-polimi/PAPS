@@ -8,6 +8,7 @@ import it.polimi.ppap.service.ServiceWorkload;
 import it.polimi.ppap.topology.FogNode;
 import peersim.core.Protocol;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -48,7 +49,7 @@ public abstract class MemberStateHolder implements Protocol {
         this.monitoringCount = 0;
     }
 
-    Map<FogNode, Set<ServiceWorkload>> nodeServiceWorkload;
+    Map<FogNode, Map<Service, Set<ServiceWorkload>>> nodeServiceWorkload;
 
     Map<Service, Map<Float, Float>> workloadAllocationHistory;
 

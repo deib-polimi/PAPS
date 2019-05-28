@@ -21,6 +21,7 @@ import peersim.edsim.EDProtocol;
 import peersim.transport.Transport;
 
 import java.util.*;
+import java.util.stream.DoubleStream;
 
 public class CommunityProtocol
         extends MemberStateHolder
@@ -105,23 +106,29 @@ public class CommunityProtocol
         nodeServiceDemand.clear();
         //Map<Service, UnivariateFunction> workloadDemandFunctionMap = buildServiceUnivariateFunctionMap();
         for(FogNode member : nodeServiceWorkload.keySet()){
-            for(ServiceWorkload serviceWorkload : nodeServiceWorkload.get(member)){
-                Service service = serviceWorkload.getService();
-                if(serviceWorkload.isActive()) {
-                    updateDemandFromStaticAllocation(member, serviceWorkload, service);
-                }else
-                    initializeDemand(serviceWorkload);
-                /*if(serviceWorkload.isActive() && workloadDemandFunctionMap.containsKey(service))
-                    updateDemandFromWorkload(serviceWorkload, workloadDemandFunctionMap.get(service));
-                else
-                    initializeDemand(serviceWorkload);*/
+            for(Service service : ServiceCatalog.getServiceCatalog()) {
+                if(nodeServiceWorkload.get(member).containsKey(service)) {
+                    float aggregateWorkload = getAggregateWorkload(nodeServiceWorkload.get(member).get(service));
+                    if(aggregateWorkload > 0)
+                        updateDemandFromStaticAllocation(member, service, aggregateWorkload);
+                    else
+                        updateServiceDemand(member, service, 0);
+                }
+
             }
+            nodeServiceWorkload.get(member).clear();
         }
         plan(node, pid);
     }
 
-    private void updateDemandFromStaticAllocation(FogNode member, ServiceWorkload serviceWorkload, Service service) {
-        float demandFromMember = NodeFacade.getStaticAllocation(serviceWorkload.getWorkload(), service.getRT(), deltaTick);
+    public float getAggregateWorkload(Set<ServiceWorkload> serviceWorkloads){
+        DoubleStream workloadStream = serviceWorkloads.stream().mapToDouble(e -> 1000 / e.getWorkload());
+        Double frequencySum = workloadStream.sum();
+        return (float) (1000 / frequencySum);
+    }
+
+    private void updateDemandFromStaticAllocation(FogNode member, Service service, float workload) {
+        float demandFromMember = NodeFacade.getStaticAllocation(workload, service.getRT(), deltaTick);
         updateServiceDemand(member, service, demandFromMember);
     }
 
@@ -205,13 +212,16 @@ public class CommunityProtocol
     }
 
     private void updateNodeServiceWorkload(FogNode sender, Map<Service, ServiceWorkload> localServiceWorkload){
-        Set<ServiceWorkload> serviceWorkloads = new HashSet<>();
-        for(Service service : ServiceCatalog.getServiceCatalog())
-            if(localServiceWorkload.containsKey(service))
+        Map<Service, Set<ServiceWorkload>> nodeServiceWorkloads = nodeServiceWorkload.getOrDefault(sender, new TreeMap<>());
+        nodeServiceWorkload.put(sender, nodeServiceWorkloads);
+        for(Service service : ServiceCatalog.getServiceCatalog()) {
+            Set<ServiceWorkload> serviceWorkloads = nodeServiceWorkload.get(sender).getOrDefault(service, new HashSet<>());
+            if (localServiceWorkload.containsKey(service))
                 serviceWorkloads.add(localServiceWorkload.get(service));
             else
                 serviceWorkloads.add(new ServiceWorkload(sender, service, 0f));
-        nodeServiceWorkload.put(sender, serviceWorkloads);
+            nodeServiceWorkload.get(sender).put(service, serviceWorkloads);
+        }
     }
 
     private void storeNodeWorkloadAllocation(FogNode sender, Map<Service, Map.Entry<Float, Float>> currentWorkloadAllocation){

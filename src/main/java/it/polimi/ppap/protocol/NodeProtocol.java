@@ -111,22 +111,4 @@ public class NodeProtocol
             }
         });
     }
-
-    //TODO it is not wise to sync this with the control tick for two reasons: i) makes it unrealistically easy for the CS; 2) workload fluctuation is not cyclic
-    private void fluctuateWorkload(){
-        serviceRequestGenerator.forEach(service -> {
-            if(nodeFacade.isServing(service)) {
-                Map.Entry<Float, Float> workloadAllocation = currentWorkloadAllocation.get(service);
-                float currentWorkload = workloadAllocation.getKey();
-                float std = service.getRT() * 0.1f;
-                ServiceWorkloadGenerator serviceWorkloadGenerator = new ServiceWorkloadGenerator(currentWorkload, std, 0.6f);
-                float nextWorkload = serviceWorkloadGenerator.nextWorkload();
-                System.out.println("########### Next Workload for " + service.getId() + ": " + nextWorkload + " ##############");
-                workloadAllocation = new AbstractMap.SimpleEntry<>(nextWorkload, workloadAllocation.getValue());
-                currentWorkloadAllocation.put(service, workloadAllocation);
-                //ServiceWorkload serviceWorkload = new ServiceWorkload(service, currentWorkload);
-                //serviceRequestGenerator.updateWorkloadForService(serviceWorkload);
-            }
-        });
-    }
 }
