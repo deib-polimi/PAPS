@@ -312,7 +312,7 @@ public class CommunityProtocol
     private void execute(Map<Service, AggregateServiceAllocation> placementAllocation, Node node, int pid){
         //System.out.println("Performing the EXECUTE activity");
         NodeProtocol nodeProtocol = (NodeProtocol) node.getProtocol(nodePid);
-        nodeProtocol.updatePlacementAllocation(placementAllocation, nodePid);
+        nodeProtocol.updatePlacementAllocation((FogNode) node, placementAllocation, nodePid);
     }
 
 

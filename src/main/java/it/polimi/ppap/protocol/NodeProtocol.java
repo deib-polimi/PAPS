@@ -39,11 +39,11 @@ public class NodeProtocol
     @Override
     public void processEvent(Node node, int pid, Object event) {}
 
-    public void updatePlacementAllocation(Map<Service, AggregateServiceAllocation> placementAllocation, int nodePID){
+    public void updatePlacementAllocation(FogNode node, Map<Service, AggregateServiceAllocation> placementAllocation, int nodePID){
         for(Service service : placementAllocation.keySet())
             if(placementAllocation.get(service).getAggregateAllocation() > 0) {
                 if (!nodeFacade.isServing(service))
-                    placeServiceOnThisNode(new Service(service), placementAllocation, nodePID);
+                    placeServiceOnThisNode(node, new Service(service), placementAllocation, nodePID);
                 else
                     updateServiceAllocation(service, placementAllocation, nodePID);
             }else if(nodeFacade.isServing(service)) {
@@ -55,10 +55,10 @@ public class NodeProtocol
 // INTERNAL
 //----------------------------------ds----------------------------------------
 
-    private void placeServiceOnThisNode(final Service service,
+    private void placeServiceOnThisNode(FogNode node, final Service service,
                                         Map<Service,AggregateServiceAllocation> placementAllocation,
                                         final int nodePID) {
-        System.out.println("########### Placing Service " + service.getId() + " Onto Node ##############");
+        System.out.println("########### Placing Service " + service.getId() + " Onto " + node + "##############");
         nodeFacade.addService(service);
         updateServiceAllocation(service, placementAllocation, nodePID);
         placementAllocation.get(service).stream().filter(e -> e.getAllocation() > 0).forEach(serviceDemand -> {

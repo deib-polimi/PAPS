@@ -31,10 +31,14 @@ public abstract class NodeStateHolder implements Protocol, NodeFacade.TickListen
         return localServiceWorkload;
     }
 
-    Map<Service, Set<ServiceWorkload>> localServiceWorkloadHistory = new HashMap<>();
+    Map<Service, Set<ServiceWorkload>> localServiceWorkloadHistory;
 
     public Map<Service, Set<ServiceWorkload>> getLocalServiceWorkloadHistory() {
         return ImmutableMap.copyOf(localServiceWorkloadHistory);
+    }
+
+    public void setLocalServiceWorkloadHistory(Map<Service, Set<ServiceWorkload>> localServiceWorkloadHistory) {
+        this.localServiceWorkloadHistory = localServiceWorkloadHistory;
     }
 
     public void clearLocalServiceWorkloadHistory(){

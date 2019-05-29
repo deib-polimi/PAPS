@@ -34,6 +34,7 @@ import peersim.core.Control;
 import peersim.core.Network;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -192,6 +193,7 @@ public class NodeStateInitializer implements Control {
             FogNode node = (FogNode) Network.get(i);
             initNodeCapacity(node, fogNodeCapacityGenerator);
             NodeStateHolder nodeProt = (NodeStateHolder) node.getProtocol(pid);
+            initLocalServiceWorkloadHistory(nodeProt);
             initWorkloadAllocation(nodeProt);
             Map<Service, ServiceWorkload> localServiceWorkload = initServiceWorkload(node, ServiceCatalog.getServiceCatalog());
             nodeProt.setLocalServiceWorkload(localServiceWorkload);
@@ -199,6 +201,10 @@ public class NodeStateInitializer implements Control {
             addServiceRequestGenerator(node, nodeProt, nodeFacade);
         }
         return false;
+    }
+
+    private void initLocalServiceWorkloadHistory(NodeStateHolder nodeProt) {
+        nodeProt.setLocalServiceWorkloadHistory(new HashMap<>());
     }
 
     private void initWorkloadAllocation(NodeStateHolder nodeProt) {

@@ -37,6 +37,11 @@ public class ServiceWorkload {
         this.reference = reference;
     }
 
+    public void disableWorkload(){
+        this.reference = 0f;
+        this.workload = 0;
+    }
+
     public boolean isActive(){
         return this.workload > 0;
     }
@@ -47,5 +52,10 @@ public class ServiceWorkload {
 
     public int getInterNodeDelay(FogNode target) {
         return source.getLinkDelay(target.getID());
+    }
+
+    @Override
+    public String toString() {
+        return "Workload for " + service.getId() + ": " + workload + "ms";
     }
 }
