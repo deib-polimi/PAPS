@@ -156,12 +156,14 @@ public class WorkloadFluctuation implements Control {
     private void fluctuateWorkload(ServiceWorkload serviceWorkload){
         if(serviceWorkload.isActive()) {
             short nextScenario = (short) random.nextInt(MAX_WORKLOAD_SCENARIOS);
+            System.out.println("########### Picked Scenario " + nextScenario + "##############");
             switch (nextScenario) {
                 case 0:
                     stableScenario(serviceWorkload);
                     break;
                 case 1:
                     peakScenario(serviceWorkload);
+                    break;
                 case 2:
                     decreasingScenario(serviceWorkload);
                     break;

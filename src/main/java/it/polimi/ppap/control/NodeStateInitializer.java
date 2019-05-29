@@ -19,6 +19,7 @@
 package it.polimi.ppap.control;
 
 import it.polimi.deib.ppap.node.NodeFacade;
+import it.polimi.deib.ppap.node.commons.Utils;
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.service.ServiceCatalog;
 import it.polimi.ppap.protocol.NodeStateHolder;
@@ -174,11 +175,8 @@ public class NodeStateInitializer implements Control {
         alpha = (float) Configuration.getDouble(prefix + "." + PAR_ALPHA);
         gama = (float) Configuration.getDouble(prefix + "." + PAR_GAMA);
         results = Configuration.getString(prefix + "." + PAR_RESULTS);
-        try {
-            logger = createLogger();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        logger = Utils.getLogger(results);
+
     }
 
     // ------------------------------------------------------------------------
@@ -232,13 +230,6 @@ public class NodeStateInitializer implements Control {
         nodeProt.setServiceRequestGenerator(serviceRequestGenerator);
     }
 
-    private Logger createLogger() throws IOException {
-        Logger logger = Logger.getLogger(NodeFacade.class.getName());
-        FileHandler fh;
-        fh = new FileHandler(results, true);
-        logger.addHandler(fh);
-        return logger;
-    }
 
     private Map<Service, ServiceWorkload> initServiceWorkload(FogNode fogNode, Set<Service> serviceCatalog){
         Map<Service, ServiceWorkload> serviceWorkload = new TreeMap<>();

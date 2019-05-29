@@ -75,15 +75,17 @@ public class ServiceRequestGenerator {
         return () -> {
             while(isWorkloadAndServiceActive(serviceWorkload)) {
                 long workload = (long) serviceWorkload.getWorkload();
-                int delay = serviceWorkload.getInterNodeDelay(fogNode);
-                long iterations = random.nextInt(100); //TODO random?
-                generateBurst(serviceWorkload.getService(), workload, delay, iterations);
+                if (workload > 0) {
+                    int delay = serviceWorkload.getInterNodeDelay(fogNode);
+                    long iterations =  1; //random.nextInt(100); //TODO random?
+                    generateBurst(serviceWorkload.getService(), workload, delay, iterations);
+                }
             }
         };
     }
 
     private boolean isWorkloadAndServiceActive(ServiceWorkload serviceWorkload) {
-        return activeServices.containsKey(serviceWorkload.getService()) && serviceWorkload.isActive();
+        return activeServices.containsKey(serviceWorkload.getService());
     }
 
     private void generateBurst(Service service, long workload, int delay, long iterations) {
