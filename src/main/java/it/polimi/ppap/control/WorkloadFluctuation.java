@@ -180,13 +180,13 @@ public class WorkloadFluctuation implements Control {
 
     private void peakScenario(ServiceWorkload serviceWorkload) {
         // peak inter-arrival rate
-        float mean = serviceWorkload.getReference() * 0.5f;
+        float mean = serviceWorkload.getReference() * 0.25f;
         serviceWorkload.setWorkload(mean);
     }
 
     private void decreasingScenario(ServiceWorkload serviceWorkload) {
         // decreasing inter-arrival rate
-        float mean = serviceWorkload.getReference() * 2f;
+        float mean = serviceWorkload.getReference() * 4f;
         serviceWorkload.setWorkload(mean);
     }
 
