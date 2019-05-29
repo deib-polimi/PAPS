@@ -37,12 +37,12 @@ public class ServiceWorkload {
         this.reference = reference;
     }
 
-    public void disableWorkload(){
+    public synchronized void disableWorkload(){
         this.reference = 0f;
         this.workload = 0;
     }
 
-    public boolean isActive(){
+    public synchronized boolean isActive(){
         return this.workload > 0;
     }
 
