@@ -21,11 +21,11 @@ public class ServiceWorkload {
         return service;
     }
 
-    public float getWorkload() {
+    public synchronized float getWorkload() {
         return workload;
     }
 
-    public void setWorkload(float workload) {
+    public synchronized void setWorkload(float workload) {
         this.workload = workload;
     }
 
