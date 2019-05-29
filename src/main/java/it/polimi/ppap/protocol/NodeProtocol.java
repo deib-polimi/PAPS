@@ -1,11 +1,7 @@
 package it.polimi.ppap.protocol;
 
 import it.polimi.deib.ppap.node.services.Service;
-import it.polimi.ppap.service.AggregateServiceAllocation;
-import it.polimi.ppap.service.ServiceAllocation;
-import it.polimi.ppap.service.ServiceWorkload;
-import it.polimi.ppap.random.initializer.ServiceWorkloadGenerator;
-import it.polimi.ppap.service.ServiceWorkloadFraction;
+import it.polimi.ppap.service.*;
 import it.polimi.ppap.topology.FogNode;
 import peersim.cdsim.CDProtocol;
 import peersim.core.CommonState;
@@ -27,7 +23,8 @@ public class NodeProtocol
 
     @Override
     public void nextCycle(Node node, int protocolID) {
-
+        for(Service service : ServiceCatalog.getServiceCatalog())
+            addToLocalServiceWorkloadHistory(localServiceWorkload.get(service));
     }
 
     @Override
@@ -56,7 +53,7 @@ public class NodeProtocol
 
 //--------------------------------------------------------------------------
 // INTERNAL
-//--------------------------------------------------------------------------
+//----------------------------------ds----------------------------------------
 
     private void placeServiceOnThisNode(final Service service,
                                         Map<Service,AggregateServiceAllocation> placementAllocation,

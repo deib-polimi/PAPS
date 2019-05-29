@@ -108,7 +108,7 @@ public class CommunityProtocol
         for(FogNode member : nodeServiceWorkload.keySet()){
             for(Service service : ServiceCatalog.getServiceCatalog()) {
                 if(nodeServiceWorkload.get(member).containsKey(service)) {
-                    float aggregateWorkload = getAggregateWorkload(nodeServiceWorkload.get(member).get(service));
+                    float aggregateWorkload = getAverageWorkload(nodeServiceWorkload.get(member).get(service));
                     if(aggregateWorkload > 0)
                         updateDemandFromStaticAllocation(member, service, aggregateWorkload);
                     else
@@ -121,10 +121,11 @@ public class CommunityProtocol
         plan(node, pid);
     }
 
-    public float getAggregateWorkload(Set<ServiceWorkload> serviceWorkloads){
-        DoubleStream workloadStream = serviceWorkloads.stream().mapToDouble(e -> 1000 / e.getWorkload());
+    public float getAverageWorkload(Set<ServiceWorkload> serviceWorkloads){
+        DoubleStream workloadStream = serviceWorkloads.stream().mapToDouble(e -> e.getWorkload());
+        int total = serviceWorkloads.size();
         Double frequencySum = workloadStream.sum();
-        return (float) (1000 / frequencySum);
+        return frequencySum.floatValue() / total;
     }
 
     private void updateDemandFromStaticAllocation(FogNode member, Service service, float workload) {
@@ -202,7 +203,7 @@ public class CommunityProtocol
 
     private void processMemberMessage(FogNode node, int pid, CommunityMessage msg) {
         MemberMessage memberMessage = (MemberMessage) msg;
-        updateNodeServiceWorkload(memberMessage.getSender(), memberMessage.getLocalServiceWorkload());
+        updateNodeServiceWorkload(memberMessage.getSender(), memberMessage.getLocalServiceWorkloadHistory());
         storeNodeWorkloadAllocation(memberMessage.getSender(), memberMessage.getWorkloadAllocation());
         incMonitoringCount();
         if(isAllMonitoringReceived(getMonitoringCount(), node, pid)) {
@@ -211,15 +212,17 @@ public class CommunityProtocol
         }
     }
 
-    private void updateNodeServiceWorkload(FogNode sender, Map<Service, ServiceWorkload> localServiceWorkload){
+    private void updateNodeServiceWorkload(FogNode sender, Map<Service, Set<ServiceWorkload>> localServiceWorkloadHistory){
         Map<Service, Set<ServiceWorkload>> nodeServiceWorkloads = nodeServiceWorkload.getOrDefault(sender, new TreeMap<>());
         nodeServiceWorkload.put(sender, nodeServiceWorkloads);
         for(Service service : ServiceCatalog.getServiceCatalog()) {
             Set<ServiceWorkload> serviceWorkloads = nodeServiceWorkload.get(sender).getOrDefault(service, new HashSet<>());
-            if (localServiceWorkload.containsKey(service))
-                serviceWorkloads.add(localServiceWorkload.get(service));
+            if (localServiceWorkloadHistory.containsKey(service))
+                for(ServiceWorkload serviceWorkload : localServiceWorkloadHistory.get(service))
+                    serviceWorkloads.add(serviceWorkload);
             else
-                serviceWorkloads.add(new ServiceWorkload(sender, service, 0f));
+                serviceWorkloads.add(new ServiceWorkload(sender, service, 0f, 0f));
+
             nodeServiceWorkload.get(sender).put(service, serviceWorkloads);
         }
     }
@@ -281,7 +284,8 @@ public class CommunityProtocol
     private void monitor(FogNode node, int pid){
         //System.out.println("Performing the MONITOR activity");
         NodeProtocol nodeProtocol = (NodeProtocol) node.getProtocol(nodePid);
-        Map<Service, ServiceWorkload> localServiceWorkload = nodeProtocol.getLocalServiceWorkload();
+        Map<Service, Set<ServiceWorkload>> localServiceWorkload = nodeProtocol.getLocalServiceWorkloadHistory();
+        nodeProtocol.clearLocalServiceWorkloadHistory();
         Map<Service, Map.Entry<Float, Float>> currentDemandAllocation = nodeProtocol.getCurrentWorkloadAllocation();
         try {
             sendMonitoredDataToLeader(localServiceWorkload, currentDemandAllocation, node, pid);
@@ -290,7 +294,7 @@ public class CommunityProtocol
         }
     }
 
-    private void sendMonitoredDataToLeader(Map<Service, ServiceWorkload> localServiceWorkload,
+    private void sendMonitoredDataToLeader(Map<Service, Set<ServiceWorkload>> localServiceWorkload,
                                            Map<Service, Map.Entry<Float, Float>> currentWorkloadAllocation,
                                            FogNode node, int pid) throws CommunityLeaderNotFoundException {
         FogNode communityLeader = getCommunityLeader(node, pid);

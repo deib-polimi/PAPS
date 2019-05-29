@@ -1,13 +1,16 @@
 package it.polimi.ppap.protocol;
 
+import com.google.common.collect.ImmutableMap;
 import it.polimi.deib.ppap.node.NodeFacade;
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.random.workload.ServiceRequestGenerator;
-import it.polimi.ppap.service.ServiceCatalog;
 import it.polimi.ppap.service.ServiceWorkload;
 import peersim.core.Protocol;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public abstract class NodeStateHolder implements Protocol, NodeFacade.TickListener {
 
@@ -26,6 +29,22 @@ public abstract class NodeStateHolder implements Protocol, NodeFacade.TickListen
 
     public Map<Service, ServiceWorkload> getLocalServiceWorkload() {
         return localServiceWorkload;
+    }
+
+    Map<Service, Set<ServiceWorkload>> localServiceWorkloadHistory = new HashMap<>();
+
+    public Map<Service, Set<ServiceWorkload>> getLocalServiceWorkloadHistory() {
+        return ImmutableMap.copyOf(localServiceWorkloadHistory);
+    }
+
+    public void clearLocalServiceWorkloadHistory(){
+        localServiceWorkloadHistory.clear();
+    }
+
+    protected void addToLocalServiceWorkloadHistory(ServiceWorkload serviceWorkload){
+        Set<ServiceWorkload> serviceWorkloads = localServiceWorkloadHistory.getOrDefault(serviceWorkload.getService(), new HashSet<>());
+        serviceWorkloads.add(serviceWorkload);
+        localServiceWorkloadHistory.put(serviceWorkload.getService(), serviceWorkloads);
     }
 
     /**

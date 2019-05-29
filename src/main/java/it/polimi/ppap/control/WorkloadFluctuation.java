@@ -18,12 +18,16 @@
 
 package it.polimi.ppap.control;
 
+import it.polimi.deib.ppap.node.commons.NormalDistribution;
+import it.polimi.deib.ppap.node.commons.Utils;
 import it.polimi.deib.ppap.node.services.Service;
+import it.polimi.deib.ppap.node.services.ServiceRequest;
 import it.polimi.ppap.random.initializer.ServiceDemandGenerator;
 import it.polimi.ppap.protocol.NodeProtocol;
 import it.polimi.ppap.random.initializer.ServiceWorkloadGenerator;
 import it.polimi.ppap.service.ServiceCatalog;
 import it.polimi.ppap.service.ServiceWorkload;
+import org.apache.commons.math3.distribution.ExponentialDistribution;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
@@ -31,6 +35,7 @@ import peersim.core.Network;
 import peersim.util.IncrementalStats;
 
 import java.util.Map;
+import java.util.Random;
 
 /**
  * Print statistics for an average aggregation computation. Statistics printed
@@ -83,6 +88,8 @@ public class WorkloadFluctuation implements Control {
     /** The mean for generating the workload for the admitted functions*/
     private final int workload;
 
+    Random random = CommonState.r;
+
 
 
     /** Protocol identifier; obtained from config property {@link #PAR_PROT}. */
@@ -133,13 +140,59 @@ public class WorkloadFluctuation implements Control {
             ServiceWorkload serviceWorkload = nodeServiceWorkload.get(service);
             if(CommonState.r.nextFloat() < changeProbability){
                 if(serviceWorkload.isActive()) {
-                    serviceWorkload.setWorkload(0);
+                    serviceWorkload.setReference(0);
                     System.out.println("########### Deactivated Workload for service " + service.getId() + "##############");
                 }else {
-                    serviceWorkload.setWorkload(serviceWorkloadGenerator.nextWorkload());
-                    System.out.println("########### Activated Workload for service " + service.getId() + ": " + serviceWorkload + " ##############");
+                    serviceWorkload.setReference(serviceWorkloadGenerator.nextWorkload());
+                    System.out.println("########### Activated Workload for service " + service.getId() + "##############");
                 }
             }
+            fluctuateWorkload(serviceWorkload);
         }
+    }
+
+
+    private final static short MAX_WORKLOAD_SCENARIOS = 3; //TODO no quiet scenario here
+
+    private void fluctuateWorkload(ServiceWorkload serviceWorkload){
+        if(serviceWorkload.isActive()) {
+            short nextScenario = (short) random.nextInt(MAX_WORKLOAD_SCENARIOS);
+            switch (nextScenario) {
+                case 0:
+                    stableScenario(serviceWorkload);
+                    break;
+                case 1:
+                    peakScenario(serviceWorkload);
+                case 2:
+                    decreasingScenario(serviceWorkload);
+                    break;
+                default:
+                    quietScenario(serviceWorkload);
+                    break;
+            }
+        }
+    }
+
+    private void stableScenario(ServiceWorkload serviceWorkload) {
+        // stable system
+        float mean = serviceWorkload.getReference();
+        serviceWorkload.setWorkload(mean);
+    }
+
+    private void peakScenario(ServiceWorkload serviceWorkload) {
+        // peak inter-arrival rate
+        float mean = serviceWorkload.getReference() * 0.5f;
+        serviceWorkload.setWorkload(mean);
+    }
+
+    private void decreasingScenario(ServiceWorkload serviceWorkload) {
+        // decreasing inter-arrival rate
+        float mean = serviceWorkload.getReference() * 2f;
+        serviceWorkload.setWorkload(mean);
+    }
+
+    private void quietScenario(ServiceWorkload serviceWorkload) {
+        // clients disappear
+        serviceWorkload.setWorkload(0f);
     }
 }

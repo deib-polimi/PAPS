@@ -248,7 +248,7 @@ public class NodeStateInitializer implements Control {
         float activeWorkloadProbability = gama;
         ServiceWorkloadGenerator serviceWorkloadGenerator = new ServiceWorkloadGenerator(mean, std, activeWorkloadProbability);
         float initialWorkload = serviceWorkloadGenerator.nextWorkload();
-        ServiceWorkload serviceWorkload = new ServiceWorkload(fogNode, service, initialWorkload);
+        ServiceWorkload serviceWorkload = new ServiceWorkload(fogNode, service, initialWorkload, initialWorkload);
         System.out.println("########### Initialized Workload for " + service.getId() + ": " + initialWorkload + " ##############");
         return serviceWorkload;
     }
