@@ -73,31 +73,37 @@ public class ServiceRequestGenerator {
 
     private Runnable executeRequestsStableScenario(ServiceWorkload serviceWorkload){
         return () -> {
-            while(activeServices.containsKey(serviceWorkload.getService()) && serviceWorkload.isActive()) {
+            while(isWorkloadAndServiceActive(serviceWorkload)) {
                 long workload = (long) serviceWorkload.getWorkload();
                 int delay = serviceWorkload.getInterNodeDelay(fogNode);
-                long iterations = random.nextInt(250); //TODO random?
-                createRequest(serviceWorkload.getService(), workload, delay, iterations);
+                long iterations = random.nextInt(100); //TODO random?
+                generateBurst(serviceWorkload.getService(), workload, delay, iterations);
             }
         };
     }
 
-    private void createRequest(Service service, long workload, int delay, long iterations) {
+    private boolean isWorkloadAndServiceActive(ServiceWorkload serviceWorkload) {
+        return activeServices.containsKey(serviceWorkload.getService()) && serviceWorkload.isActive();
+    }
+
+    private void generateBurst(Service service, long workload, int delay, long iterations) {
         NormalDistribution normalDistribution = Utils.getNormalDistribution(service.getET() * 0.8, service.getET() * 0.8 *0.1); //TODO ET * 0.8 ?
         ExponentialDistribution exponentialDistribution = new ExponentialDistribution(workload);
         for (int i = 0; i < iterations && activeServices.containsKey(service); i++) {
-            long executionTime = (long) normalDistribution.random();//execution time <= SLA
-            nodeFacade.execute(new ServiceRequest(service, executionTime, delay));
-            try {
-                long nextArrivalTime = (long) exponentialDistribution.sample();
-                Thread.sleep(nextArrivalTime);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            createRequest(service, delay, normalDistribution, exponentialDistribution);
         }
     }
 
-
+    private void createRequest(Service service, int delay, NormalDistribution normalDistribution, ExponentialDistribution exponentialDistribution) {
+        long executionTime = (long) normalDistribution.random();//execution time <= SLA
+        nodeFacade.execute(new ServiceRequest(service, executionTime, delay));
+        try {
+            long nextArrivalTime = (long) exponentialDistribution.sample();
+            Thread.sleep(nextArrivalTime);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 
 
     //DEPRECATED
@@ -114,7 +120,7 @@ public class ServiceRequestGenerator {
                 //System.out.println("Next scenario: " + iterations);
                 switch (nextScenario){
                     case 0:
-                        createRequest(serviceWorkload.getService(), workload, delay, iterations);
+                        generateBurst(serviceWorkload.getService(), workload, delay, iterations);
                         break;
                     case 1:
                         peakScenario(serviceWorkload.getService(), workload, delay, iterations);

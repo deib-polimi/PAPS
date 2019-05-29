@@ -116,8 +116,7 @@ public class WorkloadFluctuation implements Control {
     // /////////////////////////////////////////////////////////////////////
 
     public boolean execute() {
-        if(active)
-            processWorkloadFluctuation();
+        processWorkloadFluctuation();
         return false;
     }
 
@@ -138,9 +137,9 @@ public class WorkloadFluctuation implements Control {
         float changeProbability = activateProbability / 10;
         for(Service service : ServiceCatalog.getServiceCatalog()) {
             ServiceWorkload serviceWorkload = nodeServiceWorkload.get(service);
-            if(CommonState.r.nextFloat() < changeProbability){
+            if(active && CommonState.r.nextFloat() < changeProbability){
                 if(serviceWorkload.isActive()) {
-                    serviceWorkload.setReference(0);
+                    serviceWorkload.disableWorkload();
                     System.out.println("########### Deactivated Workload for service " + service.getId() + "##############");
                 }else {
                     serviceWorkload.setReference(serviceWorkloadGenerator.nextWorkload());
