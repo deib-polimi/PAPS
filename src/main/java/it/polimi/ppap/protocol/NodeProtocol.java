@@ -33,7 +33,6 @@ public class NodeProtocol
         synchronized (CommonState.r) {
             CommonState.r.notify();
         }
-        //fluctuateWorkload();
     }
 
     @Override
@@ -45,7 +44,7 @@ public class NodeProtocol
                 if (!nodeFacade.isServing(service))
                     placeServiceOnThisNode(node, new Service(service), placementAllocation, nodePID);
                 else
-                    updateServiceAllocation(service, placementAllocation, nodePID);
+                    updateServiceAllocation(service, placementAllocation);
             }else if(nodeFacade.isServing(service)) {
                 removeServiceFromThisNode(service);
         }
@@ -60,13 +59,13 @@ public class NodeProtocol
                                         final int nodePID) {
         System.out.println("########### Placing Service " + service.getId() + " Onto " + node + "##############");
         nodeFacade.addService(service);
-        updateServiceAllocation(service, placementAllocation, nodePID);
+        updateServiceAllocation(service, placementAllocation);
         placementAllocation.get(service).stream().filter(e -> e.getAllocation() > 0).forEach(serviceDemand -> {
             activateWorkloadForDemandFraction(service, nodePID, serviceDemand);
         });
     }
 
-    private void updateServiceAllocation(Service service, Map<Service, AggregateServiceAllocation> placementAllocation, int nodePID) {
+    private void updateServiceAllocation(Service service, Map<Service, AggregateServiceAllocation> placementAllocation) {
         float allocation  = placementAllocation.get(service).getAggregateAllocation();
         nodeFacade.setTargetAllocation(service, allocation);
     }
