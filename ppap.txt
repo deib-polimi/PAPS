@@ -2,7 +2,7 @@
 DEBUG 0
 
 # network size
-SIZE 50
+SIZE 5
 
 # connectivity
 CONNECTIVITY SIZE - 1
@@ -11,7 +11,7 @@ CONNECTIVITY SIZE - 1
 CAPACITY 96
 
 # number of distinct functions in the system
-ENTROPY 10
+ENTROPY 5
 
 # the memory requirement for admitted functions
 MEMORY 128
@@ -29,7 +29,7 @@ GAMA 0.3
 WORKLOAD RT_SLA * 2
 
 # if the workload fluctuates due to client mobility (0 or 1)
-CHURN 1
+CHURN 0
 
 # the maximum variation of the workload at each cycle
 DELTA_WORKLOAD GAMA / 10
