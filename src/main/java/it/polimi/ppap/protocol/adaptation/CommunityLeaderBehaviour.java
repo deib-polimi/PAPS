@@ -3,11 +3,18 @@ package it.polimi.ppap.protocol.adaptation;
 import it.polimi.deib.ppap.node.NodeFacade;
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.protocol.MemberStateHolder;
+import it.polimi.ppap.service.AggregateServiceAllocation;
 import it.polimi.ppap.service.ServiceCatalog;
 import it.polimi.ppap.service.ServiceWorkload;
 import it.polimi.ppap.solver.OplModSolver;
 import it.polimi.ppap.topology.FogNode;
+import it.polimi.ppap.transport.LeaderMessage;
+import peersim.config.FastConfig;
+import peersim.core.Linkable;
+import peersim.core.Node;
+import peersim.transport.Transport;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.DoubleStream;
 
@@ -18,9 +25,6 @@ public class CommunityLeaderBehaviour {
     public CommunityLeaderBehaviour(MemberStateHolder memberStateHolder) {
         this.memberStateHolder = memberStateHolder;
     }
-
-    // -----------------
-    // LEADER's BEHAVIOR
 
     /**
      * By default, the leader behaves in a reactive manner, namely after all community members have sent their message.
@@ -136,6 +140,7 @@ public class CommunityLeaderBehaviour {
      */
     public void plan(FogNode node, int pid){
         solvePlacementAllocation();
+        sendPlanToMembers(node, pid);
     }
 
     //TODO async system call to CPLEX solver; otherwise complex optimization will make the simulation to stop
@@ -146,6 +151,29 @@ public class CommunityLeaderBehaviour {
             memberStateHolder.setNodeServiceAllocation(oplModSolver.solve(memberStateHolder.getNodeServiceDemand(), false));
         } catch (OplModSolver.OplSolutionNotFoundException ex){
             memberStateHolder.setNodeServiceAllocation(oplModSolver.solve(memberStateHolder.getNodeServiceDemand(), true));
+        }
+    }
+
+    private void sendPlanToMembers(FogNode node, int pid){
+        Linkable linkable =
+                (Linkable) node.getProtocol(FastConfig.getLinkable(pid));
+
+        Map<Service, AggregateServiceAllocation> leaderServiceAllocation = memberStateHolder.getNodeServiceAllocation().get(node);
+        ((Transport) node.getProtocol(FastConfig.getTransport(pid))).
+                send(
+                        node,
+                        node,
+                        new LeaderMessage(node, leaderServiceAllocation),
+                        pid);
+        for(int i = 0; i < linkable.degree(); i++){
+            Node member = linkable.getNeighbor(i);
+            Map<Service, AggregateServiceAllocation> memberServiceAllocation = memberStateHolder.getNodeServiceAllocation().get(member);
+            ((Transport) node.getProtocol(FastConfig.getTransport(pid))).
+                    send(
+                            node,
+                            member,
+                            new LeaderMessage(node, memberServiceAllocation),
+                            pid);
         }
     }
 }

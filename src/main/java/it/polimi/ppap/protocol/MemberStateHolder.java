@@ -2,6 +2,7 @@ package it.polimi.ppap.protocol;
 
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.protocol.adaptation.CommunityLeaderBehaviour;
+import it.polimi.ppap.protocol.adaptation.CommunityMemberBehaviour;
 import it.polimi.ppap.service.AggregateServiceAllocation;
 import it.polimi.ppap.service.ServiceCatalog;
 import it.polimi.ppap.service.ServiceDemand;
@@ -25,6 +26,13 @@ public abstract class MemberStateHolder implements Protocol {
     public void setLeader(boolean leader) {
         this.leader = leader;
     }
+
+    CommunityMemberBehaviour communityMemberBehaviour;
+
+    public void setCommunityMemberBehaviour(CommunityMemberBehaviour communityMemberBehaviour) {
+        this.communityMemberBehaviour = communityMemberBehaviour;
+    }
+
     CommunityLeaderBehaviour communityLeaderBehaviour;
 
     public void initializeLeader(float optimizationBeta, int referenceControlPeriod){

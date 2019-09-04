@@ -1,7 +1,6 @@
 package it.polimi.ppap.protocol;
 
 import it.polimi.deib.ppap.node.services.Service;
-import it.polimi.ppap.protocol.adaptation.CommunityLeaderBehaviour;
 import it.polimi.ppap.service.AggregateServiceAllocation;
 import it.polimi.ppap.service.ServiceCatalog;
 import it.polimi.ppap.service.ServiceWorkload;
@@ -45,10 +44,10 @@ public class CommunityProtocol
     //--------------------------------------------------------------------------
 
     @Override
-    public void nextCycle(Node node, int protocolID) {
-        performMemberBehavior((FogNode) node, protocolID);
+    public void nextCycle(Node node, int pid) {
+        communityMemberBehaviour.monitor((FogNode) node, nodePid, pid);
         if(isLeader()) {
-            communityLeaderBehaviour.cyclicBehavior((FogNode) node, protocolID);
+            communityLeaderBehaviour.cyclicBehavior((FogNode) node, pid);
         }
     }
 
@@ -72,24 +71,6 @@ public class CommunityProtocol
     // INTERNAL BEHAVIOR
     //--------------------------------------------------------------------------
 
-    private void sendPlanToMembers(FogNode node, int pid){
-        Linkable linkable =
-                (Linkable) node.getProtocol(FastConfig.getLinkable(pid));
-
-        Map<Service, AggregateServiceAllocation> leaderServiceAllocation = getNodeServiceAllocation().get(node);
-        execute(leaderServiceAllocation, node, pid);
-        for(int i = 0; i < linkable.degree(); i++){
-            Node member = linkable.getNeighbor(i);
-            Map<Service, AggregateServiceAllocation> memberServiceAllocation = getNodeServiceAllocation().get(member);
-            ((Transport) node.getProtocol(FastConfig.getTransport(pid))).
-                    send(
-                            node,
-                            member,
-                            new LeaderMessage(node, memberServiceAllocation),
-                            pid);
-        }
-    }
-
     private void processMemberMessage(FogNode node, int pid, CommunityMessage msg) {
         MemberMessage memberMessage = (MemberMessage) msg;
         updateNodeServiceWorkload(memberMessage.getSender(), memberMessage.getLocalServiceWorkloadHistory());
@@ -98,7 +79,6 @@ public class CommunityProtocol
         if(isAllMonitoringReceived(getMonitoringCount(), node, pid)) {
             communityLeaderBehaviour.analyze(node, pid);
             communityLeaderBehaviour.plan(node, pid);
-            sendPlanToMembers(node, pid);
             resetMonitoringCount();
         }
     }
@@ -136,39 +116,6 @@ public class CommunityProtocol
     }
 
     // -----------------
-    // COMMON MEMBER's BEHAVIOR
-
-    private void performMemberBehavior(FogNode node, int pid){
-        monitor(node, pid);
-    }
-
-    //MAPE: MONITORING
-    private void monitor(FogNode node, int pid){
-        //System.out.println("Performing the MONITOR activity");
-        NodeProtocol nodeProtocol = (NodeProtocol) node.getProtocol(nodePid);
-        Map<Service, Set<ServiceWorkload>> localServiceWorkload = nodeProtocol.getLocalServiceWorkloadHistory();
-        nodeProtocol.clearLocalServiceWorkloadHistory();
-        Map<Service, Map.Entry<Float, Float>> currentDemandAllocation = nodeProtocol.getCurrentWorkloadAllocation();
-        try {
-            sendMonitoredDataToLeader(localServiceWorkload, currentDemandAllocation, node, pid);
-        } catch (CommunityLeaderNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void sendMonitoredDataToLeader(Map<Service, Set<ServiceWorkload>> localServiceWorkload,
-                                           Map<Service, Map.Entry<Float, Float>> currentWorkloadAllocation,
-                                           FogNode node, int pid) throws CommunityLeaderNotFoundException {
-        FogNode communityLeader = getCommunityLeader(node, pid);
-        ((Transport) node.getProtocol(FastConfig.getTransport(pid))).
-                send(
-                    node,
-                    communityLeader,
-                    new MemberMessage(node, localServiceWorkload, currentWorkloadAllocation),
-                    pid);
-    }
-
-    // -----------------
     //MAPE: EXECUTION
 
     private void execute(Map<Service, AggregateServiceAllocation> placementAllocation, Node node, int pid){
@@ -177,26 +124,4 @@ public class CommunityProtocol
         nodeProtocol.updatePlacementAllocation((FogNode) node, placementAllocation, nodePid);
     }
 
-
-    private FogNode getCommunityLeader(FogNode node, int pid) throws CommunityLeaderNotFoundException {
-        Linkable linkable =
-                (Linkable) node.getProtocol(FastConfig.getLinkable(pid));
-        if(isLeader())
-            return node;
-        else {
-            for (int i = 0; i < linkable.degree(); i++) {
-                FogNode member = (FogNode) linkable.getNeighbor(i);
-                CommunityProtocol memberCommunityProtocol = (CommunityProtocol) member.getProtocol(pid);
-                if (memberCommunityProtocol.isLeader())
-                    return member;
-            }
-            throw new CommunityLeaderNotFoundException("The community has no elected leader");
-        }
-    }
-
-    private class CommunityLeaderNotFoundException extends Exception {
-        CommunityLeaderNotFoundException(String msg){
-            super(msg);
-        }
-    }
 }

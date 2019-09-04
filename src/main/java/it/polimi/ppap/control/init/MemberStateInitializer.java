@@ -20,6 +20,7 @@ package it.polimi.ppap.control.init;
 
 import it.polimi.ppap.protocol.MemberStateHolder;
 import it.polimi.ppap.protocol.adaptation.CommunityLeaderBehaviour;
+import it.polimi.ppap.protocol.adaptation.CommunityMemberBehaviour;
 import it.polimi.ppap.random.LinearNetworkDelayGenerator;
 import it.polimi.ppap.topology.FogNode;
 import peersim.config.Configuration;
@@ -107,23 +108,28 @@ public class MemberStateInitializer implements Control {
     * @return always false
     */
     public boolean execute() {
-        initLeader();
-        return false;
-    }
-
-    private Node getLeader(){
-        return Network.get(0);
-    }
-
-    private void initLeader(){
-        Node leader = getLeader();
-        MemberStateHolder memberProtocol = (MemberStateHolder) leader.getProtocol(pid);
-        memberProtocol.initializeLeader(beta, referenceControlPeriod);
+        initializeLeader();
         for(int i=0; i<Network.size(); ++i) {
             FogNode fogNode = (FogNode) Network.get(i);
             initInterNodeDelay(fogNode);
+            initCommunityMemberBehavior(fogNode);
         }
+        return false;
+    }
 
+    private void initCommunityMemberBehavior(FogNode fogNode) {
+        MemberStateHolder memberProtocol = (MemberStateHolder) fogNode.getProtocol(pid);
+        memberProtocol.setCommunityMemberBehaviour(new CommunityMemberBehaviour(memberProtocol));
+    }
+
+    private Node pickCommunityLeader(){
+        return Network.get(0);
+    }
+
+    private void initializeLeader(){
+        Node leader = pickCommunityLeader();
+        MemberStateHolder memberProtocol = (MemberStateHolder) leader.getProtocol(pid);
+        memberProtocol.initializeLeader(beta, referenceControlPeriod);
     }
 
     private void initInterNodeDelay(FogNode fogNode){
