@@ -36,9 +36,9 @@ subject to{
       sum( s in DemandSources, f in Functions ) 
         DemandLevel[s][f] * Supply[s][w][f] <= Capacity[w];
   //Min allocation integrality
-  forall( w in Nodes, s in DemandSources, f in Functions )
-	ctMinAllocationIntegrality:
-      (DemandLevel[s][f] >= 0) => (DemandLevel[s][f] * Supply[s][w][f] == 0 || DemandLevel[s][f] * Supply[s][w][f] >= 1);
+  //forall( w in Nodes, s in DemandSources, f in Functions )
+	//ctMinAllocationIntegrality:
+      //(DemandLevel[s][f] >= 0) => (DemandLevel[s][f] * Supply[s][w][f] == 0 || DemandLevel[s][f] * Supply[s][w][f] >= 1);
   //Supply can not be negative (redundant, since Supply is float+)
     //forall( w in Nodes, s in DemandSources, f in Functions )
       //ctSupplyGEZero:

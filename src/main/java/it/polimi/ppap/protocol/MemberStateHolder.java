@@ -1,6 +1,7 @@
 package it.polimi.ppap.protocol;
 
 import it.polimi.deib.ppap.node.services.Service;
+import it.polimi.ppap.protocol.adaptation.CommunityLeaderBehaviour;
 import it.polimi.ppap.service.AggregateServiceAllocation;
 import it.polimi.ppap.service.ServiceCatalog;
 import it.polimi.ppap.service.ServiceDemand;
@@ -24,13 +25,16 @@ public abstract class MemberStateHolder implements Protocol {
     public void setLeader(boolean leader) {
         this.leader = leader;
     }
+    CommunityLeaderBehaviour communityLeaderBehaviour;
 
-    public void initializeLeader(float beta){
+    public void initializeLeader(float optimizationBeta, int referenceControlPeriod){
+        setLeader(true);
         nodeServiceWorkload = new TreeMap<>();
         workloadAllocationHistory = new TreeMap<>();
         nodeServiceDemand = new TreeMap<>();
-        optimizationBeta = beta;
-        setLeader(true);
+        this.optimizationBeta = optimizationBeta;
+        this.referenceControlPeriod = referenceControlPeriod;
+        communityLeaderBehaviour = new CommunityLeaderBehaviour(this);
     }
 
     //MAPE: Monitoring
@@ -50,6 +54,10 @@ public abstract class MemberStateHolder implements Protocol {
     }
 
     Map<FogNode, Map<Service, Set<ServiceWorkload>>> nodeServiceWorkload;
+
+    public Map<FogNode, Map<Service, Set<ServiceWorkload>>> getNodeServiceWorkload() {
+        return nodeServiceWorkload;
+    }
 
     Map<Service, Map<Float, Float>> workloadAllocationHistory;
 
@@ -75,6 +83,12 @@ public abstract class MemberStateHolder implements Protocol {
 
     public float getOptimizationBeta() {
         return optimizationBeta;
+    }
+
+    int referenceControlPeriod;
+
+    public int getReferenceControlPeriod() {
+        return referenceControlPeriod;
     }
 
     Map<FogNode, Map<Service, AggregateServiceAllocation>> nodeServiceAllocation = new TreeMap<>();

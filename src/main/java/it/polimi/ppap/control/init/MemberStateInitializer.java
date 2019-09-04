@@ -19,6 +19,7 @@
 package it.polimi.ppap.control.init;
 
 import it.polimi.ppap.protocol.MemberStateHolder;
+import it.polimi.ppap.protocol.adaptation.CommunityLeaderBehaviour;
 import it.polimi.ppap.random.LinearNetworkDelayGenerator;
 import it.polimi.ppap.topology.FogNode;
 import peersim.config.Configuration;
@@ -60,6 +61,11 @@ public class MemberStateInitializer implements Control {
      */
     private static final String PAR_BETA = "beta";
 
+    /**
+     * The reference control period variable name in the simulation config file.
+     */
+    private static final String PAR_REF_CONTROL_PERIOD = "rcp";
+
 
     // ------------------------------------------------------------------------
     // Fields
@@ -70,6 +76,12 @@ public class MemberStateInitializer implements Control {
 
     /** Optimization parameter beta; obtained from config property {@link #PAR_BETA}. */
     private final float beta;
+
+    /**
+     * The reference control period used at the node level.
+     * @see CommunityLeaderBehaviour#updateDemandFromStaticAllocation
+     */
+    private final int referenceControlPeriod;
 
 
     // ------------------------------------------------------------------------
@@ -83,6 +95,8 @@ public class MemberStateInitializer implements Control {
 
         pid = Configuration.getPid(prefix + "." + PAR_PROT);
         beta = (float) Configuration.getDouble(prefix + "." + PAR_BETA);
+        referenceControlPeriod = Configuration.getInt(prefix + "." + PAR_REF_CONTROL_PERIOD);
+
     }
 
     // ------------------------------------------------------------------------
@@ -104,7 +118,7 @@ public class MemberStateInitializer implements Control {
     private void initLeader(){
         Node leader = getLeader();
         MemberStateHolder memberProtocol = (MemberStateHolder) leader.getProtocol(pid);
-        memberProtocol.initializeLeader(beta);
+        memberProtocol.initializeLeader(beta, referenceControlPeriod);
         for(int i=0; i<Network.size(); ++i) {
             FogNode fogNode = (FogNode) Network.get(i);
             initInterNodeDelay(fogNode);

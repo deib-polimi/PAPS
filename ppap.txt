@@ -84,7 +84,6 @@ protocol.cp.linkable link
 protocol.cp.step COMMUNITY_CYCLE
 protocol.cp.transport tr
 protocol.cp.nodeprotocol np
-protocol.cp.deltatick CONTROL_PERIOD
 
 protocol.urt UniformRandomTransport
 protocol.urt.mindelay (CYCLE*MINDELAY)/100
@@ -109,6 +108,7 @@ init.ss.etmax ET_MAX
 init.ms it.polimi.ppap.control.init.MemberStateInitializer
 init.ms.protocol cp
 init.ms.beta BETA
+init.ms.rcp CONTROL_PERIOD
 
 init.ns it.polimi.ppap.control.init.NodeStateInitializer
 init.ns.protocol np
