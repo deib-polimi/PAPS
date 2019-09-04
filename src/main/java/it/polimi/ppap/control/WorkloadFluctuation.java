@@ -18,16 +18,11 @@
 
 package it.polimi.ppap.control;
 
-import it.polimi.deib.ppap.node.commons.NormalDistribution;
-import it.polimi.deib.ppap.node.commons.Utils;
 import it.polimi.deib.ppap.node.services.Service;
-import it.polimi.deib.ppap.node.services.ServiceRequest;
-import it.polimi.ppap.random.initializer.ServiceDemandGenerator;
 import it.polimi.ppap.protocol.NodeProtocol;
-import it.polimi.ppap.random.initializer.ServiceWorkloadGenerator;
+import it.polimi.ppap.random.NormalServiceWorkloadGenerator;
 import it.polimi.ppap.service.ServiceCatalog;
 import it.polimi.ppap.service.ServiceWorkload;
-import org.apache.commons.math3.distribution.ExponentialDistribution;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
@@ -133,7 +128,7 @@ public class WorkloadFluctuation implements Control {
     }
 
     private void fluctuateWorkload(float mean, float std, float activateProbability, Map<Service, ServiceWorkload> nodeServiceWorkload) {
-        ServiceWorkloadGenerator serviceWorkloadGenerator = new ServiceWorkloadGenerator(mean, std, activateProbability);
+        NormalServiceWorkloadGenerator serviceWorkloadGenerator = new NormalServiceWorkloadGenerator(mean, std, activateProbability);
         float changeProbability = activateProbability / 10;
         for(Service service : ServiceCatalog.getServiceCatalog()) {
             ServiceWorkload serviceWorkload = nodeServiceWorkload.get(service);

@@ -101,16 +101,16 @@ init.rndlink.k CONNECTIVITY
 init.rndlink.protocol link
 init.rndlink.undir true
 
-init.ss it.polimi.ppap.control.ServiceCatalogInitializer
+init.ss it.polimi.ppap.control.init.ServiceCatalogInitializer
 init.ss.entropy ENTROPY
 init.ss.rtsla RT_SLA
 init.ss.etmax ET_MAX
 
-init.ms it.polimi.ppap.control.MemberStateInitializer
+init.ms it.polimi.ppap.control.init.MemberStateInitializer
 init.ms.protocol cp
 init.ms.beta BETA
 
-init.ns it.polimi.ppap.control.NodeStateInitializer
+init.ns it.polimi.ppap.control.init.NodeStateInitializer
 init.ns.protocol np
 init.ns.delta CONTROL_PERIOD
 init.ns.capacity CAPACITY

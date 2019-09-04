@@ -1,4 +1,4 @@
-package it.polimi.ppap.random.initializer;
+package it.polimi.ppap.random;
 
 import it.polimi.deib.ppap.node.services.Service;
 import peersim.core.CommonState;
@@ -6,29 +6,21 @@ import peersim.core.CommonState;
 import java.util.Random;
 
 public class ServiceGenerator {
-
-    static Random random = CommonState.r;
     static long serviceCount = 0;
 
-    final long baseServiceMemory;
-    final short serviceMemoryMultiplier;
+    final UniformServiceMemoryRequirementGenerator serviceMemoryRequirementGenerator;
 
     public ServiceGenerator(
             long baseServiceMemory,
             short serviceMemoryMultiplier){
-        this.baseServiceMemory = baseServiceMemory;
-        this.serviceMemoryMultiplier = serviceMemoryMultiplier;
+        this.serviceMemoryRequirementGenerator = new UniformServiceMemoryRequirementGenerator(baseServiceMemory, serviceMemoryMultiplier);
     }
 
     public  Service nextService(float rtSLA, float etMax){
         String id = getNextServiceId();
-        long memory = getNextServiceMemoryRequirement();
+        long memory = serviceMemoryRequirementGenerator.nextMemRequirement();
         incServiceCount();
         return new Service(id, memory, rtSLA, etMax);
-    }
-
-    private long getNextServiceMemoryRequirement() {
-        return baseServiceMemory * (1 + random.nextInt(serviceMemoryMultiplier));
     }
 
     private String getNextServiceId(){

@@ -3,11 +3,10 @@ package it.polimi.ppap.protocol;
 import com.google.common.collect.ImmutableMap;
 import it.polimi.deib.ppap.node.NodeFacade;
 import it.polimi.deib.ppap.node.services.Service;
-import it.polimi.ppap.random.workload.ServiceRequestGenerator;
+import it.polimi.ppap.service.workload.ServiceRequestGenerator;
 import it.polimi.ppap.service.ServiceWorkload;
 import peersim.core.Protocol;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;

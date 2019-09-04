@@ -1,4 +1,4 @@
-package it.polimi.ppap.random.workload;
+package it.polimi.ppap.service.workload;
 
 import it.polimi.deib.ppap.node.NodeFacade;
 import it.polimi.deib.ppap.node.commons.NormalDistribution;

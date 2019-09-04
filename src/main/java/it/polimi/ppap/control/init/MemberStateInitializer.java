@@ -16,10 +16,10 @@
  *
  */
 
-package it.polimi.ppap.control;
+package it.polimi.ppap.control.init;
 
 import it.polimi.ppap.protocol.MemberStateHolder;
-import it.polimi.ppap.random.initializer.NetworkDelayGenerator;
+import it.polimi.ppap.random.LinearNetworkDelayGenerator;
 import it.polimi.ppap.topology.FogNode;
 import peersim.config.Configuration;
 import peersim.config.FastConfig;
@@ -39,7 +39,7 @@ import peersim.vector.SingleValue;
  */
 public class MemberStateInitializer implements Control {
 
-    final NetworkDelayGenerator networkDelayGenerator = new NetworkDelayGenerator();
+    final LinearNetworkDelayGenerator networkDelayGenerator = new LinearNetworkDelayGenerator();
 
     // ------------------------------------------------------------------------
     // Constants

@@ -1,13 +1,10 @@
-package it.polimi.ppap.random.initializer;
+package it.polimi.ppap.random;
 
 import it.polimi.deib.ppap.node.services.Service;
-import peersim.core.CommonState;
 
 import java.util.*;
 
 public class ServiceCatalogGenerator {
-
-    static Random random = CommonState.r;
 
     final int catalogSize;
     final long baseServiceMemory;

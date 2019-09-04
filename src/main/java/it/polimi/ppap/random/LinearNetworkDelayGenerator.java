@@ -1,10 +1,10 @@
-package it.polimi.ppap.random.initializer;
+package it.polimi.ppap.random;
 
 import peersim.core.CommonState;
 
 import java.util.Random;
 
-public class NetworkDelayGenerator {
+public class LinearNetworkDelayGenerator {
 
     public Random rand = CommonState.r;
 

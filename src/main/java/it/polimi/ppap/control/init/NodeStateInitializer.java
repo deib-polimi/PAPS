@@ -16,16 +16,16 @@
  *
  */
 
-package it.polimi.ppap.control;
+package it.polimi.ppap.control.init;
 
 import it.polimi.deib.ppap.node.NodeFacade;
 import it.polimi.deib.ppap.node.commons.Utils;
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.service.ServiceCatalog;
 import it.polimi.ppap.protocol.NodeStateHolder;
-import it.polimi.ppap.random.initializer.FogNodeCapacityGenerator;
-import it.polimi.ppap.random.initializer.ServiceWorkloadGenerator;
-import it.polimi.ppap.random.workload.ServiceRequestGenerator;
+import it.polimi.ppap.random.UniformFogNodeCapacityGenerator;
+import it.polimi.ppap.random.NormalServiceWorkloadGenerator;
+import it.polimi.ppap.service.workload.ServiceRequestGenerator;
 import it.polimi.ppap.service.ServiceWorkload;
 import it.polimi.ppap.topology.FogNode;
 import it.polimi.ppap.topology.NodeFactory;
@@ -33,12 +33,10 @@ import peersim.config.Configuration;
 import peersim.core.Control;
 import peersim.core.Network;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
 /**
@@ -188,7 +186,7 @@ public class NodeStateInitializer implements Control {
     */
     public boolean execute() {
         //TODO base capacity is now 0
-        FogNodeCapacityGenerator fogNodeCapacityGenerator = new FogNodeCapacityGenerator(1024 * (capacity), 0, (short) 1);
+        UniformFogNodeCapacityGenerator fogNodeCapacityGenerator = new UniformFogNodeCapacityGenerator(1024 * (capacity), 0, (short) 1);
         for(int i=0; i<Network.size(); ++i) {
             FogNode node = (FogNode) Network.get(i);
             initNodeCapacity(node, fogNodeCapacityGenerator);
@@ -243,14 +241,14 @@ public class NodeStateInitializer implements Control {
         float mean = workload;
         float std = workload * 0.1f;
         float activeWorkloadProbability = gama;
-        ServiceWorkloadGenerator serviceWorkloadGenerator = new ServiceWorkloadGenerator(mean, std, activeWorkloadProbability);
+        NormalServiceWorkloadGenerator serviceWorkloadGenerator = new NormalServiceWorkloadGenerator(mean, std, activeWorkloadProbability);
         float initialWorkload = serviceWorkloadGenerator.nextWorkload();
         ServiceWorkload serviceWorkload = new ServiceWorkload(fogNode, service, initialWorkload, initialWorkload);
         System.out.println("########### Initialized Workload for " + service.getId() + ": " + initialWorkload + " ##############");
         return serviceWorkload;
     }
 
-    private void initNodeCapacity(FogNode node, FogNodeCapacityGenerator fogNodeCapacityGenerator) {
+    private void initNodeCapacity(FogNode node, UniformFogNodeCapacityGenerator fogNodeCapacityGenerator) {
         long memoryCapacity = fogNodeCapacityGenerator.nextCapacity();
         node.setMemoryCapacity(memoryCapacity);
     }

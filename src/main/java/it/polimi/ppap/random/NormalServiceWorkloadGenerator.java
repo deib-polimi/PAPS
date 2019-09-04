@@ -1,17 +1,17 @@
-package it.polimi.ppap.random.initializer;
+package it.polimi.ppap.random;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
 import peersim.core.CommonState;
 
 import java.util.Random;
 
-public class ServiceWorkloadGenerator {
+public class NormalServiceWorkloadGenerator {
 
     final NormalDistribution normalDistribution;
     final Random random = CommonState.r;
     final float activeProbability;
 
-    public ServiceWorkloadGenerator(float mean, float std, float activeProbability) {
+    public NormalServiceWorkloadGenerator(float mean, float std, float activeProbability) {
         normalDistribution = new NormalDistribution(mean, std);
         this.activeProbability = activeProbability;
     }
