@@ -1,4 +1,4 @@
-package it.polimi.ppap.protocol;
+package it.polimi.ppap.protocol.node;
 
 import com.google.common.collect.ImmutableMap;
 import it.polimi.deib.ppap.node.NodeFacade;

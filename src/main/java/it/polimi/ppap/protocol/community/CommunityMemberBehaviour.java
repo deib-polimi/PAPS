@@ -1,9 +1,7 @@
-package it.polimi.ppap.protocol.adaptation;
+package it.polimi.ppap.protocol.community;
 
 import it.polimi.deib.ppap.node.services.Service;
-import it.polimi.ppap.protocol.CommunityProtocol;
-import it.polimi.ppap.protocol.MemberStateHolder;
-import it.polimi.ppap.protocol.NodeProtocol;
+import it.polimi.ppap.protocol.node.NodeProtocol;
 import it.polimi.ppap.service.AggregateServiceAllocation;
 import it.polimi.ppap.service.ServiceWorkload;
 import it.polimi.ppap.topology.FogNode;

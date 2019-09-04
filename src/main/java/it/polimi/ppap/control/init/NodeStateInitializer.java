@@ -22,7 +22,7 @@ import it.polimi.deib.ppap.node.NodeFacade;
 import it.polimi.deib.ppap.node.commons.Utils;
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.service.ServiceCatalog;
-import it.polimi.ppap.protocol.NodeStateHolder;
+import it.polimi.ppap.protocol.node.NodeStateHolder;
 import it.polimi.ppap.random.UniformFogNodeCapacityGenerator;
 import it.polimi.ppap.random.NormalServiceWorkloadGenerator;
 import it.polimi.ppap.service.workload.ServiceRequestGenerator;

@@ -18,9 +18,9 @@
 
 package it.polimi.ppap.control.init;
 
-import it.polimi.ppap.protocol.MemberStateHolder;
-import it.polimi.ppap.protocol.adaptation.CommunityLeaderBehaviour;
-import it.polimi.ppap.protocol.adaptation.CommunityMemberBehaviour;
+import it.polimi.ppap.protocol.community.MemberStateHolder;
+import it.polimi.ppap.protocol.community.CommunityLeaderBehaviour;
+import it.polimi.ppap.protocol.community.CommunityMemberBehaviour;
 import it.polimi.ppap.random.LinearNetworkDelayGenerator;
 import it.polimi.ppap.topology.FogNode;
 import peersim.config.Configuration;

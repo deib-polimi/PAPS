@@ -76,10 +76,10 @@ network.node it.polimi.ppap.topology.FogNode
 
 protocol.link peersim.core.IdleProtocol
 
-protocol.np it.polimi.ppap.protocol.NodeProtocol
+protocol.np it.polimi.ppap.protocol.node.NodeProtocol
 protocol.np.step NODE_CYCLE
 
-protocol.cp it.polimi.ppap.protocol.CommunityProtocol
+protocol.cp it.polimi.ppap.protocol.community.CommunityProtocol
 protocol.cp.linkable link
 protocol.cp.step COMMUNITY_CYCLE
 protocol.cp.transport tr

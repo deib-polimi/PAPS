@@ -1,16 +1,12 @@
-package it.polimi.ppap.protocol;
+package it.polimi.ppap.protocol.community;
 
 import it.polimi.deib.ppap.node.services.Service;
-import it.polimi.ppap.protocol.adaptation.CommunityLeaderBehaviour;
-import it.polimi.ppap.protocol.adaptation.CommunityMemberBehaviour;
 import it.polimi.ppap.service.AggregateServiceAllocation;
-import it.polimi.ppap.service.ServiceCatalog;
 import it.polimi.ppap.service.ServiceDemand;
 import it.polimi.ppap.service.ServiceWorkload;
 import it.polimi.ppap.topology.FogNode;
 import peersim.core.Protocol;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;

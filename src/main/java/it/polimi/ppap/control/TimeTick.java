@@ -18,7 +18,6 @@
 
 package it.polimi.ppap.control;
 
-import it.polimi.ppap.protocol.NodeStateHolder;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
