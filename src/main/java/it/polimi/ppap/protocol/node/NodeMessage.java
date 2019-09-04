@@ -1,9 +1,10 @@
-package it.polimi.ppap.transport;
+package it.polimi.ppap.protocol.node;
 
+import it.polimi.ppap.protocol.community.CommunityMessage;
 import it.polimi.ppap.topology.FogNode;
 
 public class NodeMessage
-extends CommunityMessage{
+extends CommunityMessage {
 
     final Object content;
 

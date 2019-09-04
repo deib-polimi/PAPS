@@ -1,4 +1,4 @@
-package it.polimi.ppap.transport;
+package it.polimi.ppap.protocol.community;
 
 import it.polimi.ppap.topology.FogNode;
 import peersim.core.Node;

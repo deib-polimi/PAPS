@@ -5,7 +5,6 @@ import it.polimi.ppap.protocol.node.NodeProtocol;
 import it.polimi.ppap.service.AggregateServiceAllocation;
 import it.polimi.ppap.service.ServiceWorkload;
 import it.polimi.ppap.topology.FogNode;
-import it.polimi.ppap.transport.MemberMessage;
 import peersim.config.FastConfig;
 import peersim.core.Linkable;
 import peersim.core.Node;
