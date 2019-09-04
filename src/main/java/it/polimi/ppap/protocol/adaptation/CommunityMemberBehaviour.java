@@ -4,11 +4,13 @@ import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.protocol.CommunityProtocol;
 import it.polimi.ppap.protocol.MemberStateHolder;
 import it.polimi.ppap.protocol.NodeProtocol;
+import it.polimi.ppap.service.AggregateServiceAllocation;
 import it.polimi.ppap.service.ServiceWorkload;
 import it.polimi.ppap.topology.FogNode;
 import it.polimi.ppap.transport.MemberMessage;
 import peersim.config.FastConfig;
 import peersim.core.Linkable;
+import peersim.core.Node;
 import peersim.transport.Transport;
 
 import java.util.Map;
@@ -68,5 +70,10 @@ public class CommunityMemberBehaviour {
         CommunityLeaderNotFoundException(String msg){
             super(msg);
         }
+    }
+
+    public void execute(Map<Service, AggregateServiceAllocation> placementAllocation, Node node, int nodePid) {
+        NodeProtocol nodeProtocol = (NodeProtocol) node.getProtocol(nodePid);
+        nodeProtocol.updatePlacementAllocation((FogNode) node, placementAllocation, nodePid);
     }
 }

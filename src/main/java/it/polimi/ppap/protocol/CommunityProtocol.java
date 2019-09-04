@@ -14,7 +14,6 @@ import peersim.config.FastConfig;
 import peersim.core.Linkable;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
-import peersim.transport.Transport;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -60,7 +59,7 @@ public class CommunityProtocol
                 break;
             case CommunityMessage.LDR_PLAN_MSG:
                 LeaderMessage leaderMessage = (LeaderMessage) msg;
-                execute((Map<Service, AggregateServiceAllocation>) leaderMessage.getContent(), node, pid);
+                processLeaderMessage((Map<Service, AggregateServiceAllocation>) leaderMessage.getContent(), node, pid);
                 break;
             default:
                 break;
@@ -115,13 +114,8 @@ public class CommunityProtocol
         return linkable.degree() + 1 == monitoringCount;
     }
 
-    // -----------------
-    //MAPE: EXECUTION
-
-    private void execute(Map<Service, AggregateServiceAllocation> placementAllocation, Node node, int pid){
-        //System.out.println("Performing the EXECUTE activity");
-        NodeProtocol nodeProtocol = (NodeProtocol) node.getProtocol(nodePid);
-        nodeProtocol.updatePlacementAllocation((FogNode) node, placementAllocation, nodePid);
+    private void processLeaderMessage(Map<Service, AggregateServiceAllocation> placementAllocation, Node node, int pid){
+        communityMemberBehaviour.execute(placementAllocation, node, nodePid);
     }
 
 }
