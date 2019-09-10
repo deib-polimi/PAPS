@@ -1,4 +1,4 @@
-package it.polimi.ppap.random;
+package it.polimi.ppap.generators;
 
 import it.polimi.deib.ppap.node.services.Service;
 

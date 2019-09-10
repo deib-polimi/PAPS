@@ -50,8 +50,8 @@ CONTROL_PERIOD 5000
 CYCLES 100
 CYCLE SIZE*10000
 
-NODE_CYCLE CYCLE / 3
 COMMUNITY_CYCLE CYCLE
+NODE_CYCLE COMMUNITY_CYCLE / 3
 
 ################### networking =========================
 

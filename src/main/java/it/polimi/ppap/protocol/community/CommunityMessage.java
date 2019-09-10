@@ -1,7 +1,6 @@
 package it.polimi.ppap.protocol.community;
 
 import it.polimi.ppap.topology.FogNode;
-import peersim.core.Node;
 
 public abstract class CommunityMessage {
 

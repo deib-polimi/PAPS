@@ -1,16 +1,11 @@
 package it.polimi.ppap.protocol.system;
 
-import it.polimi.ppap.protocol.community.MemberMessage;
 import it.polimi.ppap.topology.FogNode;
 import peersim.cdsim.CDProtocol;
-import peersim.config.FastConfig;
-import peersim.core.Linkable;
 import peersim.core.Network;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
-import sun.nio.ch.Net;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -26,32 +21,21 @@ public class SystemProtocol implements CDProtocol, EDProtocol {
         SystemMessage msg = (SystemMessage) event;
         switch (msg.getCode()){
             case SystemMessage.NODE_MON_MSG:
-                processNodeMessage((FogNode) node, (NodeMessage) msg, pid);
+                processNodeMessage((FogNode) node, (InterNodeDelayMessage) msg, pid);
                 break;
             case SystemMessage.SPV_PLAN_MSG:
                 processSupervisorMessage((FogNode) node, (SupervisorMessage) msg, pid);
+                break;
+            case SystemMessage.DEMAND_CAPCITY_MSG:
+                processDemandCapacityMessage((FogNode) node, (DemandCapacityMessage) msg, pid);
                 break;
             default:
                 break;
         }
     }
 
-    private void processNodeMessage(FogNode node, NodeMessage msg, int pid) {
+    private void processNodeMessage(FogNode node, InterNodeDelayMessage msg, int pid) {
         updateInterNodeDelay(msg.getSender(), msg.getInterNodeDelay());
-        if(isAllMonitoringReceived(node, getMonitoringCount(), pid)) {
-            analyze();
-            plan();
-        }
-    }
-
-    int monitoringCount;
-
-    public int getMonitoringCount() {
-        return monitoringCount;
-    }
-
-    private boolean isAllMonitoringReceived(Node node, int monitoringCount, int pid){
-        return Network.size() == monitoringCount;
     }
 
     Map<FogNode, Map<FogNode, Integer>> completeInterNodeDelay = new TreeMap<>();
@@ -73,6 +57,35 @@ public class SystemProtocol implements CDProtocol, EDProtocol {
 
     private void plan() {
 
+    }
+
+    private void processDemandCapacityMessage(FogNode node, DemandCapacityMessage msg, int pid) {
+        incMonitoringCount();
+        updateDemandCapacityRatio(msg.getSender(), msg.getDemandCapacity());
+        if(isAllMonitoringReceived(node, getMonitoringCount(), pid)) {
+            analyze();
+            plan();
+        }
+    }
+
+    private void updateDemandCapacityRatio(FogNode node, DemandCapacityMessage.DemandCapacity demandCapacity) {
+        nodeDemandCapacity.put(node, demandCapacity);
+    }
+
+    Map<FogNode, DemandCapacityMessage.DemandCapacity> nodeDemandCapacity = new TreeMap<>();
+
+    int monitoringCount;
+
+    public int getMonitoringCount() {
+        return monitoringCount;
+    }
+
+    public void incMonitoringCount() {
+        this.monitoringCount++;
+    }
+
+    private boolean isAllMonitoringReceived(Node node, int monitoringCount, int pid){
+        return Network.size() == monitoringCount;
     }
 
     @Override

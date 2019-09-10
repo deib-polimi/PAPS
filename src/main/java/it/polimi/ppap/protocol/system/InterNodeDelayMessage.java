@@ -4,11 +4,11 @@ import it.polimi.ppap.topology.FogNode;
 
 import java.util.Map;
 
-public class NodeMessage extends SystemMessage {
+public class InterNodeDelayMessage extends SystemMessage {
 
     final Map<FogNode, Integer> interNodeDelay;
 
-    public NodeMessage(FogNode sender, Map<FogNode, Integer> interNodeDelay){
+    public InterNodeDelayMessage(FogNode sender, Map<FogNode, Integer> interNodeDelay){
         super(sender, NODE_MON_MSG);
         this.interNodeDelay = interNodeDelay;
     }

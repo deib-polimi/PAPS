@@ -1,7 +1,6 @@
 package it.polimi.ppap.protocol.community;
 
 import it.polimi.deib.ppap.node.services.Service;
-import it.polimi.ppap.protocol.community.CommunityMessage;
 import it.polimi.ppap.service.ServiceWorkload;
 import it.polimi.ppap.topology.FogNode;
 

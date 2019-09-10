@@ -19,7 +19,7 @@
 package it.polimi.ppap.control.init;
 
 import it.polimi.deib.ppap.node.services.Service;
-import it.polimi.ppap.random.ServiceCatalogGenerator;
+import it.polimi.ppap.generators.ServiceCatalogGenerator;
 import it.polimi.ppap.service.ServiceCatalog;
 import peersim.config.Configuration;
 import peersim.core.Control;

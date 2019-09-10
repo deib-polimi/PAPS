@@ -1,4 +1,4 @@
-package it.polimi.ppap.random;
+package it.polimi.ppap.generators;
 
 import peersim.core.CommonState;
 

@@ -6,6 +6,7 @@ public abstract class SystemMessage {
 
     public static final int NODE_MON_MSG = 0;
     public static final int SPV_PLAN_MSG = 1;
+    public static final int DEMAND_CAPCITY_MSG = 2;
 
     final FogNode sender;
     final int code;

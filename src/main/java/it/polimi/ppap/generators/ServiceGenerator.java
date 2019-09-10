@@ -1,9 +1,6 @@
-package it.polimi.ppap.random;
+package it.polimi.ppap.generators;
 
 import it.polimi.deib.ppap.node.services.Service;
-import peersim.core.CommonState;
-
-import java.util.Random;
 
 public class ServiceGenerator {
     static long serviceCount = 0;

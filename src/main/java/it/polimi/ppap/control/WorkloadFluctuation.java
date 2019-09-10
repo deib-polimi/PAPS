@@ -20,7 +20,7 @@ package it.polimi.ppap.control;
 
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.protocol.node.NodeProtocol;
-import it.polimi.ppap.random.NormalServiceWorkloadGenerator;
+import it.polimi.ppap.generators.NormalServiceWorkloadGenerator;
 import it.polimi.ppap.service.ServiceCatalog;
 import it.polimi.ppap.service.ServiceWorkload;
 import peersim.config.Configuration;
