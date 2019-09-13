@@ -2,7 +2,7 @@
 DEBUG 0
 
 # network size
-SIZE 5
+SIZE 100
 
 # connectivity
 CONNECTIVITY SIZE - 1
@@ -95,7 +95,8 @@ protocol.tr.drop DROP
 
 ################### initialization ======================
 
-init.rndlink WireKOut
+#init.rndlink WireKOut
+init.rndlink it.polimi.ppap.generators.WireEuclideanGraph
 init.rndlink.k CONNECTIVITY
 init.rndlink.protocol link
 init.rndlink.undir true

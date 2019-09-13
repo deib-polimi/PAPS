@@ -1,5 +1,7 @@
 package it.polimi.ppap.topology;
 
+import it.polimi.ppap.topology.community.CommunityFormationRun;
+import org.graphstream.algorithm.generator.DorogovtsevMendesGenerator;
 import org.graphstream.algorithm.generator.Generator;
 import org.graphstream.algorithm.generator.RandomEuclideanGenerator;
 import org.graphstream.graph.Edge;
@@ -7,8 +9,6 @@ import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
 import peersim.core.Network;
 import peersim.graph.Graph;
-
-import java.util.Random;
 
 public class FogTopologyFactory {
 
@@ -20,12 +20,18 @@ public class FogTopologyFactory {
      */
     public static Graph wireEucledeanGraph(Graph graph) {
         org.graphstream.graph.Graph gsGraph = new SingleGraph("DorogovtsevMendes");
-        Generator gen = new RandomEuclideanGenerator();
+        //Generator gen = new RandomEuclideanGenerator();
+        Generator gen = new DorogovtsevMendesGenerator();
+        //Generator gen = new BarabasiAlbertGenerator(1);
         gen.addSink(gsGraph);
         gen.begin();
-        for(int i = 0; i< Network.size(); i++) {
+        for(int i = 0; i< Network.size() - gsGraph.getNodeCount(); i++) {
             gen.nextEvents();
         }
+        gen.end();
+        gsGraph.display(true);
+
+        CommunityFormationRun.run(gsGraph);
         wireFromGSGraph(gsGraph, graph);
         return graph;
     }

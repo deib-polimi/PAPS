@@ -18,6 +18,8 @@
 
 package it.polimi.ppap.generators;
 
+import it.polimi.ppap.topology.FogTopologyFactory;
+import it.polimi.ppap.topology.community.CommunityFormationRun;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Linkable;
@@ -79,7 +81,7 @@ public WireEuclideanGraph(String prefix)
 /** Calls {@link GraphFactory#wireKOut}. */
 public void wire(Graph g) {
 
-	GraphFactory.wireKOut(g,k,CommonState.r);
+	FogTopologyFactory.wireEucledeanGraph(g);
 }
 
 }
