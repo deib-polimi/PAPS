@@ -27,8 +27,8 @@ import it.polimi.ppap.generators.UniformFogNodeCapacityGenerator;
 import it.polimi.ppap.generators.NormalServiceWorkloadGenerator;
 import it.polimi.ppap.service.workload.ServiceRequestGenerator;
 import it.polimi.ppap.service.ServiceWorkload;
-import it.polimi.ppap.topology.FogNode;
-import it.polimi.ppap.topology.NodeFactory;
+import it.polimi.ppap.topology.node.FogNode;
+import it.polimi.ppap.topology.node.FogNodeFactory;
 import peersim.config.Configuration;
 import peersim.core.Control;
 import peersim.core.Network;
@@ -210,7 +210,7 @@ public class NodeStateInitializer implements Control {
     }
 
     private NodeFacade addNodeFacade(FogNode node, NodeStateHolder nodeProt) {
-        NodeFacade nodeFacade = NodeFactory.createCTNodeFacade(node, delta, alpha, CT);
+        NodeFacade nodeFacade = FogNodeFactory.createCTNodeFacade(node, delta, alpha, CT);
         addLogger(nodeFacade);
         nodeProt.setNodeFacade(nodeFacade);
         nodeFacade.setTickListener(nodeProt);

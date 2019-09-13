@@ -1,6 +1,6 @@
 package it.polimi.ppap.protocol.community;
 
-import it.polimi.ppap.topology.FogNode;
+import it.polimi.ppap.topology.node.FogNode;
 
 public class LeaderMessage extends CommunityMessage {
 

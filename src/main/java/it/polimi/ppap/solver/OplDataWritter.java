@@ -2,7 +2,7 @@ package it.polimi.ppap.solver;
 
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.service.ServiceDemand;
-import it.polimi.ppap.topology.FogNode;
+import it.polimi.ppap.topology.node.FogNode;
 import peersim.core.Node;
 
 import java.io.File;

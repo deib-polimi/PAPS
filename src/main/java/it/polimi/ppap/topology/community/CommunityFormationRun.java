@@ -1,10 +1,14 @@
 package it.polimi.ppap.topology.community;
 
+import it.polimi.ppap.topology.community.in.ImportSLPACommunities;
 import it.polimi.ppap.topology.community.out.ExportGSGraph;
 import it.polimi.ppap.topology.community.out.ExportSPLAGraph;
 import org.graphstream.graph.Graph;
+import org.graphstream.ui.view.Viewer;
 
-import java.io.IOException;
+import java.io.*;
+import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 public class CommunityFormationRun {
 
@@ -23,17 +27,85 @@ public class CommunityFormationRun {
         graph.display(true);*/
 
         String rootPath = System.getProperty("user.dir");
-        String outputSPLAFile = "/splaGraph.ipairs";
-        String outputGSFile = "/gsGraph.dgs";
+        String outputSLPAFile = rootPath + "/res/data/slpaGraph.ipairs";
+        String outputGSFile = rootPath + "/res/data/gsGraph.dgs";
+        exportFiles(graph, outputSLPAFile, outputGSFile);
+
+        String slpaPath = rootPath + "/res/communitydetection/slpa/";
+        String outputSLPAPath = rootPath + "/res/data/";
+        runSPLACommunityDetection(slpaPath, outputSLPAFile, outputSLPAPath);
+
+        //String inputGSFile = rootPath + "/res/data/gsGraph.dgs";
+        //String inputSPLACommunitiesFile = rootPath + "/res/data/SLPAw_slpaGraph_run1_r0.35_v3_T100.icpm";
+        String inputSPLACommunitiesFile = rootPath + "/res/data/SLPAw_slpaGraph_run1_r0.35_v3_T100.icpm.node-com.txt";
+        importCommunities(graph, inputSPLACommunitiesFile);
+    }
+
+    private static void exportFiles(Graph graph, String outputSLPAFile, String outputGSFile) {
         try {
-            ExportSPLAGraph exportSPLAGraph = new ExportSPLAGraph(rootPath + outputSPLAFile);
-            ExportGSGraph exportGSGraph = new ExportGSGraph(rootPath + outputGSFile);
+            ExportSPLAGraph exportSLPAGraph = new ExportSPLAGraph(outputSLPAFile);
+            ExportGSGraph exportGSGraph = new ExportGSGraph(outputGSFile);
             exportGSGraph.exportGraph(graph);
-            exportSPLAGraph.exportGraph(graph);
+            exportSLPAGraph.exportGraph(graph);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    private static void importCommunities(Graph graph, String inputSLPACommunitiesFile){
+        String rootPath = System.getProperty("user.dir");
+        try {
+            ImportSLPACommunities importSLPACommunities = new ImportSLPACommunities((inputSLPACommunitiesFile));
+            String cssPath = rootPath + "/src/main/resources/css/stylesheet.css";
+            graph.addAttribute("ui.stylesheet", "url('file://" + cssPath +  "')");
+            Viewer viewer =  graph.display(true);
+            importSLPACommunities.importCommunities(graph, viewer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private static void runSPLACommunityDetection(String slpaPath, String inputSPLAFile, String outputSPLAPath){
+        ProcessBuilder builder = new ProcessBuilder();
+        //if (isWindows) {
+            //builder.command("cmd.exe", "/c", "dir");
+        //} else {
+            builder.command("java", "-jar", slpaPath + "GANXiSw.jar", "-i", inputSPLAFile, "-d", outputSPLAPath, "-Sym", "1", "-Onc", "1");
+        //}
+        builder.directory(new File(slpaPath));
+        Process process = null;
+        try {
+            process = builder.start();
+            StreamGobbler streamGobbler =
+                    new StreamGobbler(process.getInputStream(), System.out::println);
+            StreamGobbler outputGobbler = new StreamGobbler(process.getInputStream(), System.out::println);
+            StreamGobbler errorGobbler = new StreamGobbler(process.getErrorStream(), System.out::println);
+            Executors.newSingleThreadExecutor().submit(streamGobbler);
+            Executors.newSingleThreadExecutor().submit(errorGobbler);
+            int exitCode = process.waitFor();
+            assert exitCode == 0;
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static class StreamGobbler implements Runnable {
+        private InputStream inputStream;
+        private Consumer<String> consumer;
+
+        public StreamGobbler(InputStream inputStream, Consumer<String> consumer) {
+            this.inputStream = inputStream;
+            this.consumer = consumer;
+        }
+
+        @Override
+        public void run() {
+            new BufferedReader(new InputStreamReader(inputStream)).lines()
+                    .forEach(consumer);
+        }
+    }
 
 }

@@ -1,4 +1,4 @@
-package it.polimi.ppap.topology;
+package it.polimi.ppap.topology.node;
 
 import peersim.core.GeneralNode;
 import peersim.core.Node;

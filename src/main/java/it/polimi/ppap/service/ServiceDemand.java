@@ -1,7 +1,7 @@
 package it.polimi.ppap.service;
 
 import it.polimi.deib.ppap.node.services.Service;
-import it.polimi.ppap.topology.FogNode;
+import it.polimi.ppap.topology.node.FogNode;
 
 public class ServiceDemand implements Comparable{
 

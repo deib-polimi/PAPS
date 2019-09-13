@@ -1,7 +1,7 @@
 package it.polimi.ppap.protocol.node;
 
 import it.polimi.ppap.protocol.community.CommunityMessage;
-import it.polimi.ppap.topology.FogNode;
+import it.polimi.ppap.topology.node.FogNode;
 
 public class NodeMessage
 extends CommunityMessage {

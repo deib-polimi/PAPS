@@ -2,7 +2,7 @@ package it.polimi.ppap.protocol.node;
 
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.service.*;
-import it.polimi.ppap.topology.FogNode;
+import it.polimi.ppap.topology.node.FogNode;
 import peersim.cdsim.CDProtocol;
 import peersim.core.CommonState;
 import peersim.core.Node;

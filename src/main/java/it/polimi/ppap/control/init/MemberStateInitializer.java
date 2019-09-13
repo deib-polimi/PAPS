@@ -22,7 +22,7 @@ import it.polimi.ppap.protocol.community.MemberStateHolder;
 import it.polimi.ppap.protocol.community.CommunityLeaderBehaviour;
 import it.polimi.ppap.protocol.community.CommunityMemberBehaviour;
 import it.polimi.ppap.generators.LinearNetworkDelayGenerator;
-import it.polimi.ppap.topology.FogNode;
+import it.polimi.ppap.topology.node.FogNode;
 import peersim.config.Configuration;
 import peersim.config.FastConfig;
 import peersim.core.Control;

@@ -1,6 +1,6 @@
 package it.polimi.ppap.protocol.system;
 
-import it.polimi.ppap.topology.FogNode;
+import it.polimi.ppap.topology.node.FogNode;
 import peersim.cdsim.CDProtocol;
 import peersim.core.Network;
 import peersim.core.Node;

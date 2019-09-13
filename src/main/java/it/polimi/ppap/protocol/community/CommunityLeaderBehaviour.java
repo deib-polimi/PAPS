@@ -6,7 +6,7 @@ import it.polimi.ppap.service.AggregateServiceAllocation;
 import it.polimi.ppap.service.ServiceCatalog;
 import it.polimi.ppap.service.ServiceWorkload;
 import it.polimi.ppap.solver.OplModSolver;
-import it.polimi.ppap.topology.FogNode;
+import it.polimi.ppap.topology.node.FogNode;
 import peersim.config.FastConfig;
 import peersim.core.Linkable;
 import peersim.core.Node;

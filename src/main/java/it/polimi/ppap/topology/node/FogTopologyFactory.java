@@ -1,4 +1,4 @@
-package it.polimi.ppap.topology;
+package it.polimi.ppap.topology.node;
 
 import it.polimi.ppap.topology.community.CommunityFormationRun;
 import org.graphstream.algorithm.generator.DorogovtsevMendesGenerator;
@@ -29,7 +29,7 @@ public class FogTopologyFactory {
             gen.nextEvents();
         }
         gen.end();
-        gsGraph.display(true);
+        //gsGraph.display(true);
 
         CommunityFormationRun.run(gsGraph);
         wireFromGSGraph(gsGraph, graph);

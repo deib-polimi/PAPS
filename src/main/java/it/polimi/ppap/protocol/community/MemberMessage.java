@@ -2,7 +2,7 @@ package it.polimi.ppap.protocol.community;
 
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.service.ServiceWorkload;
-import it.polimi.ppap.topology.FogNode;
+import it.polimi.ppap.topology.node.FogNode;
 
 import java.util.Map;
 import java.util.Set;

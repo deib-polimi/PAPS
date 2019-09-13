@@ -12,12 +12,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-public class ImportSPLACommunities {
+public class ImportSLPACommunities {
 
     String communitiesInputFilePath;
     Scanner reader;
 
-    public ImportSPLACommunities(String communitiesInputFilePath){
+    public ImportSLPACommunities(String communitiesInputFilePath){
         this.communitiesInputFilePath = communitiesInputFilePath;
     }
 

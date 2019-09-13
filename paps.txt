@@ -70,7 +70,7 @@ simulation.logtime CYCLE
 
 ################### topology ============================
 
-network.node it.polimi.ppap.topology.FogNode
+network.node it.polimi.ppap.topology.node.FogNode
 
 ################### protocols ===========================
 
