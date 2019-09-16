@@ -6,6 +6,7 @@ import it.polimi.ppap.service.AggregateServiceAllocation;
 import it.polimi.ppap.service.ServiceCatalog;
 import it.polimi.ppap.service.ServiceWorkload;
 import it.polimi.ppap.solver.OplModSolver;
+import it.polimi.ppap.topology.community.Community;
 import it.polimi.ppap.topology.node.FogNode;
 import peersim.config.FastConfig;
 import peersim.core.Linkable;
@@ -136,9 +137,9 @@ public class CommunityLeaderBehaviour {
      * @param node
      * @param pid
      */
-    public void plan(FogNode node, int pid){
+    public void plan(FogNode node, Community community, int pid){
         solvePlacementAllocation();
-        sendPlanToMembers(node, pid);
+        sendPlanToMembers(node, community, pid);
     }
 
     //TODO async system call to CPLEX solver; otherwise complex optimization will make the simulation to stop
@@ -152,19 +153,8 @@ public class CommunityLeaderBehaviour {
         }
     }
 
-    private void sendPlanToMembers(FogNode node, int pid){
-        Linkable linkable =
-                (Linkable) node.getProtocol(FastConfig.getLinkable(pid));
-
-        Map<Service, AggregateServiceAllocation> leaderServiceAllocation = memberStateHolder.getNodeServiceAllocation().get(node);
-        ((Transport) node.getProtocol(FastConfig.getTransport(pid))).
-                send(
-                        node,
-                        node,
-                        new LeaderMessage(node, leaderServiceAllocation),
-                        pid);
-        for(int i = 0; i < linkable.degree(); i++){
-            Node member = linkable.getNeighbor(i);
+    private void sendPlanToMembers(FogNode node, Community community, int pid){
+        for(FogNode member : community.getMembers()){
             Map<Service, AggregateServiceAllocation> memberServiceAllocation = memberStateHolder.getNodeServiceAllocation().get(member);
             ((Transport) node.getProtocol(FastConfig.getTransport(pid))).
                     send(

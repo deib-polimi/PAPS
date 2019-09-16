@@ -77,7 +77,7 @@ public class CommunityProtocol
         incMonitoringCount(community.getId());
         if(isAllMonitoringReceived(community, getMonitoringCount(community.getId()))) {
             communityLeaderBehavior.analyze(node, pid);
-            communityLeaderBehavior.plan(node, pid);
+            communityLeaderBehavior.plan(node, community, pid);
             resetMonitoringCount(community.getId());
         }
     }

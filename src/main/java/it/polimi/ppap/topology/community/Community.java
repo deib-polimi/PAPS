@@ -19,8 +19,12 @@ public class Community {
         return id;
     }
 
-    public boolean add(FogNode fogNode) {
+    public boolean addMember(FogNode fogNode) {
         return nodes.add(fogNode);
+    }
+
+    public Set<FogNode> getMembers() {
+        return nodes;
     }
 
     public FogNode electLeader() throws CommunityLeaderNotFoundException {
@@ -59,4 +63,5 @@ public class Community {
     public int size() {
         return this.nodes.size();
     }
+
 }

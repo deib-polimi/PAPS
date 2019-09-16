@@ -11,6 +11,8 @@ import java.util.Set;
 
 public class FogNode extends GeneralNode implements Node, Comparable{
 
+    public static final int MAX_DELAY = 999999999;
+
     private long memoryCapacity;
 
     private Map<Long, Integer> linksDelay;
@@ -23,7 +25,7 @@ public class FogNode extends GeneralNode implements Node, Comparable{
         this.memoryCapacity = capacity;
     }
 
-    //TODO check if this is the most appropriate class
+    //TODO check if this is the most appropriate class to have this collection
     public Set<Community> communities = new HashSet<>();
 
     public void addToCommunity(Community community){
@@ -58,6 +60,9 @@ public class FogNode extends GeneralNode implements Node, Comparable{
     }
 
     public int getLinkDelay(long id){
-        return linksDelay.get(id);
+        if(linksDelay.containsKey(id))
+            return linksDelay.get(id);
+        else
+            return MAX_DELAY;
     }
 }

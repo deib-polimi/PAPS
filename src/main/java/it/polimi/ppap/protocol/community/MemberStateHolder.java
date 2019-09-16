@@ -7,6 +7,7 @@ import it.polimi.ppap.service.ServiceWorkload;
 import it.polimi.ppap.topology.node.FogNode;
 import peersim.core.Protocol;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -33,12 +34,13 @@ public abstract class MemberStateHolder implements Protocol {
 
     public void initializeLeader(float optimizationBeta, int referenceControlPeriod){
         setLeader(true);
-        nodeServiceWorkload = new TreeMap<>();
-        workloadAllocationHistory = new TreeMap<>();
-        nodeServiceDemand = new TreeMap<>();
+        this.nodeServiceWorkload = new TreeMap<>();
+        this.workloadAllocationHistory = new TreeMap<>();
+        this.nodeServiceDemand = new TreeMap<>();
         this.optimizationBeta = optimizationBeta;
         this.referenceControlPeriod = referenceControlPeriod;
-        communityLeaderBehavior = new CommunityLeaderBehaviour(this);
+        this.communityLeaderBehavior = new CommunityLeaderBehaviour(this);
+        this.monitoringCount = new HashMap<>();
     }
 
     //MAPE: Monitoring
