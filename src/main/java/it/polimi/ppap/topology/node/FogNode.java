@@ -1,10 +1,13 @@
 package it.polimi.ppap.topology.node;
 
+import it.polimi.ppap.topology.community.Community;
 import peersim.core.GeneralNode;
 import peersim.core.Node;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class FogNode extends GeneralNode implements Node, Comparable{
 
@@ -18,6 +21,13 @@ public class FogNode extends GeneralNode implements Node, Comparable{
 
     public void setMemoryCapacity(long capacity) {
         this.memoryCapacity = capacity;
+    }
+
+    //TODO check if this is the most appropriate class
+    public Set<Community> communities = new HashSet<>();
+
+    public void addToCommunity(Community community){
+        this.communities.add(community);
     }
 
     public FogNode(String prefix){

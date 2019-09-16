@@ -18,7 +18,7 @@
 
 package it.polimi.ppap.generators;
 
-import it.polimi.ppap.topology.node.FogTopologyFactory;
+import it.polimi.ppap.topology.FogTopologyFactory;
 import peersim.config.Configuration;
 import peersim.core.Linkable;
 import peersim.dynamics.WireGraph;

@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 
 public class CommunityFormationRun {
 
-    public static void run(Graph graph){
+    public static void run(peersim.graph.Graph graph, Graph gsGraph){
         /*Graph graph = new SingleGraph("DorogovtsevMendes");
         //Generator gen = new DorogovtsevMendesGenerator();
         //Generator gen = new BarabasiAlbertGenerator(1);
@@ -29,7 +29,7 @@ public class CommunityFormationRun {
         String rootPath = System.getProperty("user.dir");
         String outputSLPAFile = rootPath + "/res/data/slpaGraph.ipairs";
         String outputGSFile = rootPath + "/res/data/gsGraph.dgs";
-        exportFiles(graph, outputSLPAFile, outputGSFile);
+        exportFiles(gsGraph, outputSLPAFile, outputGSFile);
 
         String slpaPath = rootPath + "/res/communitydetection/slpa/";
         String outputSLPAPath = rootPath + "/res/data/";
@@ -38,28 +38,28 @@ public class CommunityFormationRun {
         //String inputGSFile = rootPath + "/res/data/gsGraph.dgs";
         //String inputSPLACommunitiesFile = rootPath + "/res/data/SLPAw_slpaGraph_run1_r0.35_v3_T100.icpm";
         String inputSPLACommunitiesFile = rootPath + "/res/data/SLPAw_slpaGraph_run1_r0.35_v3_T100.icpm.node-com.txt";
-        importCommunities(graph, inputSPLACommunitiesFile);
+        importCommunities(graph, gsGraph, inputSPLACommunitiesFile);
     }
 
-    private static void exportFiles(Graph graph, String outputSLPAFile, String outputGSFile) {
+    private static void exportFiles(Graph gsGraph, String outputSLPAFile, String outputGSFile) {
         try {
             ExportSPLAGraph exportSLPAGraph = new ExportSPLAGraph(outputSLPAFile);
             ExportGSGraph exportGSGraph = new ExportGSGraph(outputGSFile);
-            exportGSGraph.exportGraph(graph);
-            exportSLPAGraph.exportGraph(graph);
+            exportGSGraph.exportGraph(gsGraph);
+            exportSLPAGraph.exportGraph(gsGraph);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private static void importCommunities(Graph graph, String inputSLPACommunitiesFile){
+    private static void importCommunities(peersim.graph.Graph graph, Graph gsGraph, String inputSLPACommunitiesFile){
         String rootPath = System.getProperty("user.dir");
         try {
             ImportSLPACommunities importSLPACommunities = new ImportSLPACommunities((inputSLPACommunitiesFile));
             String cssPath = rootPath + "/src/main/resources/css/stylesheet.css";
-            graph.addAttribute("ui.stylesheet", "url('file://" + cssPath +  "')");
-            Viewer viewer =  graph.display(true);
-            importSLPACommunities.importCommunities(graph, viewer);
+            gsGraph.addAttribute("ui.stylesheet", "url('file://" + cssPath +  "')");
+            Viewer viewer =  gsGraph.display(true);
+            importSLPACommunities.importCommunities(graph, gsGraph);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -71,7 +71,7 @@ public class CommunityFormationRun {
         //if (isWindows) {
             //builder.command("cmd.exe", "/c", "dir");
         //} else {
-            builder.command("java", "-jar", slpaPath + "GANXiSw.jar", "-i", inputSPLAFile, "-d", outputSPLAPath, "-Sym", "1", "-Onc", "1");
+        builder.command("java", "-jar", slpaPath + "GANXiSw.jar", "-i", inputSPLAFile, "-d", outputSPLAPath, "-Sym", "1", "-Onc", "1");
         //}
         builder.directory(new File(slpaPath));
         Process process = null;

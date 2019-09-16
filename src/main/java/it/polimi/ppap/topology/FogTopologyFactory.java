@@ -1,4 +1,4 @@
-package it.polimi.ppap.topology.node;
+package it.polimi.ppap.topology;
 
 import it.polimi.ppap.topology.community.CommunityFormationRun;
 import org.graphstream.algorithm.generator.DorogovtsevMendesGenerator;
@@ -19,19 +19,19 @@ public class FogTopologyFactory {
      * @return returns g for convenience
      */
     public static Graph wireEucledeanGraph(Graph graph) {
-        org.graphstream.graph.Graph gsGraph = new SingleGraph("DorogovtsevMendes");
+        org.graphstream.graph.Graph gsGraph = new SingleGraph("FogTopology");
         //Generator gen = new RandomEuclideanGenerator();
-        Generator gen = new DorogovtsevMendesGenerator();
+        Generator generator = new DorogovtsevMendesGenerator();
         //Generator gen = new BarabasiAlbertGenerator(1);
-        gen.addSink(gsGraph);
-        gen.begin();
+        generator.addSink(gsGraph);
+        generator.begin();
         for(int i = 0; i< Network.size() - gsGraph.getNodeCount(); i++) {
-            gen.nextEvents();
+            generator.nextEvents();
         }
-        gen.end();
+        generator.end();
         //gsGraph.display(true);
 
-        CommunityFormationRun.run(gsGraph);
+        CommunityFormationRun.run(graph, gsGraph);
         wireFromGSGraph(gsGraph, graph);
         return graph;
     }
