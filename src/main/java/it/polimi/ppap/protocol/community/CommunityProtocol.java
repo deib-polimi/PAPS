@@ -4,11 +4,11 @@ import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.service.AggregateServiceAllocation;
 import it.polimi.ppap.service.ServiceCatalog;
 import it.polimi.ppap.service.ServiceWorkload;
+import it.polimi.ppap.topology.FogTopology;
+import it.polimi.ppap.topology.community.Community;
 import it.polimi.ppap.topology.node.FogNode;
 import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
-import peersim.config.FastConfig;
-import peersim.core.Linkable;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 
@@ -41,9 +41,11 @@ public class CommunityProtocol
 
     @Override
     public void nextCycle(Node node, int pid) {
-        communityMemberBehaviour.monitor((FogNode) node, nodePid, pid);
-        if(isLeader()) {
-            communityLeaderBehaviour.cyclicBehavior((FogNode) node, pid);
+        for(Community community : FogTopology.getCommunities()) {
+            communityMemberBehaviour.cyclicBehavior((FogNode) node, community, nodePid, pid);
+            if (community.isLeader((FogNode) node)) {
+                communityLeaderBehavior.cyclicBehavior((FogNode) node, pid);
+            }
         }
     }
 
@@ -56,7 +58,7 @@ public class CommunityProtocol
                 break;
             case CommunityMessage.LDR_PLAN_MSG:
                 LeaderMessage leaderMessage = (LeaderMessage) msg;
-                processLeaderMessage((Map<Service, AggregateServiceAllocation>) leaderMessage.getContent(), node, pid);
+                processLeaderMessage(leaderMessage, node, pid);
                 break;
             default:
                 break;
@@ -69,13 +71,14 @@ public class CommunityProtocol
 
     private void processMemberMessage(FogNode node, int pid, CommunityMessage msg) {
         MemberMessage memberMessage = (MemberMessage) msg;
+        Community community = FogTopology.getCommunity(memberMessage.communityId);
         updateNodeServiceWorkload(memberMessage.getSender(), memberMessage.getLocalServiceWorkloadHistory());
         storeNodeWorkloadAllocation(memberMessage.getSender(), memberMessage.getWorkloadAllocation());
-        incMonitoringCount();
-        if(isAllMonitoringReceived(getMonitoringCount(), node, pid)) {
-            communityLeaderBehaviour.analyze(node, pid);
-            communityLeaderBehaviour.plan(node, pid);
-            resetMonitoringCount();
+        incMonitoringCount(community.getId());
+        if(isAllMonitoringReceived(community, getMonitoringCount(community.getId()))) {
+            communityLeaderBehavior.analyze(node, pid);
+            communityLeaderBehavior.plan(node, pid);
+            resetMonitoringCount(community.getId());
         }
     }
 
@@ -104,15 +107,12 @@ public class CommunityProtocol
         }
     }
 
-    //TODO: only works if the leader has a connection to all members, which is expected; can improve it?
-    private boolean isAllMonitoringReceived(int monitoringCount, Node node, int pid){
-        Linkable linkable =
-                (Linkable) node.getProtocol(FastConfig.getLinkable(pid));
-        return linkable.degree() + 1 == monitoringCount;
+    private boolean isAllMonitoringReceived(Community community, int monitoringCount){
+        return community.size() == monitoringCount;
     }
 
-    private void processLeaderMessage(Map<Service, AggregateServiceAllocation> placementAllocation, Node node, int pid){
+    private void processLeaderMessage(LeaderMessage leaderMessage, Node node, int pid){
+        Map<Service, AggregateServiceAllocation> placementAllocation = (Map<Service, AggregateServiceAllocation>) leaderMessage.getContent();
         communityMemberBehaviour.execute(placementAllocation, node, nodePid);
     }
-
 }

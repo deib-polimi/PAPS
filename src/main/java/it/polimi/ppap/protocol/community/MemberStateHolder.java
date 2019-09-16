@@ -23,13 +23,13 @@ public abstract class MemberStateHolder implements Protocol {
         this.leader = leader;
     }
 
-    CommunityMemberBehaviour communityMemberBehaviour;
+    CommunityMemberBehavior communityMemberBehaviour;
 
-    public void setCommunityMemberBehaviour(CommunityMemberBehaviour communityMemberBehaviour) {
+    public void setCommunityMemberBehaviour(CommunityMemberBehavior communityMemberBehaviour) {
         this.communityMemberBehaviour = communityMemberBehaviour;
     }
 
-    CommunityLeaderBehaviour communityLeaderBehaviour;
+    CommunityLeaderBehaviour communityLeaderBehavior;
 
     public void initializeLeader(float optimizationBeta, int referenceControlPeriod){
         setLeader(true);
@@ -38,23 +38,24 @@ public abstract class MemberStateHolder implements Protocol {
         nodeServiceDemand = new TreeMap<>();
         this.optimizationBeta = optimizationBeta;
         this.referenceControlPeriod = referenceControlPeriod;
-        communityLeaderBehaviour = new CommunityLeaderBehaviour(this);
+        communityLeaderBehavior = new CommunityLeaderBehaviour(this);
     }
 
     //MAPE: Monitoring
 
-    int monitoringCount;
+    Map<String, Integer> monitoringCount;
 
-    public int getMonitoringCount() {
-        return monitoringCount;
+    public int getMonitoringCount(String communityId) {
+        return monitoringCount.get(communityId);
     }
 
-    public void incMonitoringCount() {
-        this.monitoringCount++;
+    public void incMonitoringCount(String communityId) {
+        Integer actual = this.monitoringCount.getOrDefault(communityId, 0);
+        this.monitoringCount.put(communityId, ++actual);
     }
 
-    public void resetMonitoringCount(){
-        this.monitoringCount = 0;
+    public void resetMonitoringCount(String id){
+        this.monitoringCount.put(id, 0);
     }
 
     Map<FogNode, Map<Service, Set<ServiceWorkload>>> nodeServiceWorkload;

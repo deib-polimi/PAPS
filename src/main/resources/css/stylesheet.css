@@ -1,0 +1,16 @@
+graph { 
+	fill-color: white; 
+}
+
+node {
+	shape: box;	
+	fill-mode: plain;   /* Default.          */
+}
+
+node.shared{
+	shape: pie-chart;
+	size: 20px, 20px;
+	/*stroke-mode: plain;
+	stroke-color: black;
+	stroke-width: 3px;*/
+}

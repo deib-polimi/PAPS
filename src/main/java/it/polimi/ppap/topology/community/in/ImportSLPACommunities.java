@@ -6,7 +6,6 @@ import it.polimi.ppap.topology.node.FogNode;
 import it.polimi.ppap.ui.RandomColorPicker;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
-import org.graphstream.ui.view.Viewer;
 
 import java.awt.*;
 import java.io.File;
@@ -38,6 +37,7 @@ public class ImportSLPACommunities {
             addCommunityColor(communityId, communityColor, gsNode);
             initializeMembership(communityId, gsNode);
             FogNode fogNode = (FogNode) graph.getNode(Integer.parseInt(nodeId));
+            community.add(fogNode);
             fogNode.addToCommunity(community);
         }
         closeFile();

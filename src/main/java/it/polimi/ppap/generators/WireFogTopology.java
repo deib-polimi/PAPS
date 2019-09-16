@@ -31,7 +31,7 @@ import peersim.graph.GraphFactory;
  * combination with other initializers.
  * @see GraphFactory#wireKOut
  */
-public class WireEuclideanGraph extends WireGraph {
+public class WireFogTopology extends WireGraph {
 
 //--------------------------------------------------------------------------
 //Parameters
@@ -66,7 +66,7 @@ private final int k;
  * Invoked by the simulation engine.
  * @param prefix the configuration prefix for this class
  */
-public WireEuclideanGraph(String prefix)
+public WireFogTopology(String prefix)
 {
 	super(prefix);
 	k = Configuration.getInt(prefix + "." + PAR_DEGREE);

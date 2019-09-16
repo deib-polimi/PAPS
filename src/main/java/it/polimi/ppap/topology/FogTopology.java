@@ -1,11 +1,11 @@
 package it.polimi.ppap.topology;
 
 import it.polimi.ppap.topology.community.Community;
-import it.polimi.ppap.ui.RandomColorPicker;
 
-import java.awt.*;
+import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
+
 
 public class FogTopology{
 
@@ -20,5 +20,13 @@ public class FogTopology{
             addCommunity(new Community(communityId));
 
         return communities.get(communityId);
+    }
+
+    public static Community getCommunity(String id){
+        return communities.get(id);
+    }
+
+    public static Collection<Community> getCommunities() {
+        return communities.values();
     }
 }

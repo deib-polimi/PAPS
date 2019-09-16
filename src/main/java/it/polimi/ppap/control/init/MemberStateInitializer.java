@@ -18,17 +18,19 @@
 
 package it.polimi.ppap.control.init;
 
-import it.polimi.ppap.protocol.community.MemberStateHolder;
-import it.polimi.ppap.protocol.community.CommunityLeaderBehaviour;
-import it.polimi.ppap.protocol.community.CommunityMemberBehaviour;
 import it.polimi.ppap.generators.LinearNetworkDelayGenerator;
+import it.polimi.ppap.protocol.community.CommunityLeaderBehaviour;
+import it.polimi.ppap.protocol.community.CommunityMemberBehavior;
+import it.polimi.ppap.protocol.community.MemberStateHolder;
+import it.polimi.ppap.topology.FogTopology;
+import it.polimi.ppap.topology.community.Community;
+import it.polimi.ppap.topology.community.CommunityLeaderNotFoundException;
 import it.polimi.ppap.topology.node.FogNode;
 import peersim.config.Configuration;
 import peersim.config.FastConfig;
 import peersim.core.Control;
 import peersim.core.Linkable;
 import peersim.core.Network;
-import peersim.core.Node;
 import peersim.vector.SingleValue;
 
 /**
@@ -108,28 +110,31 @@ public class MemberStateInitializer implements Control {
     * @return always false
     */
     public boolean execute() {
-        initializeLeader();
-        for(int i=0; i<Network.size(); ++i) {
-            FogNode fogNode = (FogNode) Network.get(i);
-            initInterNodeDelay(fogNode);
-            initCommunityMemberBehavior(fogNode);
+        try {
+            initCommunityLeaders();
+            for(int i=0; i<Network.size(); ++i) {
+                FogNode fogNode = (FogNode) Network.get(i);
+                initInterNodeDelay(fogNode);
+                initCommunityMemberBehavior(fogNode);
+            }
+        } catch (CommunityLeaderNotFoundException e) {
+            e.printStackTrace();
         }
         return false;
     }
 
     private void initCommunityMemberBehavior(FogNode fogNode) {
         MemberStateHolder memberProtocol = (MemberStateHolder) fogNode.getProtocol(pid);
-        memberProtocol.setCommunityMemberBehaviour(new CommunityMemberBehaviour(memberProtocol));
+        memberProtocol.setCommunityMemberBehaviour(new CommunityMemberBehavior(memberProtocol));
     }
 
-    private Node pickCommunityLeader(){
-        return Network.get(0);
-    }
-
-    private void initializeLeader(){
-        Node leader = pickCommunityLeader();
-        MemberStateHolder memberProtocol = (MemberStateHolder) leader.getProtocol(pid);
-        memberProtocol.initializeLeader(beta, referenceControlPeriod);
+    //TODO check what goes into the community/fog classes and what remains in the memberstateholder class
+    private void initCommunityLeaders() throws CommunityLeaderNotFoundException {
+        for(Community community : FogTopology.getCommunities()){
+            FogNode leader = community.electLeader();
+            MemberStateHolder memberProtocol = (MemberStateHolder) leader.getProtocol(pid);
+            memberProtocol.initializeLeader(beta, referenceControlPeriod);
+        }
     }
 
     private void initInterNodeDelay(FogNode fogNode){
