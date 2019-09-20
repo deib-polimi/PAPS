@@ -1,111 +1,41 @@
 package it.polimi.ppap.protocol.community;
 
-import it.polimi.deib.ppap.node.services.Service;
-import it.polimi.ppap.service.AggregateServiceAllocation;
-import it.polimi.ppap.service.ServiceDemand;
-import it.polimi.ppap.service.ServiceWorkload;
-import it.polimi.ppap.topology.node.FogNode;
+import it.polimi.ppap.topology.FogTopology;
+import it.polimi.ppap.topology.community.Community;
 import peersim.core.Protocol;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 public abstract class MemberStateHolder implements Protocol {
 
     //Community
-
-    boolean leader;
-    public boolean isLeader() {
-        return leader;
-    }
-    public void setLeader(boolean leader) {
-        this.leader = leader;
-    }
-
     CommunityMemberBehavior communityMemberBehaviour;
+    Map<String, MemberState> communityMemberState;
+    Map<String, CommunityLeaderBehavior> communityLeaderBehavior;
 
-    public void setCommunityMemberBehaviour(CommunityMemberBehavior communityMemberBehaviour) {
-        this.communityMemberBehaviour = communityMemberBehaviour;
+    public void initializeMember(){
+        this.communityMemberBehaviour = new CommunityMemberBehavior(this);
+        this.communityMemberState = new TreeMap<>();
+        this.communityMemberState = new TreeMap<>();
+        this.communityLeaderBehavior = new TreeMap<>();
+        for(Community community : FogTopology.getCommunities())
+            this.communityMemberState.put(community.getId(), new MemberState(community.getId()));
     }
 
-    CommunityLeaderBehaviour communityLeaderBehavior;
-
-    public void initializeLeader(float optimizationBeta, int referenceControlPeriod){
-        setLeader(true);
-        this.nodeServiceWorkload = new TreeMap<>();
-        this.workloadAllocationHistory = new TreeMap<>();
-        this.nodeServiceDemand = new TreeMap<>();
-        this.optimizationBeta = optimizationBeta;
-        this.referenceControlPeriod = referenceControlPeriod;
-        this.communityLeaderBehavior = new CommunityLeaderBehaviour(this);
-        this.monitoringCount = new HashMap<>();
+    public void initializeLeader(String communityId, float optimizationBeta, int referenceControlPeriod){
+        this.communityLeaderBehavior.put(
+            communityId,
+            new CommunityLeaderBehavior(
+                getMemberState(communityId),
+                optimizationBeta,
+                referenceControlPeriod
+            )
+        );
     }
 
-    //MAPE: Monitoring
-
-    Map<String, Integer> monitoringCount;
-
-    public int getMonitoringCount(String communityId) {
-        return monitoringCount.get(communityId);
-    }
-
-    public void incMonitoringCount(String communityId) {
-        Integer actual = this.monitoringCount.getOrDefault(communityId, 0);
-        this.monitoringCount.put(communityId, ++actual);
-    }
-
-    public void resetMonitoringCount(String id){
-        this.monitoringCount.put(id, 0);
-    }
-
-    Map<FogNode, Map<Service, Set<ServiceWorkload>>> nodeServiceWorkload;
-
-    public Map<FogNode, Map<Service, Set<ServiceWorkload>>> getNodeServiceWorkload() {
-        return nodeServiceWorkload;
-    }
-
-    Map<Service, Map<Float, Float>> workloadAllocationHistory;
-
-    //MAPE: Analysis
-
-    Map<FogNode, Map<Service, ServiceDemand>> nodeServiceDemand;
-
-    public Map<FogNode, Map<Service, ServiceDemand>> getNodeServiceDemand(){
-        return nodeServiceDemand;
-    }
-
-    public void updateServiceDemand(FogNode node, Service service, float demand){
-        if(!nodeServiceDemand.containsKey(node))
-            nodeServiceDemand.put(node, new TreeMap<>());
-        Map<Service, ServiceDemand> serviceDemand = nodeServiceDemand.get(node);
-        serviceDemand.put(service, new ServiceDemand(node, service, demand));//TODO replace or update?
-        nodeServiceDemand.put(node, serviceDemand);
-    }
-
-    //MAPE: Planning
-
-    float optimizationBeta;
-
-    public float getOptimizationBeta() {
-        return optimizationBeta;
-    }
-
-    int referenceControlPeriod;
-
-    public int getReferenceControlPeriod() {
-        return referenceControlPeriod;
-    }
-
-    Map<FogNode, Map<Service, AggregateServiceAllocation>> nodeServiceAllocation = new TreeMap<>();
-
-    public Map<FogNode, Map<Service, AggregateServiceAllocation>> getNodeServiceAllocation() {
-        return nodeServiceAllocation;
-    }
-
-    public void setNodeServiceAllocation(Map<FogNode, Map<Service, AggregateServiceAllocation>> nodeServiceAllocation) {
-        this.nodeServiceAllocation = nodeServiceAllocation;
+    public MemberState getMemberState(String communityId) {
+        return communityMemberState.get(communityId);
     }
 
     /**

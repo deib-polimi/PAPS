@@ -9,20 +9,22 @@ import it.polimi.ppap.solver.OplModSolver;
 import it.polimi.ppap.topology.community.Community;
 import it.polimi.ppap.topology.node.FogNode;
 import peersim.config.FastConfig;
-import peersim.core.Linkable;
-import peersim.core.Node;
 import peersim.transport.Transport;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.DoubleStream;
 
-public class CommunityLeaderBehaviour {
+public class CommunityLeaderBehavior {
 
-    final MemberStateHolder memberStateHolder;
+    final MemberState memberState;
+    final int referenceControlPeriod;
+    final float optimizationBeta;
 
-    public CommunityLeaderBehaviour(MemberStateHolder memberStateHolder) {
-        this.memberStateHolder = memberStateHolder;
+    public CommunityLeaderBehavior(MemberState memberState, float optimizationBeta, int referenceControlPeriod) {
+        this.memberState = memberState;
+        this.optimizationBeta = optimizationBeta;
+        this.referenceControlPeriod = referenceControlPeriod;
     }
 
     /**
@@ -45,21 +47,22 @@ public class CommunityLeaderBehaviour {
                         final FogNode node,
                         final int pid)
     {
-        memberStateHolder.getNodeServiceDemand().clear();
-        for(FogNode member : memberStateHolder.getNodeServiceWorkload().keySet()){
+        memberState.getNodeServiceDemand().clear();
+        for(FogNode member : memberState.getNodeServiceWorkload().keySet()){
             for(Service service : ServiceCatalog.getServiceCatalog()) {
-                if(memberStateHolder.getNodeServiceWorkload().get(member).containsKey(service)) {
-                    float aggregateWorkload = getAverageWorkload(memberStateHolder.getNodeServiceWorkload().get(member).get(service));
+                if(memberState.getNodeServiceWorkload().get(member).containsKey(service)) {
+                    Set<ServiceWorkload> serviceWorkloads = memberState.getNodeServiceWorkload().get(member).get(service);
+                    float aggregateWorkload = getAverageWorkload(serviceWorkloads);
                     if(aggregateWorkload > 0)
                         updateDemandFromStaticAllocation(
                                 member,
                                 service,
                                 aggregateWorkload);
                     else
-                        memberStateHolder.updateServiceDemand(member, service, 0);
+                        memberState.updateServiceDemand(member, service, 0);
                 }
             }
-            memberStateHolder.getNodeServiceWorkload().get(member).clear();
+            memberState.getNodeServiceWorkload().get(member).clear();
         }
     }
 
@@ -75,8 +78,8 @@ public class CommunityLeaderBehaviour {
                                 final Service service,
                                 final float workload)
     {
-        final float demandFromMember = NodeFacade.getStaticAllocation(workload, service.getRT(), memberStateHolder.getReferenceControlPeriod());
-        memberStateHolder.updateServiceDemand(member, service, demandFromMember);
+        final float demandFromMember = NodeFacade.getStaticAllocation(workload, service.getRT(), referenceControlPeriod);
+        memberState.updateServiceDemand(member, service, demandFromMember);
     }
 
     /*private Map<Service, UnivariateFunction> buildServiceUnivariateFunctionMap() {
@@ -103,8 +106,8 @@ public class CommunityLeaderBehaviour {
         float workloadFromMember = 1 / serviceWorkload.getWorkload();
         FogNode member = serviceWorkload.getSource();
         Service service = serviceWorkload.getService();
-        if(!memberStateHolder.getNodeServiceDemand().containsKey(member))
-            memberStateHolder.getNodeServiceDemand().put(member, new HashMap<>());
+        if(!memberState.getNodeServiceDemand().containsKey(member))
+            memberState.getNodeServiceDemand().put(member, new HashMap<>());
         try {
             float demandFromMember = (float) workloadDemandFunction.value(workloadFromMember);
             if(demandFromMember > 0)
@@ -116,7 +119,7 @@ public class CommunityLeaderBehaviour {
             float demandFromMember = (float) workloadDemandFunction.value(fitWorkload);
             updateServiceDemand(member, servthisice, demandFromMember);
         }
-        System.out.println("Allocation demand from member " + service + ": " + memberStateHolder.getNodeServiceDemand().get(member).get(service));
+        System.out.println("Allocation demand from member " + service + ": " + memberState.getNodeServiceDemand().get(member).get(service));
     }
 
     private float estimateDemandFromNearestWorkload(Service service, FogNode member, final float unfitWorkload) {
@@ -145,23 +148,23 @@ public class CommunityLeaderBehaviour {
     //TODO async system call to CPLEX solver; otherwise complex optimization will make the simulation to stop
     private void solvePlacementAllocation(){
         OplModSolver oplModSolver = new OplModSolver();
-        oplModSolver.generateData(ServiceCatalog.getServiceCatalog(), memberStateHolder.getNodeServiceDemand(), memberStateHolder.getOptimizationBeta());
+        oplModSolver.generateData(ServiceCatalog.getServiceCatalog(), memberState.getNodeServiceDemand(), optimizationBeta);
         try {
-            memberStateHolder.setNodeServiceAllocation(oplModSolver.solve(memberStateHolder.getNodeServiceDemand(), false));
+            memberState.setNodeServiceAllocation(oplModSolver.solve(memberState.getNodeServiceDemand(), false));
         } catch (OplModSolver.OplSolutionNotFoundException ex){
-            memberStateHolder.setNodeServiceAllocation(oplModSolver.solve(memberStateHolder.getNodeServiceDemand(), true));
+            memberState.setNodeServiceAllocation(oplModSolver.solve(memberState.getNodeServiceDemand(), true));
         }
     }
 
     private void sendPlanToMembers(FogNode node, Community community, int pid){
         for(FogNode member : community.getMembers()){
-            Map<Service, AggregateServiceAllocation> memberServiceAllocation = memberStateHolder.getNodeServiceAllocation().get(member);
+            Map<Service, AggregateServiceAllocation> memberServiceAllocation = memberState.getNodeServiceAllocation().get(member);
             ((Transport) node.getProtocol(FastConfig.getTransport(pid))).
-                    send(
-                            node,
-                            member,
-                            new LeaderMessage(node, memberServiceAllocation),
-                            pid);
+                send(
+                    node,
+                    member,
+                    new LeaderMessage(node, memberServiceAllocation),
+                    pid);
         }
     }
 }

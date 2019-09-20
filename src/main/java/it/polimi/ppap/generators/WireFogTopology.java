@@ -79,7 +79,7 @@ public WireFogTopology(String prefix)
 /** Calls {@link GraphFactory#wireKOut}. */
 public void wire(Graph g) {
 
-	FogTopologyFactory.wireEucledeanGraph(g);
+	FogTopologyFactory.wireGraph(g);
 }
 
 }

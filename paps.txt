@@ -2,7 +2,7 @@
 DEBUG 0
 
 # network size
-SIZE 100
+SIZE 15
 
 # connectivity
 CONNECTIVITY SIZE - 1

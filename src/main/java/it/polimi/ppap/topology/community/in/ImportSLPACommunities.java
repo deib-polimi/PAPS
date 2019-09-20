@@ -38,7 +38,7 @@ public class ImportSLPACommunities {
             initializeMembership(communityId, gsNode);
             FogNode fogNode = (FogNode) graph.getNode(Integer.parseInt(nodeId));
             community.addMember(fogNode);
-            fogNode.addToCommunity(community);
+            fogNode.addCommunity(community);
         }
         closeFile();
     }

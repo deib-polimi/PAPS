@@ -1,7 +1,6 @@
 package it.polimi.ppap.topology;
 
 import it.polimi.ppap.topology.community.CommunityFormationRun;
-import org.graphstream.algorithm.generator.DorogovtsevMendesGenerator;
 import org.graphstream.algorithm.generator.Generator;
 import org.graphstream.algorithm.generator.RandomEuclideanGenerator;
 import org.graphstream.graph.Edge;
@@ -18,11 +17,12 @@ public class FogTopologyFactory {
      * @param graph the graph to be wired
      * @return returns g for convenience
      */
-    public static Graph wireEucledeanGraph(Graph graph) {
+    public static Graph wireGraph(Graph graph) {
         org.graphstream.graph.Graph gsGraph = new SingleGraph("FogTopology");
-        //Generator gen = new RandomEuclideanGenerator();
-        Generator generator = new DorogovtsevMendesGenerator();
-        //Generator gen = new BarabasiAlbertGenerator(1);
+        Generator generator;
+        generator = new RandomEuclideanGenerator();
+        //gen = new DorogovtsevMendesGenerator();
+        //gen = new BarabasiAlbertGenerator(1);
         generator.addSink(gsGraph);
         generator.begin();
         for(int i = 0; i< Network.size() - gsGraph.getNodeCount(); i++) {

@@ -2,8 +2,6 @@ package it.polimi.ppap.protocol.community;
 
 import it.polimi.deib.ppap.node.services.Service;
 import it.polimi.ppap.service.AggregateServiceAllocation;
-import it.polimi.ppap.service.ServiceCatalog;
-import it.polimi.ppap.service.ServiceWorkload;
 import it.polimi.ppap.topology.FogTopology;
 import it.polimi.ppap.topology.community.Community;
 import it.polimi.ppap.topology.node.FogNode;
@@ -12,10 +10,7 @@ import peersim.config.Configuration;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
 
 public class CommunityProtocol
         extends MemberStateHolder
@@ -41,10 +36,12 @@ public class CommunityProtocol
 
     @Override
     public void nextCycle(Node node, int pid) {
-        for(Community community : FogTopology.getCommunities()) {
+        FogNode fogNode = (FogNode) node;
+        for(Community community : fogNode.getCommunities()) {
             communityMemberBehaviour.cyclicBehavior((FogNode) node, community, nodePid, pid);
             if (community.isLeader((FogNode) node)) {
-                communityLeaderBehavior.cyclicBehavior((FogNode) node, pid);
+                CommunityLeaderBehavior leaderBehavior = communityLeaderBehavior.get(community.getId());
+                leaderBehavior.cyclicBehavior((FogNode) node, pid);
             }
         }
     }
@@ -54,11 +51,11 @@ public class CommunityProtocol
         CommunityMessage msg = (CommunityMessage) event;
         switch (msg.getCode()){
             case CommunityMessage.MBR_MON_MSG:
-                processMemberMessage((FogNode) node, pid, msg);
+                processMemberMessage((FogNode) node, (MemberMessage) msg, pid);
                 break;
             case CommunityMessage.LDR_PLAN_MSG:
                 LeaderMessage leaderMessage = (LeaderMessage) msg;
-                processLeaderMessage(leaderMessage, node, pid);
+                processLeaderMessage(node, leaderMessage, pid);
                 break;
             default:
                 break;
@@ -69,41 +66,17 @@ public class CommunityProtocol
     // INTERNAL BEHAVIOR
     //--------------------------------------------------------------------------
 
-    private void processMemberMessage(FogNode node, int pid, CommunityMessage msg) {
-        MemberMessage memberMessage = (MemberMessage) msg;
+    private void processMemberMessage(FogNode node, MemberMessage memberMessage, int pid) {
         Community community = FogTopology.getCommunity(memberMessage.communityId);
-        updateNodeServiceWorkload(memberMessage.getSender(), memberMessage.getLocalServiceWorkloadHistory());
-        storeNodeWorkloadAllocation(memberMessage.getSender(), memberMessage.getWorkloadAllocation());
-        incMonitoringCount(community.getId());
-        if(isAllMonitoringReceived(community, getMonitoringCount(community.getId()))) {
-            communityLeaderBehavior.analyze(node, pid);
-            communityLeaderBehavior.plan(node, community, pid);
-            resetMonitoringCount(community.getId());
-        }
-    }
-
-    private void updateNodeServiceWorkload(FogNode sender, Map<Service, Set<ServiceWorkload>> localServiceWorkloadHistory){
-        Map<Service, Set<ServiceWorkload>> nodeServiceWorkloads = nodeServiceWorkload.getOrDefault(sender, new TreeMap<>());
-        nodeServiceWorkload.put(sender, nodeServiceWorkloads);
-        for(Service service : ServiceCatalog.getServiceCatalog()) {
-            Set<ServiceWorkload> serviceWorkloads = nodeServiceWorkload.get(sender).getOrDefault(service, new HashSet<>());
-            if (localServiceWorkloadHistory.containsKey(service))
-                for(ServiceWorkload serviceWorkload : localServiceWorkloadHistory.get(service))
-                    serviceWorkloads.add(serviceWorkload);
-            else
-                serviceWorkloads.add(new ServiceWorkload(sender, service, 0f, 0f));
-
-            nodeServiceWorkload.get(sender).put(service, serviceWorkloads);
-        }
-    }
-
-    private void storeNodeWorkloadAllocation(FogNode sender, Map<Service, Map.Entry<Float, Float>> currentWorkloadAllocation){
-        for(Service service : currentWorkloadAllocation.keySet()) {
-            if(!workloadAllocationHistory.containsKey(service))
-                workloadAllocationHistory.put(service, new TreeMap<>());
-            Map.Entry<Float, Float> workloadAllocation = currentWorkloadAllocation.get(service);
-            if(workloadAllocation.getValue() > 0)
-                workloadAllocationHistory.get(service).put(1 / workloadAllocation.getKey(), workloadAllocation.getValue());
+        MemberState memberState = getMemberState(community.getId());
+        memberState.updateNodeServiceWorkload(memberMessage.getSender(), memberMessage.getLocalServiceWorkloadHistory());
+        memberState.storeNodeWorkloadAllocation(memberMessage.getSender(), memberMessage.getWorkloadAllocation());
+        memberState.incMonitoringCount(community.getId());
+        if(isAllMonitoringReceived(community, memberState.getMonitoringCount(community.getId()))) {
+            CommunityLeaderBehavior leaderBehavior = communityLeaderBehavior.get(community.getId());
+            leaderBehavior.analyze(node, pid);
+            leaderBehavior.plan(node, community, pid);
+            memberState.resetMonitoringCount(community.getId());
         }
     }
 
@@ -111,7 +84,7 @@ public class CommunityProtocol
         return community.size() == monitoringCount;
     }
 
-    private void processLeaderMessage(LeaderMessage leaderMessage, Node node, int pid){
+    private void processLeaderMessage(Node node, LeaderMessage leaderMessage, int pid){
         Map<Service, AggregateServiceAllocation> placementAllocation = (Map<Service, AggregateServiceAllocation>) leaderMessage.getContent();
         communityMemberBehaviour.execute(placementAllocation, node, nodePid);
     }

@@ -19,8 +19,7 @@
 package it.polimi.ppap.control.init;
 
 import it.polimi.ppap.generators.LinearNetworkDelayGenerator;
-import it.polimi.ppap.protocol.community.CommunityLeaderBehaviour;
-import it.polimi.ppap.protocol.community.CommunityMemberBehavior;
+import it.polimi.ppap.protocol.community.CommunityLeaderBehavior;
 import it.polimi.ppap.protocol.community.MemberStateHolder;
 import it.polimi.ppap.topology.FogTopology;
 import it.polimi.ppap.topology.community.Community;
@@ -78,11 +77,11 @@ public class MemberStateInitializer implements Control {
     private final int pid;
 
     /** Optimization parameter beta; obtained from config property {@link #PAR_BETA}. */
-    private final float beta;
+    private final float optimizationBeta;
 
     /**
      * The reference control period used at the node level.
-     * @see CommunityLeaderBehaviour#updateDemandFromStaticAllocation
+     * @see CommunityLeaderBehavior#updateDemandFromStaticAllocation
      */
     private final int referenceControlPeriod;
 
@@ -97,7 +96,7 @@ public class MemberStateInitializer implements Control {
     public MemberStateInitializer(String prefix) {
 
         pid = Configuration.getPid(prefix + "." + PAR_PROT);
-        beta = (float) Configuration.getDouble(prefix + "." + PAR_BETA);
+        optimizationBeta = (float) Configuration.getDouble(prefix + "." + PAR_BETA);
         referenceControlPeriod = Configuration.getInt(prefix + "." + PAR_REF_CONTROL_PERIOD);
 
     }
@@ -111,12 +110,12 @@ public class MemberStateInitializer implements Control {
     */
     public boolean execute() {
         try {
-            initCommunityLeaders();
             for(int i=0; i<Network.size(); ++i) {
                 FogNode fogNode = (FogNode) Network.get(i);
                 initInterNodeDelay(fogNode);
                 initCommunityMemberBehavior(fogNode);
             }
+            initCommunityLeaders();
         } catch (CommunityLeaderNotFoundException e) {
             e.printStackTrace();
         }
@@ -125,7 +124,7 @@ public class MemberStateInitializer implements Control {
 
     private void initCommunityMemberBehavior(FogNode fogNode) {
         MemberStateHolder memberProtocol = (MemberStateHolder) fogNode.getProtocol(pid);
-        memberProtocol.setCommunityMemberBehaviour(new CommunityMemberBehavior(memberProtocol));
+        memberProtocol.initializeMember();
     }
 
     //TODO check what goes into the community/fog classes and what remains in the memberstateholder class
@@ -133,7 +132,7 @@ public class MemberStateInitializer implements Control {
         for(Community community : FogTopology.getCommunities()){
             FogNode leader = community.electLeader();
             MemberStateHolder memberProtocol = (MemberStateHolder) leader.getProtocol(pid);
-            memberProtocol.initializeLeader(beta, referenceControlPeriod);
+            memberProtocol.initializeLeader(community.getId(), optimizationBeta, referenceControlPeriod);
         }
     }
 

@@ -26,10 +26,14 @@ public class FogNode extends GeneralNode implements Node, Comparable{
     }
 
     //TODO check if this is the most appropriate class to have this collection
-    public Set<Community> communities = new HashSet<>();
+    public Set<Community> communities;
 
-    public void addToCommunity(Community community){
+    public void addCommunity(Community community){
         this.communities.add(community);
+    }
+
+    public Set<Community> getCommunities() {
+        return communities;
     }
 
     public FogNode(String prefix){
@@ -41,6 +45,7 @@ public class FogNode extends GeneralNode implements Node, Comparable{
         FogNode result = null;
         result=(FogNode)super.clone();
         result.linksDelay = new HashMap<>();
+        result.communities = new HashSet<>();
         return result;
     }
 
@@ -65,4 +70,5 @@ public class FogNode extends GeneralNode implements Node, Comparable{
         else
             return MAX_DELAY;
     }
+
 }
