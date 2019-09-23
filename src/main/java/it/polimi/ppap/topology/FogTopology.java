@@ -1,10 +1,12 @@
 package it.polimi.ppap.topology;
 
 import it.polimi.ppap.topology.community.Community;
+import it.polimi.ppap.topology.community.in.ImportSLPACommunities;
+import it.polimi.ppap.topology.node.FogNode;
+import peersim.core.Network;
+import scala.Int;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 
 public class FogTopology{
@@ -28,5 +30,21 @@ public class FogTopology{
 
     public static Collection<Community> getCommunities() {
         return communities.values();
+    }
+
+    public static Set<FogNode> getFogNodes(){
+        Set<FogNode> nodes = new TreeSet<>();
+        for(int i = 0; i < Network.size(); i++)
+            nodes.add((FogNode) Network.get(i));
+        return nodes;
+    }
+
+    //TODO possibly refactor this
+    public static String getNextCommunityId(){
+        Optional<Integer> opt = communities.keySet().stream().map(Integer::valueOf).max(Integer::compareTo);
+        if(opt.isPresent())
+            return "" + (opt.get() + 1);
+        else
+            return ImportSLPACommunities.BASE_ID;
     }
 }

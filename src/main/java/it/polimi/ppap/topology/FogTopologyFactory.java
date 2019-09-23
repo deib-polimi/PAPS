@@ -1,6 +1,6 @@
 package it.polimi.ppap.topology;
 
-import it.polimi.ppap.topology.community.CommunityFormationRun;
+import it.polimi.ppap.topology.community.CommunityDetectionRun;
 import org.graphstream.algorithm.generator.Generator;
 import org.graphstream.algorithm.generator.RandomEuclideanGenerator;
 import org.graphstream.graph.Edge;
@@ -25,13 +25,14 @@ public class FogTopologyFactory {
         //gen = new BarabasiAlbertGenerator(1);
         generator.addSink(gsGraph);
         generator.begin();
-        for(int i = 0; i< Network.size() - gsGraph.getNodeCount(); i++) {
+        int initGsNodeCount = gsGraph.getNodeCount();
+        for(int i = 0; i< Network.size() - initGsNodeCount; i++) {
             generator.nextEvents();
         }
         generator.end();
         //gsGraph.display(true);
 
-        CommunityFormationRun.run(graph, gsGraph);
+        CommunityDetectionRun.run(graph, gsGraph);
         wireFromGSGraph(gsGraph, graph);
         return graph;
     }

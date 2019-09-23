@@ -36,6 +36,10 @@ public class FogNode extends GeneralNode implements Node, Comparable{
         return communities;
     }
 
+    public boolean isInCommunity(){
+        return !communities.isEmpty();
+    }
+
     public FogNode(String prefix){
         super(prefix);
     }

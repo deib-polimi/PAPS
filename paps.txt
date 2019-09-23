@@ -2,7 +2,7 @@
 DEBUG 0
 
 # network size
-SIZE 15
+SIZE 250
 
 # connectivity
 CONNECTIVITY SIZE - 1
@@ -11,7 +11,7 @@ CONNECTIVITY SIZE - 1
 CAPACITY 96
 
 # number of distinct functions in the system
-ENTROPY 5
+ENTROPY 3
 
 # the memory requirement for admitted functions
 MEMORY 128

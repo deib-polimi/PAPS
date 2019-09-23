@@ -1,16 +1,19 @@
 package it.polimi.ppap.topology.community;
 
+import it.polimi.ppap.topology.FogTopology;
 import it.polimi.ppap.topology.community.in.ImportSLPACommunities;
 import it.polimi.ppap.topology.community.out.ExportGSGraph;
 import it.polimi.ppap.topology.community.out.ExportSPLAGraph;
 import org.graphstream.graph.Graph;
 import org.graphstream.ui.view.Viewer;
+import peersim.core.Network;
+import sun.nio.ch.Net;
 
 import java.io.*;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
-public class CommunityFormationRun {
+public class CommunityDetectionRun {
 
     public static void run(peersim.graph.Graph graph, Graph gsGraph){
         /*Graph graph = new SingleGraph("DorogovtsevMendes");
@@ -37,7 +40,7 @@ public class CommunityFormationRun {
 
         //String inputGSFile = rootPath + "/res/data/gsGraph.dgs";
         //String inputSPLACommunitiesFile = rootPath + "/res/data/SLPAw_slpaGraph_run1_r0.35_v3_T100.icpm";
-        String inputSPLACommunitiesFile = rootPath + "/res/data/SLPAw_slpaGraph_run1_r0.35_v3_T100.icpm.node-com.txt";
+        String inputSPLACommunitiesFile = rootPath + "/res/data/SLPAw_slpaGraph_run1_r0.15_v3_T100.icpm.node-com.txt";
         importCommunities(graph, gsGraph, inputSPLACommunitiesFile);
     }
 
@@ -52,7 +55,10 @@ public class CommunityFormationRun {
         }
     }
 
-    private static void importCommunities(peersim.graph.Graph graph, Graph gsGraph, String inputSLPACommunitiesFile){
+    private static void importCommunities(
+            peersim.graph.Graph graph,
+            Graph gsGraph,
+            String inputSLPACommunitiesFile){
         String rootPath = System.getProperty("user.dir");
         try {
             ImportSLPACommunities importSLPACommunities = new ImportSLPACommunities((inputSLPACommunitiesFile));
@@ -60,11 +66,11 @@ public class CommunityFormationRun {
             gsGraph.addAttribute("ui.stylesheet", "url('file://" + cssPath +  "')");
             Viewer viewer =  gsGraph.display(true);
             importSLPACommunities.importCommunities(graph, gsGraph);
+            importSLPACommunities.createSingleMemberCommunities(graph, gsGraph);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
 
     private static void runSPLACommunityDetection(String slpaPath, String inputSPLAFile, String outputSPLAPath){
         ProcessBuilder builder = new ProcessBuilder();
