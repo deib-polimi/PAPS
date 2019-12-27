@@ -1,8 +1,8 @@
-# PPAP SIMULATOR
+# PAPS SIMULATOR
 
 <img src="https://github.com/deib-polimi/ppap-simulation/raw/master/docs/PPAP_communities.png" alt="Communities in a complex fog node topology" width="200px"/>
 
-## PPAP
+## PAPS
 
 A PeerSim based implementation of the PPAP framework. The actual version features two of the three framework levels, namely:
 
@@ -23,7 +23,7 @@ The node level self-adaptation is materialized as a set of control-theoretic con
 
 ### Dependencies
 
-The project (or a module in IntelliJ Idea) has a dependency with another project (module), which can be found [in this repo](https://github.com/deib-polimi/ppap-node). Additionally, you must include in your path the (still missing) libraries in the lib folder (to be updated soon with MVN). 
+The project (or a module in IntelliJ Idea) has a dependency with another project (module), which can be found [in this repo](https://github.com/deib-polimi/PAPS-node). Additionally, you must include in your path the (still missing) libraries in the lib folder (to be updated soon with MVN). 
 
 ### Simulation Execution
 
@@ -46,7 +46,7 @@ ppap.txt
 #### Environment Variables
 LD_LIBRARY_PATH=/opt/ibm/ILOG/CPLEX_Studio128/opl/bin/x86-64_linux
 
-<img src="https://github.com/deib-polimi/ppap-simulation/raw/master/docs/Idea_Run_Parameters.png" alt="Communities in a complex fog node topology" />
+<img src="https://github.com/deib-polimi/PAPS/raw/master/docs/Idea_Run_Parameters.png" alt="Communities in a complex fog node topology" />
 
 #### Known Caveats 
 
