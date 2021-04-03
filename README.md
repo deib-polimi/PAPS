@@ -1,4 +1,4 @@
-# PAPS SIMULATOR
+# PAPS PROTOTYPE
 
 <img src="https://github.com/deib-polimi/ppap-simulation/raw/master/docs/PPAP_communities.png" alt="Communities in a complex fog node topology" width="200px"/>
 
