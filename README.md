@@ -2,9 +2,7 @@
 
 <img src="https://github.com/deib-polimi/ppap-simulation/raw/master/docs/PPAP_communities.png" alt="Communities in a complex fog node topology" width="200px"/>
 
-## PAPS
-
-A PeerSim based implementation of the PPAP framework. The actual version features two of the three framework levels, namely:
+The actual version features two of the three framework levels, namely:
 
 * The community Level Self-Adaptation (Regional Planner Decentralized MAPE)
 * The Node Level Self-Adaptation (Control-Theoretic Loop)
@@ -52,3 +50,5 @@ LD_LIBRARY_PATH=/opt/ibm/ILOG/CPLEX_Studio128/opl/bin/x86-64_linux
 
 The simulator uses Java threads to mimick the execution of functions. In its default configuration, the JVM will allocate a considerable amount of memory to each thread stack. To prevent exausting the JVM memory and running into *OutOfMemoryError: unable to create new native thread* errors, we recommend lowering the thread memory through the JVM -Xss parameters (e.g., -Xss228k).
 
+
+PAPS
